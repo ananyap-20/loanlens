@@ -67,7 +67,9 @@ export function paperResultFromLines(lines: string[]): PaperResult {
   if (terms.length === 0) {
     return { ok: false, reason: "no_terms", message: "Is kagaz par loan ki shartein nahi mil payeen" };
   }
-  return { ok: true, terms, missing, ambiguous };
+  // The grievance-officer line printed on the KFS (shown on the result screen; not a loan term).
+  const grievance = lines.map((l) => l.replace(/\s+/g, " ").trim()).find((l) => /^grievance\b/i.test(l));
+  return grievance ? { ok: true, terms, missing, ambiguous, grievance } : { ok: true, terms, missing, ambiguous };
 }
 
 type TextItem = { str: string; transform: number[] };

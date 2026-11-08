@@ -2,23 +2,11 @@
 
 // Phase 4 test page for the paper input (like /smoke). Phase 5 builds the real flow screens on lib/paper.
 import { useEffect, useRef, useState } from "react";
-import { readPdfTerms } from "@/lib/paper/pdf";
-import { decodeQrFromFile, scanQrWithCamera, termsFromQrPayload } from "@/lib/paper/qr";
+import { readPaperFile as readFile } from "@/lib/paper/input";
+import { scanQrWithCamera, termsFromQrPayload } from "@/lib/paper/qr";
 import type { PaperResult } from "@/lib/paper/terms";
 
 const btn = "min-h-14 w-full rounded-xl bg-blue-600 px-4 py-3 text-lg font-semibold text-white disabled:opacity-50";
-
-async function readFile(file: Blob): Promise<PaperResult> {
-  const isPdf = file.type === "application/pdf" || ("name" in file && String((file as File).name).toLowerCase().endsWith(".pdf"));
-  if (isPdf) return readPdfTerms(await file.arrayBuffer());
-  try {
-    const text = await decodeQrFromFile(file);
-    if (!text) return { ok: false, reason: "bad_qr", message: "Is tasveer mein QR nahi mila" };
-    return termsFromQrPayload(text);
-  } catch {
-    return { ok: false, reason: "unreadable", message: "Yeh file khul nahi payi" };
-  }
-}
 
 export default function PaperPage() {
   const [result, setResult] = useState<PaperResult | null>(null);

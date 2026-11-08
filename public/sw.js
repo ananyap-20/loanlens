@@ -1,5 +1,5 @@
 // LoanLens service worker: ONLY receives a file shared to the app (Web Share Target).
-// The file stays on the phone: it is parked in the Cache API for one page load, then deleted by /paper.
+// The file stays on the phone: it is parked in the Cache API for one page load, then deleted by the paper step.
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
@@ -17,12 +17,12 @@ self.addEventListener("fetch", (event) => {
             "/shared-file",
             new Response(file, { headers: { "Content-Type": file.type || "application/octet-stream" } }),
           );
-          return Response.redirect("/paper?shared=1", 303);
+          return Response.redirect("/?shared=1", 303);
         }
       } catch {
         /* fall through to the file-picker fallback */
       }
-      return Response.redirect("/paper?shared=failed", 303);
+      return Response.redirect("/?shared=failed", 303);
     })(),
   );
 });
