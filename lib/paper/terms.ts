@@ -11,7 +11,7 @@ export type PaperFailure =
   | "bad_qr"; // QR payload is not valid LoanLens JSON
 
 export type PaperResult =
-  | { ok: true; terms: PaperTerms; lender?: string; missing: Field[]; ambiguous: Field[] }
+  | { ok: true; terms: PaperTerms; lender?: string; grievance?: string; missing: Field[]; ambiguous: Field[] }
   | { ok: false; reason: PaperFailure; message: string; detail?: string }; // detail = technical error name/message, for debugging only
 
 export const NO_TEXT_MESSAGE = "is PDF mein likha hua text nahi mila";
