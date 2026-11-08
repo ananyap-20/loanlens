@@ -28,8 +28,14 @@ export default function PaperPage() {
   const abortRef = useRef<AbortController | null>(null);
 
   async function handle(file: Blob) {
-    setNote("");
-    setResult(await readFile(file));
+    setNote("Reading the paper...");
+    setResult(null);
+    try {
+      setResult(await readFile(file));
+      setNote("");
+    } catch (e) {
+      setNote(`ERROR: ${e instanceof Error ? e.name + ": " + e.message : String(e)}`);
+    }
   }
 
   useEffect(() => {
@@ -65,8 +71,14 @@ export default function PaperPage() {
   }
 
   async function loadSample() {
-    const res = await fetch("/sample/kfs-sahyog.pdf");
-    await handle(await res.blob());
+    setNote("Loading sample...");
+    try {
+      const res = await fetch("/sample/kfs-sahyog.pdf");
+      if (!res.ok) return setNote(`ERROR: sample download failed (HTTP ${res.status})`);
+      await handle(await res.blob());
+    } catch (e) {
+      setNote(`ERROR: ${e instanceof Error ? e.name + ": " + e.message : String(e)}`);
+    }
   }
 
   return (
@@ -99,7 +111,7 @@ export default function PaperPage() {
       </button>
 
       {note && <p className="font-semibold">{note}</p>}
-      {result && !result.ok && <p className="rounded-xl bg-gray-200 p-3 text-lg">❔ {result.message}</p>}
+      {result && !result.ok && <p className="rounded-xl bg-gray-200 p-3 text-lg">❔ {result.message}{result.detail ? ` [${result.detail}]` : ""}</p>}
       {result?.ok && (
         <div className="flex flex-col gap-2">
           {result.lender && <p className="font-semibold">{result.lender}</p>}
