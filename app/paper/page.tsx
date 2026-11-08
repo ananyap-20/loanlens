@@ -33,7 +33,6 @@ export default function PaperPage() {
   }
 
   useEffect(() => {
-    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
     const shared = new URLSearchParams(window.location.search).get("shared");
     const fail = "Share se file nahi aayi. Neeche se file chuniye.";
     (async () => {
@@ -77,16 +76,14 @@ export default function PaperPage() {
       <button className={btn} onClick={scan} disabled={scanning}>
         Scan QR with camera
       </button>
-      {scanning && (
-        <div className="flex flex-col gap-2">
-          <p className="font-semibold text-red-700">Camera ON (nothing is recorded)</p>
-          <video ref={videoRef} playsInline muted className="w-full rounded-xl bg-black" />
-          <button className={btn} onClick={() => abortRef.current?.abort()}>
-            Stop camera
-          </button>
-        </div>
-      )}
-      {!scanning && <video ref={videoRef} className="hidden" />}
+      <div className={scanning ? "flex flex-col gap-2" : "hidden"}>
+        <p className="font-semibold text-red-700">Camera ON (nothing is recorded)</p>
+        {/* One always-mounted <video>: the stream is attached to this exact element. */}
+        <video ref={videoRef} playsInline muted className="w-full rounded-xl bg-black" />
+        <button className={btn} onClick={() => abortRef.current?.abort()}>
+          Stop camera
+        </button>
+      </div>
 
       <label className={btn + " block cursor-pointer text-center"}>
         Choose PDF or QR photo

@@ -1,8 +1,7 @@
-// One-off generator (non-AI, deterministic): public/sample/kfs-sahyog.pdf and PWA icons.
+// One-off generator (non-AI): public/sample/kfs-sahyog.pdf. Icons: scripts/make-icons.mjs.
 // Run: node scripts/make-sample.mjs
 import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
 import QRCode from "qrcode";
-import { deflateSync } from "node:zlib";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 // CLAUDE.md section 5 (fictional). Same text is in tests/fixtures/paper.ts (SAMPLE_QR_PAYLOAD).
@@ -45,19 +44,4 @@ page.drawText("Scan to read these terms in LoanLens", { x: ox + side + 15, y: oy
 page.drawText("QR payload: " + PAYLOAD, { x: 50, y: 60, size: 5, font });
 mkdirSync("public/sample", { recursive: true });
 writeFileSync("public/sample/kfs-sahyog.pdf", await pdf.save());
-
-// Solid-colour PWA icons (valid PNG, written by hand).
-const crcTable = Array.from({ length: 256 }, (_, k) => { let c = k; for (let i = 0; i < 8; i++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
-const crc = (b) => { let c = 0xffffffff; for (const x of b) c = crcTable[(c ^ x) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
-const chunk = (t, d) => { const len = Buffer.alloc(4); len.writeUInt32BE(d.length); const td = Buffer.concat([Buffer.from(t), d]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([len, td, c]); };
-const png = (s) => {
-  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(s, 0); ihdr.writeUInt32BE(s, 4); ihdr[8] = 8; ihdr[9] = 2;
-  const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(s * 3).fill(0)]);
-  for (let i = 0; i < s; i++) { row[1 + i * 3] = 37; row[2 + i * 3] = 99; row[3 + i * 3] = 235; }
-  const raw = Buffer.concat(Array(s).fill(row));
-  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]);
-};
-mkdirSync("public/icons", { recursive: true });
-writeFileSync("public/icons/icon-192.png", png(192));
-writeFileSync("public/icons/icon-512.png", png(512));
 console.log("done");
