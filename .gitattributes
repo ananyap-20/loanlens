@@ -1,0 +1,2 @@
+# Byte-exact Prisma transcript fixtures: never convert line endings or encoding.
+tests/fixtures/prisma/*.txt -text
