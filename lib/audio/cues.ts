@@ -50,3 +50,10 @@ export function tick() {
   void resumeAudio();
   tone(520, 0, 0.12, "triangle", 0.15);
 }
+
+/** Sound for a comparison status: chime = match, buzz = different, tick = not mentioned / couldn't check. */
+export function cueFor(status: "match" | "conflict" | "not_mentioned" | "unable_to_verify") {
+  if (status === "match") chime();
+  else if (status === "conflict") buzz();
+  else tick();
+}
