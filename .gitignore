@@ -47,3 +47,10 @@ LAUNCH.md
 PROMPTS.md
 AGENTS.md
 .claude/
+
+# vercel deploy config
+.vercelignore
+.vercel/
+
+.vercel
+.env*

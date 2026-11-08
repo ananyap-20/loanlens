@@ -11,4 +11,8 @@ export const SAMPLE_PAPER: Value[] = [
   { field: "late_fee", amount: 200, unit: "INR", evidence: "Late fee: ₹200 per missed instalment", source: "paper", confidence: "high" },
 ];
 
-export const paperWithout = (...fields: Value["field"][]) => SAMPLE_PAPER.filter((v) => !fields.includes(v.field));
+// CLAUDE.md section 5 QR payload; encodes exactly the same terms as SAMPLE_PAPER.
+export const SAMPLE_QR_PAYLOAD =
+  '{"v":1,"lender":"Sahyog Finance (fictional)","amt":30000,"rate":12,"n":12,"freq":"monthly","emi":2666,"fee":1500,"net":28500,"late":200}';
+
+export const paperWithout =(...fields: Value["field"][]) => SAMPLE_PAPER.filter((v) => !fields.includes(v.field));
