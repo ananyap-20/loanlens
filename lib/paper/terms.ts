@@ -12,7 +12,7 @@ export type PaperFailure =
 
 export type PaperResult =
   | { ok: true; terms: PaperTerms; lender?: string; missing: Field[]; ambiguous: Field[] }
-  | { ok: false; reason: PaperFailure; message: string };
+  | { ok: false; reason: PaperFailure; message: string; detail?: string }; // detail = technical error name/message, for debugging only
 
 export const NO_TEXT_MESSAGE = "is PDF mein likha hua text nahi mila";
 

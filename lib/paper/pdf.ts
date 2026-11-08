@@ -114,8 +114,9 @@ export async function readPdfTerms(bytes: ArrayBuffer | Uint8Array): Promise<Pap
   let lines: string[];
   try {
     lines = await extractPdfLines(bytes);
-  } catch {
-    return { ok: false, reason: "unreadable", message: "Yeh PDF khul nahi payi" };
+  } catch (e) {
+    const err = e as Error;
+    return { ok: false, reason: "unreadable", message: "Yeh PDF khul nahi payi", detail: `${err?.name}: ${err?.message}`.slice(0, 200) };
   }
   return paperResultFromLines(lines);
 }
