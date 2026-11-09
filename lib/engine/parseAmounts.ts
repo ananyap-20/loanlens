@@ -82,7 +82,9 @@ function readPhrase(toks: Token[], i: number, text: string): { amount: ParsedAmo
     if (isWord(t, NUMBER_WORDS)) {
       const v = NUMBER_WORDS.get(t.norm)!;
       if (current !== null) break;
-      if (continuing && (v >= lastMult || unitAt(toks, j + 1))) break; // "तीस हज़ार बारह महीने" -> 30000, 12
+      // "तीस हज़ार बारह महीने" -> 30000, 12; but "दो हज़ार छह सौ छियासठ रुपये" stays one number (2666).
+      const nextUnit = unitAt(toks, j + 1);
+      if (continuing && (v >= lastMult || (nextUnit !== undefined && nextUnit !== "INR"))) break;
       current = v + (pendingMod ?? 0);
       pendingMod = null;
       fromWords = true;

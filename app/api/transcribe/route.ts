@@ -35,6 +35,9 @@ export async function POST(req: Request): Promise<Response> {
     if (model === "prisma-v3.0") {
       out.append("keyterms", JSON.stringify(KEYTERMS));
       out.append("topic", TOPIC);
+      // Call check: the transcript of the previous chunk (prisma-v3.0, up to 1,600 characters per docs.gnani.ai).
+      const previous = incoming.get("previous_text");
+      if (typeof previous === "string" && previous.trim()) out.append("previous_text", previous.trim().slice(-1600));
     }
   }
 
