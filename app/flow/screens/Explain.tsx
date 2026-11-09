@@ -2,14 +2,27 @@
 
 import { explainPaper, FIELD_NAME_HI } from "@/lib/flow/scripts";
 import type { PaperInput } from "@/lib/flow/session";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { prefetchSpeech } from "@/lib/audio/voice";
+import { HANDOVER_HI } from "@/lib/flow/scripts";
 import { FIELD_ICON, TermCard } from "../TermCard";
 import { primary, Screen } from "../ui";
 
 const ORDER = ["loan_amount", "net_disbursed", "processing_fee", "installment", "tenure", "interest_rate", "late_fee"] as const;
 
-export function Explain({ dots, paper, onNext }: { dots: { total: number; current: number }; paper: PaperInput; onNext: () => void }) {
+export function Explain({
+  dots,
+  paper,
+  nextSpeaker,
+  onNext,
+}: {
+  dots: { total: number; current: number };
+  paper: PaperInput;
+  nextSpeaker: "agent" | "borrower";
+  onNext: () => void;
+}) {
   const text = useMemo(() => explainPaper(paper), [paper]);
+  useEffect(() => prefetchSpeech(HANDOVER_HI[nextSpeaker]), [nextSpeaker]);
   const terms = ORDER.flatMap((f) => paper.terms.filter((v) => v.field === f));
   return (
     <Screen instruction={text} dots={dots}>

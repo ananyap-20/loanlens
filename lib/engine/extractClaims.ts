@@ -243,7 +243,29 @@ const CONSEQUENCE_SEQS = phrases([
   "late fee", "late fees", "लेट फीस", "लेट फी", "late charge", "penalty", "पेनल्टी", "jurmana", "jurmaana", "जुर्माना",
   "dand", "दंड", "extra lagega", "extra lagegi", "extra lagenge", "extra dena", "extra dene", "extra charge",
   "एक्स्ट्रा लगेगा", "एक्स्ट्रा लगेगी", "एक्स्ट्रा लगेंगे", "एक्स्ट्रा देना", "एक्स्ट्रा चार्ज",
+  // single words heard in phone tests
+  "fine", "फाइन", "फ़ाइन", "penalty", "पेनल्टी", "jurmana", "जुर्माना", "charge", "charges", "चार्ज", "extra", "एक्स्ट्रा",
+  "late", "लेट", "dand", "दंड",
 ]);
+
+// ---------------------------------------------------------------- navigation words ("next", "aage badho")
+
+const NAV_WORDS = new Set(
+  ["next", "नेक्स्ट", "aage", "age", "आगे", "badho", "badhiye", "बढ़ो", "बढ़िए", "chalo", "चलो", "skip", "स्किप", "please", "plz", "प्लीज़", "प्लीज"].map(normWord),
+);
+const NAV_FILLER = new Set(
+  ["ji", "जी", "ok", "okay", "ओके", "haan", "हाँ", "हां", "theek", "ठीक", "hai", "है", "bas", "बस", "ab", "अब", "now", "go", "karo", "करो", "kijiye", "कीजिए", "question", "सवाल", "agla", "अगला"].map(normWord),
+);
+
+/**
+ * "next", "आगे", "aage badho", "skip", "please" (and fillers like "ji", "ok") with no number:
+ * this is not an answer. The flow does not count it as an attempt and asks for the answer first.
+ */
+export function isNavigationOnly(text: string): boolean {
+  const words = tokenize(text).filter((t) => t.kind !== "other");
+  if (words.length === 0 || words.some((t) => t.kind === "num")) return false;
+  return words.some((t) => NAV_WORDS.has(t.norm)) && words.every((t) => NAV_WORDS.has(t.norm) || NAV_FILLER.has(t.norm));
+}
 
 /** Late fee / penalty / jurmana / "extra lagega" mentioned? */
 export function hasConsequenceKeyword(text: string): boolean {

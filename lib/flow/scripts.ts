@@ -2,6 +2,7 @@
 // Every sentence is Devanagari with numbers written as WORDS (Timbre mispronounces digits);
 // tests check that no digit ever reaches the speaker. No verdict words ("safe", "approved", ...).
 import { decimalToHindiWords, monthsToHindi, numberToHindiWords, percentToHindi, rupeesToHindi, weeksToHindi } from "@/lib/engine";
+import type { VerifyReason } from "@/lib/engine";
 import type { Field, Frequency, Value } from "@/lib/engine/types";
 import type { PaperFailure } from "@/lib/paper/terms";
 
@@ -14,6 +15,35 @@ export const FIELD_NAME_HI: Record<Field, string> = {
   net_disbursed: "हाथ में आने वाली रक़म",
   late_fee: "लेट फ़ीस",
 };
+
+/** One-word labels shown under every field icon (tap = spoken FIELD_NAME_HI). */
+export const FIELD_SHORT_HI: Record<Field, string> = {
+  loan_amount: "राशि",
+  net_disbursed: "हाथ में",
+  installment: "किस्त",
+  processing_fee: "फ़ीस",
+  tenure: "समय",
+  late_fee: "लेट फ़ीस",
+  interest_rate: "ब्याज",
+};
+
+/** Why a check said "❔ जाँच नहीं पाए" — one short line, shown and spoken. */
+export const REASON_HI: Record<VerifyReason, string> = {
+  no_number: "जवाब में नंबर नहीं मिला — फिर से बोलिए",
+  implausible: "यह नंबर इस सवाल का नहीं लगता — फिर से बोलिए",
+  uncertain: "पक्का नहीं बोला — फिर से बोलिए",
+  several_numbers: "अलग-अलग नंबर बोले — एक नंबर फिर से बोलिए",
+  unit_or_frequency: "महीना या हफ़्ता साफ़ नहीं, या कागज़ से अलग — फिर से बोलिए",
+  not_on_paper: "यह कागज़ पर नहीं लिखा है — लेंडर से पूछिए",
+  rate_basis: "ब्याज का हिसाब अलग तरीके से हो सकता है — लेंडर से पूछिए",
+};
+
+export const NAV_ONLY_HI = "पहले जवाब दीजिए, फिर आगे बढ़ेंगे।";
+
+export const HANDOVER_HI = {
+  agent: "अब एजेंट बोलेंगे। फ़ोन एजेंट को दीजिए। एजेंट जी, तैयार हों तो बड़ा बटन दबाइए।",
+  borrower: "अब फ़ोन उधार लेने वाली को दीजिए। आप तैयार हों तो बड़ा बटन दबाइए।",
+} as const;
 
 const FREQ_HI: Record<Frequency, string> = {
   monthly: "हर महीने",

@@ -13,6 +13,7 @@
 // - A field the paper does not state is "not_on_paper" and not asked (we never invent paper values).
 
 import { detectFrequency, extractClaims, hasConsequenceKeyword, isUncertain } from "./extractClaims";
+import { plausibility } from "./plausibility";
 import type { Field, Value } from "./types";
 
 export const GATE_LABEL = "number-and-keyword check";
@@ -33,7 +34,9 @@ export const FOLLOW_UP_QUESTIONS = {
 } as const;
 export type FollowUpKey = keyof typeof FOLLOW_UP_QUESTIONS;
 
-export type AnswerOutcome = "pass" | "wrong" | "uncertain" | "not_mentioned";
+// "implausible" = a number that cannot be a sensible answer (plausibility guard): asked again like a follow-up,
+// never counted as a wrong number.
+export type AnswerOutcome = "pass" | "wrong" | "uncertain" | "not_mentioned" | "implausible";
 export type GateFieldStatus = "pending" | "passed" | "failed" | "not_on_paper";
 
 export type GateFieldState = {
@@ -127,23 +130,28 @@ function evaluate(fs: GateFieldState, transcript: string, paper: Value[]): Evalu
       const vals = extractClaims(transcript, "net_disbursed", "borrower").filter(
         (v) => v.field === "net_disbursed" || v.field === "loan_amount",
       );
-      const ok = vals.filter((v) => usable(v) && !v.negated);
+      const usableVals = vals.filter((v) => usable(v) && !v.negated);
+      const ok = usableVals.filter((v) => plausibility(v, paper, ["net_disbursed", "loan_amount"]) === "ok");
       if (ok.length) return { outcome: ok.some((v) => targets.includes(v.amount as number)) ? "pass" : "wrong" };
+      if (usableVals.length) return { outcome: "implausible" };
       return { outcome: vals.length || unsure() ? "uncertain" : "not_mentioned" };
     }
 
     case "processing_fee": {
       const target = paperAmount(paper, "processing_fee");
       const vals = extractClaims(transcript, "processing_fee", "borrower").filter((v) => v.field === "processing_fee");
-      const ok = vals.filter(usable);
+      const usableVals = vals.filter(usable);
+      const ok = usableVals.filter((v) => plausibility(v, paper) === "ok");
       if (ok.length) return { outcome: ok.every((v) => v.amount === target) ? "pass" : "wrong" };
+      if (usableVals.length) return { outcome: "implausible" };
       return { outcome: vals.length || unsure() ? "uncertain" : "not_mentioned" };
     }
 
     case "installment": {
       const p = paperValue(paper, "installment")!;
       const vals = extractClaims(transcript, "installment", "borrower").filter((v) => v.field === "installment");
-      const ok = vals.filter((v) => usable(v) && !v.negated);
+      const usableVals = vals.filter((v) => usable(v) && !v.negated);
+      const ok = usableVals.filter((v) => plausibility(v, paper) === "ok");
       const freq = detectFrequency(transcript);
       let amountOk = fs.amountOk;
       let frequencyOk = p.frequency ? fs.frequencyOk : true; // paper has no frequency -> cannot require it
@@ -167,6 +175,7 @@ function evaluate(fs: GateFieldState, transcript: string, paper: Value[]): Evalu
       }
       if (wrong) return { outcome: "wrong", amountOk, frequencyOk };
       if (amountOk && frequencyOk) return { outcome: "pass", amountOk, frequencyOk };
+      if (!said && usableVals.length) return { outcome: "implausible", amountOk, frequencyOk };
       if (!said && (vals.length || unsure())) return { outcome: "uncertain", amountOk, frequencyOk };
       return { outcome: "not_mentioned", amountOk, frequencyOk };
     }
@@ -174,10 +183,12 @@ function evaluate(fs: GateFieldState, transcript: string, paper: Value[]): Evalu
     case "missed_payment": {
       const target = paperAmount(paper, "late_fee");
       const vals = extractClaims(transcript, "late_fee", "borrower").filter((v) => v.field === "late_fee");
-      const ok = vals.filter(usable);
+      const usableVals = vals.filter(usable);
+      const ok = usableVals.filter((v) => plausibility(v, paper) === "ok");
       if (target !== undefined && target > 0 && ok.some((v) => v.negated)) return { outcome: "wrong" }; // "koi late fee nahi"
       if (target !== undefined && ok.some((v) => !v.negated && v.amount !== target)) return { outcome: "wrong" };
       if (ok.some((v) => v.amount === target) || hasConsequenceKeyword(transcript)) return { outcome: "pass" };
+      if (usableVals.length) return { outcome: "implausible" };
       return { outcome: vals.length || unsure() ? "uncertain" : "not_mentioned" };
     }
   }
@@ -227,6 +238,7 @@ export function answerGate(
       next = fail();
       break;
     case "not_mentioned":
+    case "implausible":
       fs.followUps++;
       if (fs.followUps > GATE_MAX_FOLLOW_UPS) next = fail();
       else {

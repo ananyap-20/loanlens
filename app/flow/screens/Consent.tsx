@@ -1,7 +1,9 @@
 "use client";
 
 import { chime } from "@/lib/audio/cues";
-import { CONSENT_DONE, CONSENT_LINE, CONSENT_SAY } from "@/lib/flow/agent";
+import { useEffect } from "react";
+import { prefetchSpeech } from "@/lib/audio/voice";
+import { AGENT_ASK, CONSENT_DONE, CONSENT_LINE, CONSENT_SAY } from "@/lib/flow/agent";
 import { useSpeech } from "../speech";
 import { RecordPanel } from "../RecordPanel";
 import { primary, Screen } from "../ui";
@@ -20,6 +22,7 @@ export function Consent({
   onNext: () => void;
 }) {
   const { say } = useSpeech();
+  useEffect(() => prefetchSpeech(AGENT_ASK.loan_amount), []);
   const rec = useClipRecorder((r) => {
     onRecorded(r);
     chime();
@@ -27,7 +30,7 @@ export function Consent({
   });
 
   return (
-    <Screen instruction={CONSENT_SAY} dots={dots}>
+    <Screen instruction={CONSENT_SAY} dots={dots} speaker="agent">
       <p className="rounded-2xl border-2 border-indigo-400 bg-indigo-50 p-4 text-2xl font-semibold leading-relaxed">🧑‍💼 “{CONSENT_LINE}”</p>
       <RecordPanel speaker="agent" {...rec} onToggle={rec.toggle} />
       {consentTranscript && (

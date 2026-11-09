@@ -3,10 +3,11 @@
 // Big mic button + always-visible recording state + speaker label.
 import { MAX_RECORD_SECONDS } from "@/lib/audio/recorder";
 import type { Speaker } from "@/lib/flow/session";
+import { useSpeech } from "./speech";
 import type { ClipPhase } from "./useClipRecorder";
 
 export const SPEAKER_UI: Record<Speaker, { icon: string; word: string; cls: string }> = {
-  agent: { icon: "🧑‍💼", word: "एजेंट", cls: "bg-indigo-100 text-indigo-900 border-indigo-500" },
+  agent: { icon: "🧑‍💼", word: "एजेंट", cls: "bg-purple-100 text-purple-900 border-purple-500" },
   borrower: { icon: "👩", word: "उधार लेने वाली", cls: "bg-pink-100 text-pink-900 border-pink-500" },
   helper: { icon: "🤝", word: "मददगार", cls: "bg-teal-100 text-teal-900 border-teal-500" },
 };
@@ -38,6 +39,7 @@ export function RecordPanel({
   disabled?: boolean;
 }) {
   const recording = phase === "recording";
+  const { speaking } = useSpeech();
   return (
     <section className="flex flex-col items-center gap-3 rounded-2xl border-2 border-gray-200 p-4">
       <SpeakerChip speaker={speaker} />
@@ -47,10 +49,15 @@ export function RecordPanel({
           रिकॉर्डिंग · {SPEAKER_UI[speaker].icon} {fmt(elapsed)} / {fmt(MAX_RECORD_SECONDS)}
         </div>
       ) : (
-        <div role="status" className="w-full rounded-xl bg-gray-100 p-3 text-center text-xl">
+        <div
+          role="status"
+          className={`w-full rounded-xl p-3 text-center text-xl font-semibold ${
+            phase === "idle" && !speaking ? "bg-green-100 text-green-900 ring-2 ring-green-500" : "bg-gray-100"
+          }`}
+        >
           {phase === "requesting" && "🎤❔ माइक की अनुमति…"}
-          {phase === "sending" && "⏳ सुन रही हूँ…"}
-          {phase === "idle" && "⏸️ रिकॉर्ड नहीं हो रहा"}
+          {phase === "sending" && "📱 ऐप आपकी बात समझ रहा है…"}
+          {phase === "idle" && (speaking ? "📱 ऐप बोल रहा है — सुनिए, फिर बोलिए" : "🎤 आपकी बारी — माइक दबाइए")}
         </div>
       )}
       <button

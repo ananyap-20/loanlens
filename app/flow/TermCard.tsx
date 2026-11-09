@@ -8,7 +8,7 @@ export const FIELD_ICON: Record<Field, string> = {
   net_disbursed: "👛",
   processing_fee: "🧾",
   installment: "🗓️",
-  tenure: "📅",
+  tenure: "⏳",
   interest_rate: "📈",
   late_fee: "⏰",
 };

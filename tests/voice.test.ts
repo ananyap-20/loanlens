@@ -92,3 +92,4 @@ describe("speak() settles", () => {
     await expect(second).resolves.toBeUndefined();
   });
 });
+

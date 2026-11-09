@@ -4,6 +4,7 @@
 // (random order, follow-ups, slow re-explain, max 3 tries); this screen only plays and records.
 import { useState } from "react";
 import { cueFor } from "@/lib/audio/cues";
+import { isNavigationOnly } from "@/lib/engine";
 import {
   answerGate,
   createGate,
@@ -12,14 +13,18 @@ import {
   GATE_MAX_ATTEMPTS,
   shuffledGateFields,
   type AnswerOutcome,
+  type GateFieldId,
   type GateState,
   type NextStep,
 } from "@/lib/engine/gate";
-import type { Status } from "@/lib/engine/types";
+import type { Field, Status } from "@/lib/engine/types";
+import { NAV_ONLY_HI, REASON_HI } from "@/lib/flow/scripts";
 import type { PaperInput } from "@/lib/flow/session";
-import { gatePrompt, GATE_FIELD_HI } from "@/lib/flow/teachback";
+import { FOLLOW_UP_HI, GATE_ASK_HI, gatePrompt } from "@/lib/flow/teachback";
 import { RecordPanel } from "../RecordPanel";
-import { Screen, StatusBadge } from "../ui";
+import { useSpeech } from "../speech";
+import { FIELD_ICON } from "../TermCard";
+import { FieldChip, Legend, Screen, StatusBadge } from "../ui";
 import { useClipRecorder, type ClipResult } from "../useClipRecorder";
 
 const OUTCOME_STATUS: Record<AnswerOutcome, Status> = {
@@ -27,9 +32,22 @@ const OUTCOME_STATUS: Record<AnswerOutcome, Status> = {
   wrong: "conflict",
   uncertain: "unable_to_verify",
   not_mentioned: "not_mentioned",
+  implausible: "unable_to_verify",
 };
 
-const GATE_ICON = { amount_in_hand: "👛", installment: "🗓️", processing_fee: "🧾", missed_payment: "⏰" } as const;
+const OUTCOME_REASON: Partial<Record<AnswerOutcome, string>> = {
+  uncertain: REASON_HI.uncertain,
+  implausible: REASON_HI.implausible,
+  not_mentioned: REASON_HI.no_number,
+};
+
+// Each teach-back point shown with the paper field it is about (icon + one-word label).
+const GATE_CHIP: Record<GateFieldId, Field> = {
+  amount_in_hand: "net_disbursed",
+  installment: "installment",
+  processing_fee: "processing_fee",
+  missed_payment: "late_fee",
+};
 
 export function TeachBack({
   dots,
@@ -42,15 +60,23 @@ export function TeachBack({
   onClip: (r: ClipResult, field: string) => void;
   onDone: (state: GateState) => void;
 }) {
+  const { say } = useSpeech();
   const [gate, setGate] = useState<{ state: GateState; next: NextStep }>(() => createGate(paper.terms, shuffledGateFields()));
   const [last, setLast] = useState<{ outcome: AnswerOutcome; transcript: string } | null>(null);
   const [turn, setTurn] = useState(0);
 
   const prompt = gatePrompt(gate.next, paper.terms, last?.outcome, turn === 0);
   const field = "field" in gate.next ? gate.next.field : null;
+  const questionText =
+    gate.next.kind === "follow_up" ? FOLLOW_UP_HI[gate.next.key] : field ? GATE_ASK_HI[field] : "";
 
   const rec = useClipRecorder((r) => {
     if (!field || gate.state.result !== "in_progress") return;
+    if (isNavigationOnly(r.transcript)) {
+      onClip(r, "navigation"); // kept as a recording, not an answer: no attempt is counted
+      void say(NAV_ONLY_HI);
+      return;
+    }
     const a = answerGate(gate.state, field, r.transcript);
     onClip(r, field);
     cueFor(OUTCOME_STATUS[a.outcome]);
@@ -61,42 +87,50 @@ export function TeachBack({
   });
 
   return (
-    <Screen instruction={prompt.text} slow={prompt.slow} playKey={turn} dots={dots}>
+    <Screen instruction={prompt.text} slow={prompt.slow} playKey={turn} dots={dots} speaker="borrower">
+      <Legend />
       <p className="text-base text-gray-600">🔢 नंबर और शब्दों की जाँच ({GATE_LABEL})</p>
 
       <div className="grid grid-cols-4 gap-2">
         {GATE_FIELDS.map((id) => {
           const fs = gate.state.fields[id];
           const mark = fs.status === "passed" ? "✅" : fs.status === "failed" ? "❌" : fs.status === "not_on_paper" ? "❔" : "";
+          const tries = Math.min(fs.failedAttempts + (id === field ? 1 : 0), GATE_MAX_ATTEMPTS);
           return (
-            <div
+            <FieldChip
               key={id}
-              className={`flex flex-col items-center gap-1 rounded-xl border-2 p-2 ${id === field ? "border-blue-600 bg-blue-50" : "border-gray-200"}`}
-              aria-label={GATE_FIELD_HI[id]}
-            >
-              <span className="text-3xl">{GATE_ICON[id]}</span>
-              <span className="h-6 text-xl">{mark}</span>
-              <span className="flex gap-1" aria-label="tries">
-                {Array.from({ length: GATE_MAX_ATTEMPTS }, (_, k) => (
-                  <span key={k} className={`h-2 w-2 rounded-full ${k < fs.failedAttempts ? "bg-red-500" : "bg-gray-300"}`} />
-                ))}
-              </span>
-            </div>
+              field={GATE_CHIP[id]}
+              icon={FIELD_ICON[GATE_CHIP[id]]}
+              active={id === field}
+              mark={mark}
+              extra={
+                tries > 0 && fs.status === "pending" ? (
+                  <span className="flex items-center gap-1" aria-label={`कोशिश ${tries}/${GATE_MAX_ATTEMPTS}`}>
+                    {Array.from({ length: GATE_MAX_ATTEMPTS }, (_, k) => (
+                      <span key={k} className={`h-2 w-2 rounded-full ${k < fs.failedAttempts ? "bg-red-500" : k < tries ? "bg-blue-500" : "bg-gray-300"}`} />
+                    ))}
+                    <span className="text-[10px] font-bold">
+                      कोशिश {tries}/{GATE_MAX_ATTEMPTS}
+                    </span>
+                  </span>
+                ) : undefined
+              }
+            />
           );
         })}
       </div>
 
-      {field && (
-        <p className="flex items-center gap-2 text-2xl font-bold">
-          <span className="text-4xl">{GATE_ICON[field]}</span> ❓
+      {questionText && (
+        <p className="rounded-2xl border-2 border-pink-300 bg-white p-3 text-2xl font-bold leading-snug">
+          {field ? FIELD_ICON[GATE_CHIP[field]] : ""} {questionText}
         </p>
       )}
 
       <RecordPanel speaker="borrower" {...rec} onToggle={rec.toggle} />
 
       {last && rec.phase === "idle" && (
-        <div className="flex flex-col gap-2 rounded-2xl border-2 border-gray-200 p-3">
-          <StatusBadge status={OUTCOME_STATUS[last.outcome]} big />
+        <div className="flex flex-col gap-2 rounded-2xl border-2 border-gray-200 bg-white p-3">
+          <StatusBadge status={OUTCOME_STATUS[last.outcome]} big reason={OUTCOME_REASON[last.outcome]} />
           <p className="text-base text-gray-600">“{last.transcript}”</p>
         </div>
       )}
