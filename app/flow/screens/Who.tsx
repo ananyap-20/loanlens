@@ -12,11 +12,11 @@ export function Who({ dots, onPick }: { dots: { total: number; current: number }
   return (
     <Screen instruction={say.who} dots={dots}>
       <button aria-label={ui.aloneAria} className={`${primary} min-h-32 flex-col`} onClick={() => onPick("alone")}>
-        <span className="text-6xl">👩</span>
+        <span className="text-6xl">🧑</span>
         <span>{ui.alone}</span>
       </button>
       <button aria-label={ui.withAgentAria} className={`${primary} min-h-32 flex-col bg-indigo-600`} onClick={() => onPick("with_agent")}>
-        <span className="text-6xl">👩 🧑‍💼</span>
+        <span className="text-6xl">🧑 🧑‍💼</span>
         <span>{ui.withAgent}</span>
       </button>
     </Screen>

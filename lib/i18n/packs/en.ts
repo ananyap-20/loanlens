@@ -238,7 +238,7 @@ const receipt: ReceiptStrings = {
   docFingerprint: "Document fingerprint",
   outcomePassed: "✅ Proof of understanding, alongside the signature",
   outcomeStopped: "✋ Do not sign yet — bring someone you trust",
-  cols: { item: "Item", paper: "📄 Paper", agent: "🧑‍💼 Agent", borrower: "👩 Borrower" },
+  cols: { item: "Item", paper: "📄 Paper", agent: "🧑‍💼 Agent", borrower: "🧑 Borrower" },
   cell: {
     match: "Matches",
     conflict: "Different",
@@ -249,7 +249,7 @@ const receipt: ReceiptStrings = {
     notAsked: "Not asked",
     saidNotCharged: "₹0 (said: not charged)",
     noClearAmount: "No clear amount",
-    gatePassed: "Explained correctly in her own words",
+    gatePassed: "Explained correctly in their own words",
     gateFailed: "Different 3 times",
     gatePending: "Not checked",
     gateNotOnPaper: "Not on the paper",
@@ -283,6 +283,7 @@ export const en: LangPack = {
   greeting: "Hello. I will speak in English.",
   normalize: (t) => wordsToDigits(t, TABLE),
   numberToWords: englishWords,
+  rupeesToWords: (n) => (n === 1 ? "one rupee" : `${englishWords(n)} rupees`),
   lexicon: {
     numberWords: NUMBER_WORDS,
     // The engine already knows these English words (lib/engine/extractClaims.ts); listed here for review.
@@ -293,9 +294,11 @@ export const en: LangPack = {
   say: buildSay(phrases),
   ui: {
     start: "▶️ Start",
+    replay: "Replay",
+    slow: "Slower",
     chooseLanguage: "Language",
-    female: "👩 Female voice",
-    male: "👨 Male voice",
+    female: "🔊 Voice 1",
+    male: "🔊 Voice 2",
     alone: "1 · Only me",
     withAgent: "2 · Me + agent",
     aloneAria: "Only me",
@@ -325,7 +328,7 @@ export const en: LangPack = {
     proofTitle: "Proof of understanding, alongside the signature",
     dontSign: "Do not sign yet",
     bringTrusted: "Bring someone you trust 🤝",
-    ownWords: "👩 In your own words",
+    ownWords: "🧑 In your own words",
     agentVsPaper: "🧑‍💼 Agent vs 📄 paper",
     askLender: "❓ Ask the lender",
     complaint: "📢 Complaint",

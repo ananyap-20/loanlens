@@ -2,6 +2,7 @@
 
 // One paper term as a picture card: icon + name (in the selected language) + notes/coins or digits.
 import type { Field, Value } from "@/lib/engine/types";
+import { nativeINR, nativeNumber } from "@/lib/i18n/numerals";
 import { useLang } from "./lang";
 import { Money } from "./Money";
 
@@ -16,8 +17,8 @@ export const FIELD_ICON: Record<Field, string> = {
 };
 
 export function ValueView({ v }: { v: Value }) {
-  const { ui } = useLang().pack;
-  if (v.negated && v.amount === 0) return <span className="text-3xl font-extrabold">₹0 🚫</span>;
+  const { ui, code } = useLang().pack;
+  if (v.negated && v.amount === 0) return <span className="text-3xl font-extrabold">{nativeINR(0, code)} 🚫</span>;
   if (v.amount === undefined) return <span className="text-3xl">❔</span>;
   if (v.unit === "INR") {
     return (
@@ -28,7 +29,7 @@ export function ValueView({ v }: { v: Value }) {
     );
   }
   const unit = v.unit === "percent" ? "%" : v.unit === "months" ? ` ${ui.months}` : v.unit === "weeks" ? ` ${ui.weeks}` : "";
-  return <span className="text-3xl font-extrabold">{`${v.amount}${unit}`}</span>;
+  return <span className="text-3xl font-extrabold">{`${nativeNumber(v.amount, code)}${unit}`}</span>;
 }
 
 export function TermCard({ v, highlight }: { v: Value; highlight?: boolean }) {

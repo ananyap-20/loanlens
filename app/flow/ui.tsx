@@ -16,7 +16,7 @@ export const secondary = `${bigBtn} border-2 border-blue-600 bg-white text-blue-
 /** Who is speaking now: whole-screen tint + banner colour. agent = purple, borrower = pink. */
 export const SPEAKER_THEME: Record<Speaker, { icon: string; bg: string; banner: string; button: string }> = {
   agent: { icon: "🧑‍💼", bg: "bg-purple-50", banner: "bg-purple-700", button: "bg-purple-700" },
-  borrower: { icon: "👩", bg: "bg-pink-50", banner: "bg-pink-600", button: "bg-pink-600" },
+  borrower: { icon: "🧑", bg: "bg-pink-50", banner: "bg-pink-600", button: "bg-pink-600" },
   helper: { icon: "🤝", bg: "bg-teal-50", banner: "bg-teal-700", button: "bg-teal-700" },
 };
 
@@ -73,10 +73,10 @@ export function Screen({
       <div className="flex items-center justify-between gap-3">
         {dots ? <Dots {...dots} /> : <span />}
         <div className="flex gap-2">
-          <button aria-label="फिर से सुनें — replay" className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => void say(instruction)}>
+          <button aria-label={ui.replay} className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => void say(instruction)}>
             🔁
           </button>
-          <button aria-label="धीरे सुनें — slow" className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => void say(instruction, true)}>
+          <button aria-label={ui.slow} className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => void say(instruction, true)}>
             🐢
           </button>
         </div>

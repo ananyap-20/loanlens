@@ -33,9 +33,9 @@ export function agentChangedEarlier(checks: AgentCheck[], field: string): boolea
 }
 
 export const CONSENT_SAY =
-  "एजेंट जी, माइक वाला बटन दबाइए। अपना नाम बताइए और बोलिए: मैं इस बातचीत की रिकॉर्डिंग की अनुमति देता हूँ। फिर बटन दोबारा दबाइए।";
+  "एजेंट जी, माइक वाला बटन दबाइए। अपना नाम बताइए और बोलिए: इस बातचीत की रिकॉर्डिंग के लिए मेरी सहमति है। फिर बटन दोबारा दबाइए।";
 /** Shown on screen for the agent to read aloud (the agent can read; the borrower may not). */
-export const CONSENT_LINE = "मैं (अपना नाम), इस बातचीत की रिकॉर्डिंग की अनुमति देता / देती हूँ।";
+export const CONSENT_LINE = "मैं (अपना नाम): इस बातचीत की रिकॉर्डिंग के लिए मेरी सहमति है।";
 export const CONSENT_DONE = "धन्यवाद। अब आगे वाला बटन दबाइए।";
 
 export type AgentCheck = {

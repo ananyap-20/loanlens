@@ -48,6 +48,8 @@ export type SpokenTemplates = {
 /** On-screen words (the app is voice-first; these are short labels next to icons). */
 export type UiStrings = {
   start: string;
+  replay: string;
+  slow: string;
   chooseLanguage: string;
   female: string;
   male: string;
@@ -120,6 +122,8 @@ export type LangPack = {
   normalize: (transcript: string) => string;
   /** Integer -> spoken words, or null when this pack has no number words yet (callers then show digits only). */
   numberToWords: ((n: number) => string) | null;
+  /** Whole rupees -> spoken words incl. the currency word, or null when this pack has no verified number words. */
+  rupeesToWords: ((n: number) => string) | null;
   /** Raw lexicon data, kept for review by a native speaker and for the tests. */
   lexicon: {
     numberWords: ReadonlyArray<readonly [string, number]>;

@@ -1,6 +1,6 @@
 "use client";
 
-// Teach-back: the borrower explains in her own words. lib/engine/gate.ts decides every step
+// Teach-back: the borrower explains in their own words. lib/engine/gate.ts decides every step
 // (random order, follow-ups, slow re-explain, max 3 tries); this screen only plays and records.
 // The transcript is normalised by the language pack first; the borrower's own words are what the receipt keeps.
 import { useState } from "react";
@@ -77,7 +77,7 @@ export function TeachBack({
     }
     const a = answerGate(gate.state, field, engineText);
     const answers = a.state.fields[field].answers;
-    answers[answers.length - 1] = { ...answers[answers.length - 1], transcript: r.transcript }; // keep her own words
+    answers[answers.length - 1] = { ...answers[answers.length - 1], transcript: r.transcript }; // keep their own words
     onClip(r, field);
     cueFor(OUTCOME_STATUS[a.outcome]);
     setLast({ outcome: a.outcome, transcript: r.transcript });

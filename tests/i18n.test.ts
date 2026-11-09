@@ -176,11 +176,11 @@ describe("receipt in the selected language", () => {
     gate: null,
   };
   it("Marathi labels on the summary; Hindi by default", () => {
-    const lang = { strings: mr.receipt!, fieldName: mr.ui!.fieldName, reason: mr.ui!.reason, lenderQuestions: mr.say!.lenderQuestions };
+    const lang = { code: mr.code, rupeesToWords: mr.rupeesToWords, strings: mr.receipt!, fieldName: mr.ui!.fieldName, reason: mr.ui!.reason, lenderQuestions: mr.say!.lenderQuestions };
     const s = buildSummary(input, lang);
     expect(s.rows[0].hi).toBe("कर्जाची रक्कम");
     expect(s.labelHi).toBe(mr.receipt!.label);
-    expect(s.rows.find((r) => r.field === "installment")!.paper.hi).toBe("₹2,666 दर महिन्याला");
+    expect(s.rows.find((r) => r.field === "installment")!.paper.hi).toBe("₹२,६६६ दर महिन्याला"); // the language's own digits
     expect(buildSummary(input).rows[0].hi).toBe(FIELD_NAME_HI.loan_amount);
     expect(s.label).toBe("Proof of understanding — not a signature, not a loan approval"); // the English label is always there
   });

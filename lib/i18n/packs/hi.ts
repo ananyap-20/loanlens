@@ -1,6 +1,6 @@
 // Hindi (default). Every string and function here is the app's existing Hindi, unchanged:
 // the pack only points at it. normalize() is the identity, so the engine sees exactly what it always saw.
-import { numberToHindiWords } from "@/lib/engine";
+import { numberToHindiWords, rupeesToHindi } from "@/lib/engine";
 import {
   AGENT_ASK,
   AGENT_CHANGED_HI,
@@ -28,9 +28,10 @@ export const hi: LangPack = {
   verified: true,
   prisma: { language_code: "hi-IN,en-IN" }, // verified in the Gnani playground (CLAUDE.md section 4)
   timbre: { language: "hi-IN", voices: { female: "Nalini", male: "Deepak" } },
-  greeting: "नमस्ते। मैं हिंदी में बात करूँगी।",
+  greeting: "नमस्ते। यह ऐप हिंदी में बात करेगा।",
   normalize: (t) => t,
   numberToWords: numberToHindiWords,
+  rupeesToWords: (n) => rupeesToHindi(n),
   lexicon: {
     // The Hindi engine's own tables live in lib/engine (hindiNumbers.ts, extractClaims.ts); nothing extra here.
     numberWords: [],
@@ -55,9 +56,11 @@ export const hi: LangPack = {
   },
   ui: {
     start: "▶️ शुरू करें",
+    replay: "फिर से सुनें",
+    slow: "धीरे सुनें",
     chooseLanguage: "भाषा",
-    female: "👩 महिला आवाज़",
-    male: "👨 पुरुष आवाज़",
+    female: "🔊 आवाज़ 1",
+    male: "🔊 आवाज़ 2",
     alone: "1 · सिर्फ़ मैं",
     withAgent: "2 · मैं + एजेंट",
     aloneAria: "सिर्फ़ मैं — just me",
@@ -65,11 +68,11 @@ export const hi: LangPack = {
     sample: "3 · नमूना",
     cameraOn: "📷 कैमरा चालू (रिकॉर्ड नहीं हो रहा)",
     cameraOff: "⏹️ कैमरा बंद",
-    readingPaper: "⏳ कागज़ पढ़ रही हूँ…",
+    readingPaper: "⏳ कागज़ पढ़ा जा रहा है…",
     next: "आगे",
     ready: "मैं तैयार हूँ ▶️",
-    handoverTitle: { agent: "अब एजेंट बोलेंगे", borrower: "अब फ़ोन उधार लेने वाली को दीजिए" },
-    role: { agent: "एजेंट", borrower: "उधार लेने वाली", helper: "मददगार" },
+    handoverTitle: { agent: "अब एजेंट बोलेंगे", borrower: "अब फ़ोन ग्राहक को दीजिए" },
+    role: { agent: "एजेंट", borrower: "ग्राहक", helper: "मददगार" },
     speakingNow: "🎤 अभी बोल रहे हैं:",
     appSpeaking: "ऐप बोल रहा है… सुनिए",
     audioFailed: "🔇 आवाज़ नहीं चल पाई ({error}). 🔁 दबाइए।",
@@ -87,7 +90,7 @@ export const hi: LangPack = {
     proofTitle: "समझ का सबूत, साइन के साथ",
     dontSign: "अभी साइन मत कीजिए",
     bringTrusted: "किसी भरोसे वाले को साथ लाइए 🤝",
-    ownWords: "👩 अपने शब्दों में",
+    ownWords: "🧑 अपने शब्दों में",
     agentVsPaper: "🧑‍💼 एजेंट बनाम 📄 कागज़",
     askLender: "❓ लेंडर से पूछिए",
     complaint: "📢 शिकायत",

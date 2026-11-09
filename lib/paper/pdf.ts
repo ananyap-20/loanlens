@@ -1,11 +1,12 @@
 // PDF path: text from text-based PDFs (pdfjs-dist), then deterministic regex rules. No OCR, no AI.
 import { detectFrequency, parseAmounts } from "@/lib/engine";
+import { DIGIT_CLASS } from "@/lib/engine/tokens";
 import type { Field, Frequency, Unit, Value } from "@/lib/engine/types";
 import { finishTerms, NO_TEXT_MESSAGE, paperValue, type PaperResult } from "./terms";
 
 type Rule = { field: Field; label: RegExp; unit: Unit; freq?: Frequency | "detect" };
 
-const NONNUM = "[^\\d\\u0966-\\u096F]*";
+const NONNUM = `[^${DIGIT_CLASS}]*`;
 
 // Labels are anchored at the start of a line so "Sum of instalments..." never counts as the instalment.
 const RULES: Rule[] = [

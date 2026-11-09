@@ -14,6 +14,7 @@ export function stub(code: LangCode, name: string, prisma: string, voices: LangP
     greeting: "",
     normalize: (t) => t,
     numberToWords: null,
+    rupeesToWords: null,
     lexicon: { numberWords: [], negation: [], consequence: [], navigation: [] },
     say: null,
     ui: null,
