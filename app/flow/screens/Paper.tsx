@@ -37,7 +37,7 @@ export function Paper({ dots, shared, onPaper }: Props) {
     setProblem("");
     setBusy(true);
     try {
-      const bytes = isPdf(file) ? new Uint8Array(await file.arrayBuffer()) : undefined;
+      const bytes = new Uint8Array(await file.arrayBuffer()); // PDF or QR photo, kept for the receipt fingerprint
       finish(await readPaperFile(file), source, bytes);
     } catch (e) {
       setProblem(e instanceof Error ? e.message : String(e));

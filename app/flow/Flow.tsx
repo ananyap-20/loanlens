@@ -6,7 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import type { AgentCheck as Check } from "@/lib/flow/agent";
 import type { GateState } from "@/lib/engine/gate";
 import type { PaperInput, Presence, Recording, Speaker } from "@/lib/flow/session";
+import { SAY } from "@/lib/flow/scripts";
+import { speak, stopSpeaking } from "@/lib/audio/voice";
+import { gnani } from "@/lib/gnani/queue";
 import { SpeechProvider } from "./speech";
+import { Receipt } from "./screens/Receipt";
 import { AgentCheck } from "./screens/AgentCheck";
 import { Consent } from "./screens/Consent";
 import { Explain } from "./screens/Explain";
@@ -17,12 +21,12 @@ import { Welcome } from "./screens/Welcome";
 import { Who } from "./screens/Who";
 import type { ClipResult } from "./useClipRecorder";
 
-type Step = "welcome" | "who" | "paper" | "explain" | "consent" | "agent" | "teachback" | "result";
+type Step = "welcome" | "who" | "paper" | "explain" | "consent" | "agent" | "teachback" | "result" | "receipt";
 
 function stepsFor(presence: Presence | null): Step[] {
   return presence === "with_agent"
-    ? ["who", "paper", "explain", "consent", "agent", "teachback", "result"]
-    : ["who", "paper", "explain", "teachback", "result"];
+    ? ["who", "paper", "explain", "consent", "agent", "teachback", "result", "receipt"]
+    : ["who", "paper", "explain", "teachback", "result", "receipt"];
 }
 
 export default function Flow() {
@@ -62,15 +66,21 @@ export default function Flow() {
   const consent = [...recordings].reverse().find((r) => r.step === "consent");
   const afterExplain: Step = presence === "with_agent" ? "consent" : "teachback";
 
-  // Start again: drop everything kept in memory for this check.
-  function restart() {
+  // "सब मिटाएँ": drop everything this check kept — document bytes, recordings, transcripts, results,
+  // cached speech (some prompts contain the loan figures) and any shared file still parked by the service worker.
+  function clearAll() {
+    stopSpeaking();
+    gnani.clearSpeakCache();
+    if (typeof caches !== "undefined") void caches.delete("loanlens-shared").catch(() => undefined);
     setPresence(null);
     setPaper(null);
     setShared(null);
     setRecordings([]);
     setChecks([]);
     setGate(null);
-    setStep("who");
+    nextId.current = 1;
+    setStep("welcome");
+    void speak(SAY.cleared).catch(() => undefined);
   }
 
   return (
@@ -127,7 +137,21 @@ export default function Flow() {
           }}
         />
       )}
-      {step === "result" && paper && gate && <Result dots={dots} paper={paper} gate={gate} checks={checks} onRestart={restart} />}
+      {step === "result" && paper && gate && (
+        <Result dots={dots} paper={paper} gate={gate} checks={checks} onReceipt={() => setStep("receipt")} onClear={clearAll} />
+      )}
+      {step === "receipt" && paper && presence && (
+        <Receipt
+          dots={dots}
+          presence={presence}
+          paper={paper}
+          recordings={recordings}
+          checks={checks}
+          gate={gate}
+          onBack={() => setStep("result")}
+          onClear={clearAll}
+        />
+      )}
     </SpeechProvider>
   );
 }

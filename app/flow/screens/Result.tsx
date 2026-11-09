@@ -10,20 +10,23 @@ import { FIELD_NAME_HI } from "@/lib/flow/scripts";
 import type { PaperInput } from "@/lib/flow/session";
 import { GATE_FIELD_HI, lenderQuestions, resultSpeech } from "@/lib/flow/teachback";
 import { FIELD_ICON } from "../TermCard";
-import { Screen, secondary, StatusBadge } from "../ui";
+import { ClearButton } from "../ClearButton";
+import { primary, Screen, StatusBadge } from "../ui";
 
 export function Result({
   dots,
   paper,
   gate,
   checks,
-  onRestart,
+  onReceipt,
+  onClear,
 }: {
   dots: { total: number; current: number };
   paper: PaperInput;
   gate: GateState;
   checks: AgentCheck[];
-  onRestart: () => void;
+  onReceipt: () => void;
+  onClear: () => void;
 }) {
   const kind = gate.result === "passed" ? "passed" : "stopped";
   const questions = useMemo(() => lenderQuestions(paper, checks, gate.fields), [paper, checks, gate]);
@@ -98,9 +101,10 @@ export function Result({
         </p>
       </section>
 
-      <button className={secondary} onClick={onRestart}>
-        🔄 नया
+      <button className={primary} onClick={onReceipt}>
+        <span className="text-4xl">🧾</span> रसीद
       </button>
+      <ClearButton onClear={onClear} />
     </Screen>
   );
 }
