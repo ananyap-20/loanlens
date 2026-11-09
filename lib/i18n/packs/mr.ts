@@ -341,6 +341,8 @@ const receipt: ReceiptStrings = {
   recCols: { who: "कोण", what: "काय", time: "वेळ", transcript: "काय बोलले" },
   speaker: { agent: "एजंट", borrower: "ग्राहक", helper: "मदतनीस" },
   agentChanged: "एजंटने आधी वेगळे सांगितले होते",
+  disclaimer:
+    "Beta चिन्हांकित भाषांची अजून चाचणी सुरू आहे, आणि त्यांच्या शब्दांची मूळ भाषकाकडून तपासणी झालेली नाही. LoanLens सहीसोबत समजल्याचा पुरावा देते. ही सही नाही आणि कर्जाची मंजुरी नाही.",
 };
 
 export const mr: LangPack = {
@@ -364,6 +366,11 @@ export const mr: LangPack = {
     start: "▶️ सुरू करा",
     replay: "पुन्हा ऐका",
     slow: "हळू ऐका",
+    betaTag: "Beta",
+    reviewTag: "शब्द तपासणीत",
+    notReady: "अजून उपलब्ध नाही",
+    disclaimer:
+      "Beta चिन्हांकित भाषांची अजून चाचणी सुरू आहे, आणि त्यांच्या शब्दांची मूळ भाषकाकडून तपासणी झालेली नाही. LoanLens सहीसोबत समजल्याचा पुरावा देते. ही सही नाही आणि कर्जाची मंजुरी नाही.",
     chooseLanguage: "भाषा",
     female: "🔊 आवाज 1",
     male: "🔊 आवाज 2",

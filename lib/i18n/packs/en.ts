@@ -272,6 +272,8 @@ const receipt: ReceiptStrings = {
   recCols: { who: "Who", what: "What", time: "Time", transcript: "Transcript" },
   speaker: { agent: "Agent", borrower: "Borrower", helper: "Helper" },
   agentChanged: "The agent said something different earlier",
+  disclaimer:
+    "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. LoanLens gives proof of understanding alongside the signature. It is not a signature and not a loan approval.",
 };
 
 export const en: LangPack = {
@@ -296,6 +298,11 @@ export const en: LangPack = {
     start: "▶️ Start",
     replay: "Replay",
     slow: "Slower",
+    betaTag: "Beta",
+    reviewTag: "Wording under review",
+    notReady: "not available yet",
+    disclaimer:
+      "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. LoanLens gives proof of understanding alongside the signature. It is not a signature and not a loan approval.",
     chooseLanguage: "Language",
     female: "🔊 Voice 1",
     male: "🔊 Voice 2",
