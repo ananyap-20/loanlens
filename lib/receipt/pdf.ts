@@ -2,6 +2,7 @@
 // encode as JPEG, then put the images into one PDF with pdf-lib. Page 1 = summary, page 2+ = evidence log.
 import { imagesToPdf } from "./assemble";
 import type { Cell, Evidence, Mark, Summary } from "./build";
+import type { ReceiptStrings } from "./strings";
 
 const PW = 1240; // A4 at 150 dpi
 const PH = 1754;
@@ -117,13 +118,14 @@ function drawSummary(p: Pages, s: Summary) {
   // header band
   ctx.fillStyle = "#1d4ed8";
   ctx.fillRect(0, 0, PW, 150);
-  text(ctx, "LoanLens रसीद", M, 26, PW - 2 * M, 54, { weight: 800, color: "#ffffff" });
+  const t = s.strings;
+  text(ctx, t.title, M, 26, PW - 2 * M, 54, { weight: 800, color: "#ffffff" });
   text(ctx, "Receipt · page 1: summary", M, 100, PW - 2 * M, 22, { color: "#dbeafe" });
   p.y = 172;
   p.y += text(ctx, `🕒 ${s.createdIST}`, M, p.y, PW - 2 * M, 26, { weight: 600 });
   if (s.lender) p.y += text(ctx, `🏦 ${s.lender}`, M, p.y, PW - 2 * M, 26);
-  p.y += text(ctx, `👥 मौजूद: ${s.presenceHi}  ·  present: ${s.presenceEn}`, M, p.y, PW - 2 * M, 24);
-  p.y += text(ctx, `📄 दस्तावेज़ फ़िंगरप्रिंट / document fingerprint: ${s.documentShort}…`, M, p.y, PW - 2 * M, 20, { color: "#4b5563" });
+  p.y += text(ctx, `👥 ${t.present}: ${s.presenceHi}  ·  present: ${s.presenceEn}`, M, p.y, PW - 2 * M, 24);
+  p.y += text(ctx, `📄 ${t.docFingerprint} / document fingerprint: ${s.documentShort}…`, M, p.y, PW - 2 * M, 20, { color: "#4b5563" });
   p.y += 12;
 
   // outcome block
@@ -134,7 +136,7 @@ function drawSummary(p: Pages, s: Summary) {
     ctx.fillRect(M, p.y, PW - 2 * M, h);
     ctx.fillStyle = ok ? "#16a34a" : "#dc2626";
     ctx.fillRect(M, p.y, 12, h);
-    text(ctx, ok ? "✅ समझ का सबूत, साइन के साथ" : "✋ अभी साइन मत कीजिए — किसी भरोसे वाले को साथ लाइए", M + 28, p.y + 12, PW - 2 * M - 40, 30, {
+    text(ctx, ok ? t.outcomePassed : t.outcomeStopped, M + 28, p.y + 12, PW - 2 * M - 40, 30, {
       weight: 800,
       color: ok ? "#14532d" : "#7f1d1d",
     });
@@ -147,10 +149,10 @@ function drawSummary(p: Pages, s: Summary) {
   // table
   const cols = [250, 290, 290, 270]; // = PW - 2M = 1112 (rounded)
   const heads: [string, string][] = [
-    ["बात", "Item"],
-    ["📄 कागज़", "Paper"],
-    ["🧑‍💼 एजेंट", "Agent"],
-    ["👩 उधार लेने वाली", "Borrower"],
+    [t.cols.item, "Item"],
+    [t.cols.paper, "Paper"],
+    [t.cols.agent, "Agent"],
+    [t.cols.borrower, "Borrower"],
   ];
   let x = M;
   heads.forEach(([hi, en], i) => {
@@ -185,7 +187,7 @@ function drawSummary(p: Pages, s: Summary) {
   p.ctx.lineWidth = 4;
   p.ctx.strokeRect(M, p.y, PW - 2 * M, qh);
   let qy = p.y + 14;
-  qy += text(p.ctx, "❓ साइन करने से पहले लेंडर से पूछिए", M + 20, qy, PW - 2 * M - 40, 28, { weight: 800, color: "#78350f" });
+  qy += text(p.ctx, t.questionsTitle, M + 20, qy, PW - 2 * M - 40, 28, { weight: 800, color: "#78350f" });
   qy += text(p.ctx, "Questions to ask before signing", M + 20, qy, PW - 2 * M - 40, 18, { color: "#92400e" }) + 6;
   for (const q of qText) qy += text(p.ctx, q, M + 20, qy, PW - 2 * M - 40, 25);
   p.y += qh + 18;
@@ -193,23 +195,23 @@ function drawSummary(p: Pages, s: Summary) {
   // complaint path
   const ch = 40 + [...s.complaintHi].reduce((sum, c) => sum + measure(ctx, c, PW - 2 * M, 23), 0) + 30;
   p.ensure(ch);
-  p.y += text(p.ctx, "📢 शिकायत कहाँ करें · Where to complain", M, p.y, PW - 2 * M, 26, { weight: 800 });
+  p.y += text(p.ctx, `${t.complaintTitle} · Where to complain`, M, p.y, PW - 2 * M, 26, { weight: 800 });
   for (const c of s.complaintHi) p.y += text(p.ctx, c, M, p.y, PW - 2 * M, 23);
   p.y += text(p.ctx, s.complaintEn.join("   "), M, p.y, PW - 2 * M, 17, { color: "#4b5563" });
 }
 
 // ------------------------------------------------------------------ page 2+: evidence log
 
-function drawEvidence(p: Pages, e: Evidence) {
+function drawEvidence(p: Pages, e: Evidence, t: ReceiptStrings) {
   p.add();
   const ctx = () => p.ctx;
   ctx().fillStyle = "#1d4ed8";
   ctx().fillRect(0, 0, PW, 16);
   p.y = 40;
-  p.y += text(ctx(), "सबूत", M, p.y, PW - 2 * M, 44, { weight: 800 });
+  p.y += text(ctx(), t.evidenceTitle, M, p.y, PW - 2 * M, 44, { weight: 800 });
   p.y += text(ctx(), `Evidence log · source: ${e.sourceEn}`, M, p.y, PW - 2 * M, 22, { color: "#4b5563" }) + 6;
 
-  heading(p, "कागज़ की बातें", "Terms on the paper (with the line printed on the paper)");
+  heading(p, t.termsTitle, "Terms on the paper (with the line printed on the paper)");
   for (const t of e.terms) {
     const h = measure(ctx(), `${t.hi} / ${t.en}: ${t.value}`, PW - 2 * M, 23) + measure(ctx(), `“${t.evidence}”`, PW - 2 * M - 24, 19) + 6;
     p.ensure(h);
@@ -226,13 +228,13 @@ function drawEvidence(p: Pages, e: Evidence) {
   }
 
   if (e.comparisons.length) {
-    heading(p, "एजेंट बनाम कागज़", "Agent vs paper (latest recording counts; all recordings are listed below)");
+    heading(p, t.agentVsPaperTitle, "Agent vs paper (latest recording counts; all recordings are listed below)");
     for (const c of e.comparisons) {
       const lines = [
         `${c.en}: ${c.status}${c.attempts > 1 ? ` · ${c.attempts} recordings` : ""}`,
         `paper: “${c.paper}”`,
         `agent: “${c.agent}”`,
-        ...(c.changed ? ["⚠️ एजेंट ने पहले अलग बताया था · an earlier answer differed from the paper"] : []),
+        ...(c.changed ? [`⚠️ ${t.agentChanged} · an earlier answer differed from the paper`] : []),
       ];
       const h = lines.reduce((s, l) => s + measure(ctx(), l, PW - 2 * M - 24, 20), 0) + 10;
       p.ensure(h);
@@ -247,7 +249,7 @@ function drawEvidence(p: Pages, e: Evidence) {
   }
 
   if (e.teachback.length) {
-    heading(p, "उधार लेने वाली के अपने शब्द", "Borrower's own words (number-and-keyword check)");
+    heading(p, t.ownWordsTitle, "Borrower's own words (number-and-keyword check)");
     for (const t of e.teachback) {
       const lines = [`${t.en}: ${t.status}`, `paper: “${t.paper}”`, ...t.answers.map((a, k) => `try ${k + 1}: “${a}”`)];
       const h = lines.reduce((s, l) => s + measure(ctx(), l, PW - 2 * M - 24, 20), 0) + 10;
@@ -260,9 +262,9 @@ function drawEvidence(p: Pages, e: Evidence) {
   }
 
   // recordings table
-  heading(p, "सारी रिकॉर्डिंग (पहली और दोबारा वाली)", "All recordings, original and re-recordings · SHA-256 first 16 characters");
+  heading(p, t.recordingsTitle, "All recordings, original and re-recordings · SHA-256 first 16 characters");
   const cols = [50, 150, 210, 150, 80, 300, 172];
-  const heads = ["#", "कौन / who", "क्या / what", "समय / time", "sec", "जो बोला / transcript", "SHA-256 (16)"];
+  const heads = ["#", `${t.recCols.who} / who`, `${t.recCols.what} / what`, `${t.recCols.time} / time`, "sec", `${t.recCols.transcript} / transcript`, "SHA-256 (16)"];
   const drawRow = (vals: string[], header: boolean) => {
     const sizes = vals.map((_, i) => (header ? 18 : i === 6 ? 15 : 17));
     const h = Math.max(header ? 40 : 34, ...vals.map((v, i) => 14 + measure(ctx(), v, cols[i] - 14, sizes[i], i === 6 && !header)));
@@ -286,7 +288,7 @@ function drawEvidence(p: Pages, e: Evidence) {
   }
 
   // full fingerprints
-  heading(p, "पूरे फ़िंगरप्रिंट", "Full SHA-256 fingerprints");
+  heading(p, t.fullFingerprintsTitle, "Full SHA-256 fingerprints");
   const full = [`document: ${e.documentSha256 ?? "not available"}`, ...e.recordings.map((r) => `#${r.id}: ${r.sha256}`)];
   for (const f of full) {
     p.ensure(30);
@@ -318,7 +320,7 @@ export type ReceiptPdf = { pdf: Blob; pages: number; previews: string[] };
 export async function makeReceiptPdf(summary: Summary, evidence: Evidence, createdAt: Date): Promise<ReceiptPdf> {
   const p = new Pages();
   drawSummary(p, summary);
-  drawEvidence(p, evidence);
+  drawEvidence(p, evidence, summary.strings);
   drawFooters(p, summary);
   const jpegs = await Promise.all(p.pages.map((pg) => toJpeg(pg.canvas)));
   const bytes = await imagesToPdf(

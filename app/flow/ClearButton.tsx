@@ -1,34 +1,35 @@
 "use client";
 
-// Big "सब मिटाएँ" (clear everything). Two taps: the first asks (spoken), the second clears.
+// Big "clear everything" button. Two taps: the first asks (spoken), the second clears.
 import { useEffect, useState } from "react";
-import { SAY } from "@/lib/flow/scripts";
+import { useLang } from "./lang";
 import { useSpeech } from "./speech";
 import { bigBtn } from "./ui";
 
 export function ClearButton({ onClear }: { onClear: () => void }) {
   const { say } = useSpeech();
+  const { say: t, ui } = useLang().pack;
   const [armed, setArmed] = useState(false);
 
   useEffect(() => {
     if (!armed) return;
-    const t = setTimeout(() => setArmed(false), 10_000); // the question expires
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setArmed(false), 10_000); // the question expires
+    return () => clearTimeout(timer);
   }, [armed]);
 
   return (
     <button
-      aria-label={armed ? "पक्का, सब मिटाएँ — confirm clear everything" : "सब मिटाएँ — clear everything"}
+      aria-label={armed ? `${ui.clearSure} — confirm clear everything` : `${ui.clear} — clear everything`}
       className={`${bigBtn} ${armed ? "bg-red-700 text-white ring-8 ring-red-200" : "border-2 border-red-600 bg-white text-red-700"}`}
       onClick={() => {
         if (armed) onClear();
         else {
           setArmed(true);
-          void say(SAY.clearConfirm);
+          void say(t.clearConfirm);
         }
       }}
     >
-      <span className="text-4xl">🗑️</span> {armed ? "पक्का? ✔️" : "सब मिटाएँ"}
+      <span className="text-4xl">🗑️</span> {armed ? ui.clearSure : ui.clear}
     </button>
   );
 }

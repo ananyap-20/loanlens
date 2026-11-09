@@ -3,7 +3,8 @@
 import { chime } from "@/lib/audio/cues";
 import { useEffect } from "react";
 import { prefetchSpeech } from "@/lib/audio/voice";
-import { AGENT_ASK, CONSENT_DONE, CONSENT_LINE, CONSENT_SAY } from "@/lib/flow/agent";
+
+import { useLang } from "../lang";
 import { useSpeech } from "../speech";
 import { RecordPanel } from "../RecordPanel";
 import { primary, Screen } from "../ui";
@@ -22,16 +23,17 @@ export function Consent({
   onNext: () => void;
 }) {
   const { say } = useSpeech();
-  useEffect(() => prefetchSpeech(AGENT_ASK.loan_amount), []);
+  const { say: t, ui } = useLang().pack;
+  useEffect(() => prefetchSpeech(t.agentAsk.loan_amount), [t]);
   const rec = useClipRecorder((r) => {
     onRecorded(r);
     chime();
-    void say(CONSENT_DONE);
+    void say(t.consentDone);
   });
 
   return (
-    <Screen instruction={CONSENT_SAY} dots={dots} speaker="agent">
-      <p className="rounded-2xl border-2 border-indigo-400 bg-indigo-50 p-4 text-2xl font-semibold leading-relaxed">🧑‍💼 “{CONSENT_LINE}”</p>
+    <Screen instruction={t.consentSay} dots={dots} speaker="agent">
+      <p className="rounded-2xl border-2 border-indigo-400 bg-indigo-50 p-4 text-2xl font-semibold leading-relaxed">🧑‍💼 “{ui.consentLine}”</p>
       <RecordPanel speaker="agent" {...rec} onToggle={rec.toggle} />
       {consentTranscript && (
         <p className="rounded-xl bg-green-50 p-3 text-lg">
@@ -39,7 +41,7 @@ export function Consent({
         </p>
       )}
       <button className={primary} disabled={!consentTranscript || rec.phase !== "idle"} onClick={onNext}>
-        आगे <span className="text-4xl">▶️</span>
+        {ui.next} <span className="text-4xl">▶️</span>
       </button>
     </Screen>
   );

@@ -1,21 +1,15 @@
 "use client";
 
 // Field-by-field agent check: ask -> agent speaks -> ✅/❌/❔ + sound + spoken flag. Re-record any time.
+// The transcript goes through the language pack's normalize() (number words -> digits, keywords -> engine
+// keywords) before the unchanged engine; the person's own words are kept for the screen and the receipt.
 import { useEffect, useState } from "react";
 import { cueFor } from "@/lib/audio/cues";
 import { prefetchSpeech } from "@/lib/audio/voice";
 import { isNavigationOnly } from "@/lib/engine";
-import {
-  AGENT_ASK,
-  AGENT_CHANGED_HI,
-  AGENT_FIELDS,
-  AGENT_QUESTION_TEXT,
-  agentChangedEarlier,
-  checkAgentClip,
-  type AgentCheck as Check,
-} from "@/lib/flow/agent";
-import { NAV_ONLY_HI, REASON_HI } from "@/lib/flow/scripts";
+import { AGENT_FIELDS, agentChangedEarlier, checkAgentClip, type AgentCheck as Check } from "@/lib/flow/agent";
 import type { PaperInput } from "@/lib/flow/session";
+import { useLang } from "../lang";
 import { useSpeech } from "../speech";
 import { RecordPanel } from "../RecordPanel";
 import { FIELD_ICON, ValueView } from "../TermCard";
@@ -36,67 +30,64 @@ export function AgentCheck({
   onDone: () => void;
 }) {
   const { say } = useSpeech();
+  const { pack } = useLang();
+  const { say: t, ui } = pack;
   const [i, setI] = useState(0);
   const field = AGENT_FIELDS[i];
   const latest = (f: string) => [...checks].reverse().find((c) => c.field === f);
   const current = latest(field);
   const changed = agentChangedEarlier(checks, field);
 
-  // Fetch the next question's first words now, so it starts at once after "आगे".
+  // Fetch the next question's first words now, so it starts at once after "next".
   useEffect(() => {
-    if (i + 1 < AGENT_FIELDS.length) prefetchSpeech(AGENT_ASK[AGENT_FIELDS[i + 1]]);
-  }, [i]);
+    if (i + 1 < AGENT_FIELDS.length) prefetchSpeech(t.agentAsk[AGENT_FIELDS[i + 1]]);
+  }, [i, t]);
 
   const rec = useClipRecorder((r) => {
-    if (isNavigationOnly(r.transcript)) {
+    const engineText = pack.normalize(r.transcript);
+    if (isNavigationOnly(engineText)) {
       onClip(r, null); // keep the recording, do not count it as an answer
-      void say(NAV_ONLY_HI);
+      void say(t.navOnly);
       return;
     }
-    const c = checkAgentClip(field, r.transcript, paper.terms);
+    const raw = checkAgentClip(field, engineText, paper.terms);
+    const c: Check = { ...raw, transcript: r.transcript };
+    c.flag = t.agentFlag(c);
     onClip(r, c);
     cueFor(c.status);
     void say(c.flag);
   });
 
   return (
-    <Screen instruction={AGENT_ASK[field]} dots={dots} speaker="agent">
+    <Screen instruction={t.agentAsk[field]} dots={dots} speaker="agent">
       <Legend />
       <div className="flex justify-center gap-2" aria-label="fields">
         {AGENT_FIELDS.map((f, k) => {
           const c = latest(f);
           const mark = c ? (c.status === "match" ? "✅" : c.status === "conflict" ? "❌" : "❔") : "";
-          return (
-            <FieldChip
-              key={f}
-              field={f}
-              icon={FIELD_ICON[f]}
-              active={k === i}
-              mark={mark + (agentChangedEarlier(checks, f) ? "⚠️" : "")}
-            />
-          );
+          return <FieldChip key={f} field={f} icon={FIELD_ICON[f]} active={k === i} mark={mark + (agentChangedEarlier(checks, f) ? "⚠️" : "")} />;
         })}
       </div>
 
-      <p className="rounded-2xl border-2 border-purple-300 bg-white p-3 text-2xl font-bold leading-snug">{AGENT_QUESTION_TEXT[field]}</p>
+      <p className="rounded-2xl border-2 border-purple-300 bg-white p-3 text-2xl font-bold leading-snug">{ui.agentQuestion[field]}</p>
 
       <RecordPanel speaker="agent" {...rec} onToggle={rec.toggle} />
 
       {current && rec.phase === "idle" && (
         <div className="flex flex-col gap-3 rounded-2xl border-2 border-gray-200 bg-white p-3">
-          <StatusBadge status={current.status} big reason={current.status === "unable_to_verify" && current.reason ? REASON_HI[current.reason] : undefined} />
+          <StatusBadge status={current.status} big reason={current.status === "unable_to_verify" && current.reason ? ui.reason[current.reason] : undefined} />
           {changed && (
             <p className="rounded-xl border-2 border-amber-500 bg-amber-50 p-2 text-lg font-bold text-amber-900" role="alert">
-              ⚠️ {AGENT_CHANGED_HI}
+              ⚠️ {ui.agentChanged}
             </p>
           )}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-lg font-bold">🧑‍💼 एजेंट</span>
+              <span className="text-lg font-bold">{ui.agentCol}</span>
               {current.spoken[0] ? <ValueView v={current.spoken[0]} /> : <span className="text-3xl">❔</span>}
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-lg font-bold">📄 कागज़</span>
+              <span className="text-lg font-bold">{ui.paperCol}</span>
               {current.paper ? <ValueView v={current.paper} /> : <span className="text-3xl">❔</span>}
             </div>
           </div>
@@ -104,12 +95,8 @@ export function AgentCheck({
         </div>
       )}
 
-      <button
-        className={primary}
-        disabled={rec.phase !== "idle"}
-        onClick={() => (i + 1 < AGENT_FIELDS.length ? setI(i + 1) : onDone())}
-      >
-        आगे <span className="text-4xl">▶️</span>
+      <button className={primary} disabled={rec.phase !== "idle"} onClick={() => (i + 1 < AGENT_FIELDS.length ? setI(i + 1) : onDone())}>
+        {ui.next} <span className="text-4xl">▶️</span>
       </button>
     </Screen>
   );

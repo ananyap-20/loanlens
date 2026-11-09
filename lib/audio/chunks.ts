@@ -5,7 +5,7 @@ const FIRST_MAX = 70;
 
 export function splitForSpeech(text: string): string[] {
   const sentences = text
-    .split(/(?<=[।?!:])\s+/u)
+    .split(/(?<=[।?!:.])\s+/u) // "." ends sentences in English and Marathi
     .map((s) => s.trim())
     .filter(Boolean);
   const out: string[] = [];

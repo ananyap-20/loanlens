@@ -37,7 +37,13 @@ export function stopSpeaking() {
   finishCurrent = null;
 }
 
-const speakOptions = (slow: boolean) => (slow ? { speed: SLOW_SPEED } : {});
+// The selected language pack's Timbre voice + language. Unset = the server defaults (Hindi, Nalini),
+// so the Hindi flow sends exactly the requests it always sent.
+let voiceConfig: { voice?: string; language?: string } = {};
+export function setVoiceConfig(c: { voice?: string; language?: string }) {
+  voiceConfig = { ...c };
+}
+const speakOptions = (slow: boolean) => ({ ...voiceConfig, ...(slow ? { speed: SLOW_SPEED } : {}) });
 
 /** Warm the cache with the FIRST chunk of a prompt that is about to be needed (it then starts at once). */
 export function prefetchSpeech(text: string, slow = false): void {

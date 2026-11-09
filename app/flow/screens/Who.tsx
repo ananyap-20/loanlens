@@ -3,24 +3,21 @@
 import { useEffect } from "react";
 import { prefetchSpeech } from "@/lib/audio/voice";
 import type { Presence } from "@/lib/flow/session";
-import { SAY } from "@/lib/flow/scripts";
+import { useLang } from "../lang";
 import { primary, Screen } from "../ui";
 
 export function Who({ dots, onPick }: { dots: { total: number; current: number }; onPick: (p: Presence) => void }) {
-  useEffect(() => prefetchSpeech(SAY.paper), []);
+  const { say, ui } = useLang().pack;
+  useEffect(() => prefetchSpeech(say.paper), [say]);
   return (
-    <Screen instruction={SAY.who} dots={dots}>
-      <button aria-label="सिर्फ़ मैं — just me" className={`${primary} min-h-32 flex-col`} onClick={() => onPick("alone")}>
+    <Screen instruction={say.who} dots={dots}>
+      <button aria-label={ui.aloneAria} className={`${primary} min-h-32 flex-col`} onClick={() => onPick("alone")}>
         <span className="text-6xl">👩</span>
-        <span>1 · सिर्फ़ मैं</span>
+        <span>{ui.alone}</span>
       </button>
-      <button
-        aria-label="मैं और एजेंट — me and the agent"
-        className={`${primary} min-h-32 flex-col bg-indigo-600`}
-        onClick={() => onPick("with_agent")}
-      >
+      <button aria-label={ui.withAgentAria} className={`${primary} min-h-32 flex-col bg-indigo-600`} onClick={() => onPick("with_agent")}>
         <span className="text-6xl">👩 🧑‍💼</span>
-        <span>2 · मैं + एजेंट</span>
+        <span>{ui.withAgent}</span>
       </button>
     </Screen>
   );

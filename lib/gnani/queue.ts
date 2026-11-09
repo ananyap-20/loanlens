@@ -90,11 +90,12 @@ export function createGnaniClient(config: QueueConfig = {}) {
 
   return {
     /** Audio -> transcript through /api/transcribe. Keep the real filename extension (clip.wav from the recorder). */
-    transcribe(audio: Blob, filename = "clip.wav"): Promise<TranscribeResult> {
+    transcribe(audio: Blob, filename = "clip.wav", opts: { language?: string } = {}): Promise<TranscribeResult> {
       return enqueue(async () => {
         const res = await callWithRetry(() => {
           const fd = new FormData();
           fd.append("audio_file", audio, filename);
+          if (opts.language) fd.append("language_code", opts.language); // omitted = server default (hi-IN,en-IN)
           return { url: "/api/transcribe", init: { method: "POST", body: fd } };
         });
         const raw = await res.json();

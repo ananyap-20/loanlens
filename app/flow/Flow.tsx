@@ -6,14 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import type { AgentCheck as Check } from "@/lib/flow/agent";
 import type { GateState } from "@/lib/engine/gate";
 import type { PaperInput, Presence, Recording, Speaker } from "@/lib/flow/session";
-import { SAY } from "@/lib/flow/scripts";
 import { speak, stopSpeaking } from "@/lib/audio/voice";
 import { gnani } from "@/lib/gnani/queue";
+import { LangProvider, useLang } from "./lang";
 import { SpeechProvider } from "./speech";
 import { Receipt } from "./screens/Receipt";
 import { Handover } from "./screens/Handover";
-import { CONSENT_SAY } from "@/lib/flow/agent";
-import { TEACHBACK_INTRO } from "@/lib/flow/teachback";
 import { AgentCheck } from "./screens/AgentCheck";
 import { Consent } from "./screens/Consent";
 import { Explain } from "./screens/Explain";
@@ -33,6 +31,15 @@ function stepsFor(presence: Presence | null): Step[] {
 }
 
 export default function Flow() {
+  return (
+    <LangProvider>
+      <FlowSteps />
+    </LangProvider>
+  );
+}
+
+function FlowSteps() {
+  const { say: t } = useLang().pack;
   const [step, setStep] = useState<Step>("welcome");
   const [presence, setPresence] = useState<Presence | null>(null);
   const [paper, setPaper] = useState<PaperInput | null>(null);
@@ -85,7 +92,7 @@ export default function Flow() {
     setHandedTo(null);
     nextId.current = 1;
     setStep("welcome");
-    void speak(SAY.cleared).catch(() => undefined);
+    void speak(t.cleared).catch(() => undefined);
   }
 
   // Before every change of speaker, a full-screen handover.
@@ -94,7 +101,7 @@ export default function Flow() {
   if (needed && handedTo !== needed) {
     return (
       <SpeechProvider>
-        <Handover speaker={needed} next={needed === "agent" ? CONSENT_SAY : TEACHBACK_INTRO} onReady={() => setHandedTo(needed)} />
+        <Handover speaker={needed} next={needed === "agent" ? t.consentSay : t.teachbackIntro} onReady={() => setHandedTo(needed)} />
       </SpeechProvider>
     );
   }

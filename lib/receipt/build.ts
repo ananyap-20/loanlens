@@ -4,11 +4,14 @@
 // (original + re-recordings) with SHA-256, full fingerprints. No verdict words.
 import { GATE_FIELDS, type GateFieldId, type GateFieldStatus, type GateState } from "@/lib/engine/gate";
 import type { Field, Status, Value } from "@/lib/engine/types";
-import { AGENT_CHANGED_HI, agentChangedEarlier, type AgentCheck } from "@/lib/flow/agent";
+import { agentChangedEarlier, type AgentCheck } from "@/lib/flow/agent";
 import { formatINR } from "@/lib/flow/money";
 import { FIELD_NAME_HI, REASON_HI } from "@/lib/flow/scripts";
 import type { PaperInput, Presence, Recording } from "@/lib/flow/session";
 import { lenderQuestions } from "@/lib/flow/teachback";
+import type { VerifyReason } from "@/lib/engine";
+import type { PaperFacts } from "@/lib/flow/scripts";
+import { HI_RECEIPT, type ReceiptStrings } from "./strings";
 
 export const RECEIPT_LABEL = "Proof of understanding — not a signature, not a loan approval";
 export const RECEIPT_LABEL_HI = "समझ का सबूत — यह साइन नहीं है, और लोन की मंज़ूरी भी नहीं";
@@ -58,6 +61,7 @@ export type Summary = {
   documentShort: string; // first 12 hex chars
   label: string;
   labelHi: string;
+  strings: ReceiptStrings;
 };
 
 export type EvidenceRecording = {
@@ -86,7 +90,6 @@ export type Evidence = {
 export const ROW_FIELDS: Field[] = ["loan_amount", "net_disbursed", "installment", "processing_fee", "tenure", "interest_rate", "late_fee"];
 
 const FREQ_EN = { monthly: " per month", weekly: " per week", fortnightly: " every 15 days", once: "" } as const;
-const FREQ_HI = { monthly: " हर महीने", weekly: " हर हफ़्ते", fortnightly: " हर 15 दिन", once: "" } as const;
 const SOURCE_EN = { pdf: "PDF shared or picked", qr: "QR code", sample: "sample KFS PDF (fictional)" } as const;
 
 /** "₹2,666 per month", "12%", "12 months". */
@@ -107,23 +110,33 @@ export function valueEn(v: Value): string {
   }
 }
 
-/** Same in Hindi words around digits: "₹2,666 हर महीने", "12 महीने", "₹0 (नहीं लगेगी)". */
-export function valueHiShort(v: Value): string {
-  if (v.negated && v.amount === 0) return "₹0 (कहा: नहीं लगेगी)";
-  if (v.amount === undefined) return "साफ़ रक़म नहीं";
+/** The receipt's words in one language (Hindi by default). */
+export type ReceiptLang = {
+  strings: ReceiptStrings;
+  fieldName: Record<Field, string>;
+  reason: Record<VerifyReason, string>;
+  lenderQuestions: (paper: PaperFacts, checks?: AgentCheck[], gateFields?: Record<GateFieldId, { status: GateFieldStatus }>) => string[];
+};
+export const HI_RECEIPT_LANG: ReceiptLang = { strings: HI_RECEIPT, fieldName: FIELD_NAME_HI, reason: REASON_HI, lenderQuestions };
+
+/** A value with digits and the language's words: "₹2,666 हर महीने", "12 महीने", "₹0 (कहा: नहीं लगेगी)". */
+export function valueShort(v: Value, t: ReceiptStrings = HI_RECEIPT): string {
+  if (v.negated && v.amount === 0) return t.cell.saidNotCharged;
+  if (v.amount === undefined) return t.cell.noClearAmount;
   switch (v.unit) {
     case "INR":
-      return formatINR(v.amount) + (v.frequency ? FREQ_HI[v.frequency] : "");
+      return formatINR(v.amount) + (v.frequency ? t.freq[v.frequency] : "");
     case "percent":
       return `${v.amount}%`;
     case "months":
-      return `${v.amount} महीने`;
+      return `${v.amount} ${t.months}`;
     case "weeks":
-      return `${v.amount} हफ़्ते`;
+      return `${v.amount} ${t.weeks}`;
     default:
       return String(v.amount);
   }
 }
+export const valueHiShort = (v: Value) => valueShort(v, HI_RECEIPT);
 
 export function formatIST(d: Date): string {
   return (
@@ -139,19 +152,32 @@ export function formatIST(d: Date): string {
   );
 }
 
-const STATUS_CELL: Record<Status, (spoken?: string) => Cell> = {
-  match: (s) => ({ mark: "match", hi: `मिलता है${s ? ` · ${s}` : ""}`, en: "matched" }),
-  conflict: (s) => ({ mark: "conflict", hi: `अलग है${s ? ` · ${s}` : ""}`, en: "different" }),
-  not_mentioned: () => ({ mark: "not_mentioned", hi: "नहीं बोला", en: "not mentioned" }),
-  unable_to_verify: () => ({ mark: "unable", hi: "जाँच नहीं पाए", en: "couldn't check" }),
-};
+function statusCell(t: ReceiptStrings, status: Status, spoken?: string): Cell {
+  const sp = spoken ? ` · ${spoken}` : "";
+  switch (status) {
+    case "match":
+      return { mark: "match", hi: `${t.cell.match}${sp}`, en: "matched" };
+    case "conflict":
+      return { mark: "conflict", hi: `${t.cell.conflict}${sp}`, en: "different" };
+    case "not_mentioned":
+      return { mark: "not_mentioned", hi: t.cell.notMentioned, en: "not mentioned" };
+    case "unable_to_verify":
+      return { mark: "unable", hi: t.cell.unable, en: "couldn't check" };
+  }
+}
 
-const GATE_CELL: Record<GateFieldStatus, Cell> = {
-  passed: { mark: "match", hi: "अपने शब्दों में सही बताया", en: "matched" },
-  failed: { mark: "conflict", hi: "3 बार अलग बताया", en: "different (3 tries)" },
-  pending: { mark: "unable", hi: "जाँच नहीं हुई", en: "not checked (stopped earlier)" },
-  not_on_paper: { mark: "unable", hi: "कागज़ पर नहीं", en: "not on the paper" },
-};
+function gateCell(t: ReceiptStrings, s: GateFieldStatus): Cell {
+  switch (s) {
+    case "passed":
+      return { mark: "match", hi: t.cell.gatePassed, en: "matched" };
+    case "failed":
+      return { mark: "conflict", hi: t.cell.gateFailed, en: "different (3 tries)" };
+    case "pending":
+      return { mark: "unable", hi: t.cell.gatePending, en: "not checked (stopped earlier)" };
+    case "not_on_paper":
+      return { mark: "unable", hi: t.cell.gateNotOnPaper, en: "not on the paper" };
+  }
+}
 
 // Which summary row shows each teach-back point.
 function gateFieldForRow(field: Field, paper: Value[]): GateFieldId | null {
@@ -166,56 +192,55 @@ function gateFieldForRow(field: Field, paper: Value[]): GateFieldId | null {
 
 const DASH: Cell = { mark: "none", hi: "—", en: "" };
 
-export function buildSummary(input: ReceiptInput): Summary {
+export function buildSummary(input: ReceiptInput, lang: ReceiptLang = HI_RECEIPT_LANG): Summary {
   const { paper, checks, gate } = input;
+  const t = lang.strings;
   const rows: Row[] = ROW_FIELDS.map((field) => {
     const pv = paper.terms.find((v) => v.field === field);
     const paperCell: Cell = paper.ambiguous.includes(field)
-      ? { mark: "warn", hi: "कागज़ पर दो अलग बातें", en: "written twice, differently" }
+      ? { mark: "warn", hi: t.cell.writtenTwice, en: "written twice, differently" }
       : pv
-        ? { mark: "none", hi: valueHiShort(pv), en: valueEn(pv) }
-        : { mark: "unable", hi: "कागज़ पर नहीं लिखा", en: "not on the paper" };
+        ? { mark: "none", hi: valueShort(pv, t), en: valueEn(pv) }
+        : { mark: "unable", hi: t.cell.notOnPaper, en: "not on the paper" };
 
     let agentCell: Cell = DASH;
     const forField = checks.filter((c) => c.field === field);
     const changed = agentChangedEarlier(checks, field);
     if (input.presence === "with_agent" && forField.length) {
       const c = forField[forField.length - 1];
-      const spoken = c.spoken[0] && c.status !== "unable_to_verify" ? valueHiShort(c.spoken[0]) : undefined;
-      agentCell = STATUS_CELL[c.status](spoken);
-      if (c.status === "unable_to_verify" && c.reason) agentCell = { ...agentCell, hi: REASON_HI[c.reason].split(" — ")[0] };
-      if (changed) agentCell = { mark: "warn", hi: `${agentCell.hi} · ${AGENT_CHANGED_HI}`, en: `${agentCell.en}; earlier answer differed` };
+      const spoken = c.spoken[0] && c.status !== "unable_to_verify" ? valueShort(c.spoken[0], t) : undefined;
+      agentCell = statusCell(t, c.status, spoken);
+      if (c.status === "unable_to_verify" && c.reason) agentCell = { ...agentCell, hi: lang.reason[c.reason].split(" — ")[0] };
+      if (changed) agentCell = { mark: "warn", hi: `${agentCell.hi} · ${t.agentChanged}`, en: `${agentCell.en}; earlier answer differed` };
     } else if (input.presence === "with_agent" && ["loan_amount", "installment", "processing_fee", "tenure", "late_fee"].includes(field)) {
-      agentCell = { mark: "not_mentioned", hi: "नहीं पूछा गया", en: "not asked" };
+      agentCell = { mark: "not_mentioned", hi: t.cell.notAsked, en: "not asked" };
     }
 
     const gid = gate ? gateFieldForRow(field, paper.terms) : null;
-    const borrowerCell: Cell = gate && gid ? GATE_CELL[gate.fields[gid].status] : DASH;
+    const borrowerCell: Cell = gate && gid ? gateCell(t, gate.fields[gid].status) : DASH;
 
-    return { field, hi: FIELD_NAME_HI[field], en: FIELD_EN[field], paper: paperCell, agent: agentCell, borrower: borrowerCell, changed };
+    return { field, hi: lang.fieldName[field], en: FIELD_EN[field], paper: paperCell, agent: agentCell, borrower: borrowerCell, changed };
   });
 
   return {
     createdIST: formatIST(input.createdAt),
     createdISO: input.createdAt.toISOString(),
     lender: paper.lender,
-    presenceHi: input.presence === "with_agent" ? "उधार लेने वाली और एजेंट" : "उधार लेने वाली",
+    presenceHi: t.presence[input.presence],
     presenceEn: input.presence === "with_agent" ? "borrower and agent" : "borrower",
     outcome: gate ? (gate.result === "passed" ? "passed" : "stopped") : null,
     rows,
-    questions: lenderQuestions(paper, checks, gate?.fields),
-    complaintHi: [
-      paper.grievance ? `1. लेंडर के शिकायत अधिकारी: ${paper.grievance}` : "1. लेंडर से शिकायत अधिकारी का नाम लिखकर माँगिए",
-      "2. RBI शिकायत पोर्टल: cms.rbi.org.in",
-    ],
+    questions: lang.lenderQuestions(paper, checks, gate?.fields),
+    complaintHi: [paper.grievance ? `${t.grievanceOfficer}${paper.grievance}` : t.grievanceAsk, t.rbi],
     complaintEn: ["1. Lender's grievance officer (named on the KFS)", "2. RBI Complaint Management System: cms.rbi.org.in"],
     documentShort: input.documentSha256 ? input.documentSha256.slice(0, 12) : "—",
     label: RECEIPT_LABEL,
-    labelHi: RECEIPT_LABEL_HI,
+    labelHi: t.label,
+    strings: t,
   };
 }
 
-const SPEAKER = { agent: ["एजेंट", "Agent"], borrower: ["उधार लेने वाली", "Borrower"], helper: ["मददगार", "Helper"] } as const;
+const SPEAKER_EN = { agent: "Agent", borrower: "Borrower", helper: "Helper" } as const;
 const STEP_EN = { consent: "consent", agent: "agent check", teachback: "teach-back" } as const;
 
 function whatEn(r: Recording): string {
@@ -231,7 +256,7 @@ const STATUS_EN: Record<Status, string> = {
   unable_to_verify: "❔ couldn't check",
 };
 
-export function buildEvidence(input: ReceiptInput): Evidence {
+export function buildEvidence(input: ReceiptInput, lang: ReceiptLang = HI_RECEIPT_LANG): Evidence {
   const { paper, checks, gate } = input;
   const byField = new Map<string, AgentCheck[]>();
   for (const c of checks) byField.set(c.field, [...(byField.get(c.field) ?? []), c]);
@@ -239,7 +264,7 @@ export function buildEvidence(input: ReceiptInput): Evidence {
   return {
     sourceEn: SOURCE_EN[paper.source],
     documentSha256: input.documentSha256,
-    terms: paper.terms.map((v) => ({ hi: FIELD_NAME_HI[v.field], en: FIELD_EN[v.field], value: valueEn(v), evidence: v.evidence })),
+    terms: paper.terms.map((v) => ({ hi: lang.fieldName[v.field], en: FIELD_EN[v.field], value: valueEn(v), evidence: v.evidence })),
     missing: paper.missing.map((f) => FIELD_EN[f]),
     ambiguous: paper.ambiguous.map((f) => FIELD_EN[f]),
     comparisons: [...byField.entries()].map(([field, all]) => {
@@ -260,7 +285,7 @@ export function buildEvidence(input: ReceiptInput): Evidence {
           const pv = pf.map((f) => paper.terms.find((v) => v.field === f)).find(Boolean);
           return {
             en: GATE_EN[id],
-            status: GATE_CELL[fs.status].en,
+            status: gateCell(lang.strings, fs.status).en,
             paper: pv ? pv.evidence : "not on the paper",
             answers: fs.answers.map((a) => a.transcript),
           };
@@ -268,8 +293,8 @@ export function buildEvidence(input: ReceiptInput): Evidence {
       : [],
     recordings: input.recordings.map((r) => ({
       id: r.id,
-      whoHi: SPEAKER[r.speaker][0],
-      whoEn: SPEAKER[r.speaker][1],
+      whoHi: lang.strings.speaker[r.speaker],
+      whoEn: SPEAKER_EN[r.speaker],
       what: whatEn(r),
       time: formatIST(new Date(r.at)).replace(/^.*?, /, ""),
       durationSec: Math.round(r.durationSec * 10) / 10,

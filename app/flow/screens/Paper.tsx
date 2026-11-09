@@ -2,11 +2,11 @@
 
 // Paper step: QR camera scan, PDF / QR-photo file picker, the sample KFS, or a file shared to the app.
 import { useEffect, useRef, useState } from "react";
-import { PAPER_FAIL_HI, SAY } from "@/lib/flow/scripts";
 import type { PaperInput } from "@/lib/flow/session";
 import { isPdf, readPaperFile, takeSharedFile } from "@/lib/paper/input";
 import { scanQrWithCamera, termsFromQrPayload } from "@/lib/paper/qr";
 import type { PaperResult } from "@/lib/paper/terms";
+import { useLang } from "../lang";
 import { useSpeech } from "../speech";
 import { primary, Screen, secondary } from "../ui";
 
@@ -18,6 +18,7 @@ type Props = {
 
 export function Paper({ dots, shared, onPaper }: Props) {
   const { say, stop } = useSpeech();
+  const { say: t, ui } = useLang().pack;
   const [busy, setBusy] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [problem, setProblem] = useState("");
@@ -27,7 +28,7 @@ export function Paper({ dots, shared, onPaper }: Props) {
   function finish(r: PaperResult, source: PaperInput["source"], bytes?: Uint8Array) {
     if (!r.ok) {
       setProblem(r.detail ? `${r.message} [${r.detail}]` : r.message);
-      void say(PAPER_FAIL_HI[r.reason]);
+      void say(t.paperFail[r.reason]);
       return;
     }
     onPaper({ terms: r.terms, missing: r.missing, ambiguous: r.ambiguous, lender: r.lender, grievance: r.grievance, source, bytes });
@@ -41,7 +42,7 @@ export function Paper({ dots, shared, onPaper }: Props) {
       finish(await readPaperFile(file), source, bytes);
     } catch (e) {
       setProblem(e instanceof Error ? e.message : String(e));
-      void say(PAPER_FAIL_HI.unreadable);
+      void say(t.paperFail.unreadable);
     } finally {
       setBusy(false);
     }
@@ -52,8 +53,8 @@ export function Paper({ dots, shared, onPaper }: Props) {
     (async () => {
       const file = shared === "1" ? await takeSharedFile() : null;
       if (file) await fromFile(file, isPdf(file) ? "pdf" : "qr");
-      else void say(SAY.sharedFail);
-    })().catch(() => void say(SAY.sharedFail));
+      else void say(t.sharedFail);
+    })().catch(() => void say(t.sharedFail));
     return () => abortRef.current?.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shared]);
@@ -70,7 +71,7 @@ export function Paper({ dots, shared, onPaper }: Props) {
     } catch (e) {
       if ((e as Error).name !== "AbortError") {
         setProblem((e as Error).message);
-        void say(SAY.cameraFail);
+        void say(t.cameraFail);
       }
     } finally {
       setScanning(false);
@@ -85,20 +86,20 @@ export function Paper({ dots, shared, onPaper }: Props) {
       await fromFile(await res.blob(), "sample");
     } catch (e) {
       setProblem(e instanceof Error ? e.message : String(e));
-      void say(PAPER_FAIL_HI.unreadable);
+      void say(t.paperFail.unreadable);
       setBusy(false);
     }
   }
 
   return (
-    <Screen instruction={SAY.paper} dots={dots}>
+    <Screen instruction={t.paper} dots={dots}>
       <div className={scanning ? "flex flex-col gap-3" : "hidden"}>
         <p className="flex items-center gap-2 rounded-xl bg-red-600 p-3 text-xl font-bold text-white" role="status">
-          <span className="h-4 w-4 animate-pulse rounded-full bg-white" /> 📷 कैमरा चालू (रिकॉर्ड नहीं हो रहा)
+          <span className="h-4 w-4 animate-pulse rounded-full bg-white" /> {ui.cameraOn}
         </p>
         <video ref={videoRef} playsInline muted className="w-full rounded-2xl bg-black" />
         <button className={secondary} onClick={() => abortRef.current?.abort()}>
-          ⏹️ कैमरा बंद
+          {ui.cameraOff}
         </button>
       </div>
 
@@ -121,14 +122,14 @@ export function Paper({ dots, shared, onPaper }: Props) {
             />
           </label>
           <button className={secondary} disabled={busy} onClick={sample}>
-            <span className="text-4xl">🧪</span> 3 · नमूना
+            <span className="text-4xl">🧪</span> {ui.sample}
           </button>
         </>
       )}
 
       {busy && (
         <p className="text-center text-2xl" role="status">
-          ⏳ कागज़ पढ़ रही हूँ…
+          {ui.readingPaper}
         </p>
       )}
       {problem && (
