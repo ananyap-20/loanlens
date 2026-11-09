@@ -8,6 +8,7 @@ import { staticFile, staticKeyFor, textHash } from "@/lib/audio/staticAudio";
 import { Timeline } from "@/lib/audio/timeline";
 import { trimAndFade, trimBounds } from "@/lib/audio/trim";
 import { PACKS } from "@/lib/i18n";
+import { readPdfTerms } from "@/lib/paper/pdf";
 import { staticPrompts, staticVoices } from "@/lib/i18n/staticPrompts";
 
 const RATE = 1000; // 1 sample = 1 ms keeps the arithmetic obvious
@@ -146,10 +147,13 @@ describe("static prompts", () => {
     expect(staticKeyFor("en", "female")).toBe("en-1");
   });
 
-  it("the fixed prompts are the Welcome, who-is-present, paper, handover and consent lines, digit-free, within the Timbre limit", () => {
+  it("the fixed prompts are the Welcome, who-is-present, paper, handover, consent and agent-question lines, digit-free, within the Timbre limit", () => {
     for (const code of ["hi", "en", "mr"] as const) {
       const prompts = staticPrompts(PACKS[code]);
-      expect(prompts.map((p) => p.id)).toEqual(["greeting", "who", "paper", "handover-agent", "handover-borrower", "consent", "consent-done"]);
+      expect(prompts.map((p) => p.id)).toEqual([
+        "greeting", "who", "paper", "handover-agent", "handover-borrower", "consent", "consent-done",
+        "agent-ask-loan_amount", "agent-ask-installment", "agent-ask-processing_fee", "agent-ask-tenure", "agent-ask-late_fee",
+      ]);
       for (const p of prompts) {
         expect(p.text).not.toMatch(/[0-9०-९]/);
         expect(p.text.length).toBeLessThan(1000);
@@ -164,13 +168,17 @@ describe("static prompts", () => {
     expect(staticVoices(PACKS.mr).map((v) => v.voice)).toEqual(["Zahira", "Ishaan"]);
   });
 
-  it("every fixed prompt in every selectable language and voice is shipped as a real Timbre mp3 listed in the manifest", () => {
+  it("every fixed prompt (incl. the sample paper explained and the 5 agent questions) in every selectable language and voice is shipped as a real Timbre mp3 listed in the manifest", async () => {
+    const sampleRead = await readPdfTerms(readFileSync(path.join(__dirname, "..", "public", "sample", "kfs-sahyog.pdf")));
+    if (!sampleRead.ok) throw new Error("sample KFS unreadable");
+    const sample = { terms: sampleRead.terms, missing: sampleRead.missing, ambiguous: sampleRead.ambiguous };
     const dir = path.join(__dirname, "..", "public", "audio");
     const manifest = JSON.parse(readFileSync(path.join(dir, "manifest.json"), "utf8")) as { files: string[] };
     let n = 0;
     for (const code of ["hi", "en", "mr"] as const) {
       for (const v of staticVoices(PACKS[code])) {
-        for (const p of staticPrompts(PACKS[code])) {
+        for (const p of staticPrompts(PACKS[code], sample)) {
+          expect(p.text.length, p.id).toBeLessThan(1000);
           const file = staticFile(v.key, p.text);
           expect(manifest.files, `${v.key} ${p.id} missing from manifest (run scripts/make-static-audio.mjs)`).toContain(file);
           expect(existsSync(path.join(dir, file)), file).toBe(true);
@@ -179,8 +187,8 @@ describe("static prompts", () => {
         }
       }
     }
-    expect(n).toBe(42);
-    expect(manifest.files.length).toBe(42);
+    expect(n).toBe(78); // 3 languages x 2 voices x 13 prompts
+    expect(manifest.files.length).toBe(78);
   });
 });
 
