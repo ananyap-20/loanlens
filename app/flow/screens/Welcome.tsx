@@ -5,7 +5,7 @@ import { getPack, PACKS, voiceFor } from "@/lib/i18n";
 import { langStatus } from "@/lib/i18n/status";
 import { applyVoice, useLang } from "../lang";
 import { useSpeech } from "../speech";
-import { primary } from "../ui";
+import { primary, ReplayButtons } from "../ui";
 
 // Language picker + voice (Voice 1 / Voice 2) + start. Each selectable language speaks a short line in that
 // language. Languages without a finished wording pack are listed with a "Beta" tag but cannot be selected
@@ -19,7 +19,8 @@ export function Welcome({ onStart }: { onStart: () => void }) {
   const tagText = (s: ReturnType<typeof langStatus>) => (s === "beta" ? pack.ui.betaTag : s === "review" ? pack.ui.reviewTag : "");
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center gap-3 bg-white p-3 text-center text-gray-900">
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center gap-3 bg-white p-3 text-center text-gray-900">
+      <ReplayButtons text={pack.greeting} className="absolute right-3 top-3" />
       <div className="flex w-full flex-1 flex-col items-center justify-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icons/icon-192.png" alt="" className="h-16 w-16 rounded-2xl shadow-lg" />

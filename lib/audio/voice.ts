@@ -5,6 +5,7 @@ import { SLOW_SPEED } from "@/lib/engine/gate";
 import { samplesToWavBlob } from "./wav";
 import { resumeAudio } from "./cues";
 import { splitForSpeech } from "./chunks";
+import type * as WebSpeech from "./webspeech";
 
 let el: HTMLAudioElement | null = null;
 let seq = 0;
@@ -28,8 +29,16 @@ export function unlockAudio(): void {
     .finally(() => URL.revokeObjectURL(silent));
 }
 
+const hasWebAudio = () => typeof AudioContext !== "undefined";
+let web: typeof WebSpeech | null = null;
+async function webSpeech(): Promise<typeof WebSpeech> {
+  web ??= await import("./webspeech");
+  return web;
+}
+
 /** Stops any speech that is playing (e.g. before the microphone opens). */
 export function stopSpeaking() {
+  web?.stopWeb();
   seq++;
   const a = element();
   a.pause();
@@ -43,10 +52,29 @@ let voiceConfig: { voice?: string; language?: string } = {};
 export function setVoiceConfig(c: { voice?: string; language?: string }) {
   voiceConfig = { ...c };
 }
+// Which pre-generated clips apply: "<language>-<voice number>". Default = Hindi, Voice 1 (the server default voice).
+let staticKey: string | null = "hi-1";
+export function setStaticKey(key: string | null) {
+  staticKey = key;
+}
+const webConfig = () => ({ ...voiceConfig, staticKey });
+
+/** Wakes the API functions and loads the list of pre-generated clips. Costs no Timbre/Prisma credit. */
+export function warmUp(): void {
+  if (typeof fetch === "undefined") return;
+  void fetch("/api/speak").catch(() => undefined);
+  void fetch("/api/transcribe").catch(() => undefined);
+  if (hasWebAudio()) void webSpeech().then((w) => w.warmStatic());
+}
+
 const speakOptions = (slow: boolean) => ({ ...voiceConfig, ...(slow ? { speed: SLOW_SPEED } : {}) });
 
 /** Warm the cache with the FIRST chunk of a prompt that is about to be needed (it then starts at once). */
 export function prefetchSpeech(text: string, slow = false): void {
+  if (hasWebAudio()) {
+    void webSpeech().then((w) => w.prefetchWeb(text, slow, webConfig()));
+    return;
+  }
   const first = splitForSpeech(text)[0];
   if (first) void gnani.speak(first, speakOptions(slow)).catch(() => undefined);
 }
@@ -58,6 +86,10 @@ export function prefetchSpeech(text: string, slow = false): void {
  * first words are heard much sooner.
  */
 export async function speak(text: string, slow = false): Promise<void> {
+  if (hasWebAudio()) {
+    stopSpeaking();
+    return (await webSpeech()).speakWeb(text, slow, webConfig());
+  }
   stopSpeaking();
   const mine = seq;
   const chunks = splitForSpeech(text);

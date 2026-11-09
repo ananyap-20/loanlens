@@ -110,9 +110,11 @@ export function createGnaniClient(config: QueueConfig = {}) {
     },
 
     /** Text -> mp3 Blob through /api/speak. Identical requests are served from memory. */
-    speak(text: string, options: SpeakOptions = {}): Promise<Blob> {
+    speak(text: string, options: SpeakOptions = {}, extra: { signal?: AbortSignal } = {}): Promise<Blob> {
       const key = speakKey(text, options);
       return enqueue(async () => {
+        // A queued prompt that was replaced or stopped never reaches Timbre (no credit spent).
+        if (extra.signal?.aborted) throw new DOMException("aborted", "AbortError");
         const cached = speakCache.get(key);
         if (cached) return cached;
         const res = await callWithRetry(() => ({
