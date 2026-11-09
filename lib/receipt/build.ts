@@ -278,7 +278,11 @@ export function buildEvidence(input: ReceiptInput, lang: ReceiptLang = HI_RECEIP
   return {
     sourceEn: SOURCE_EN[paper.source],
     documentSha256: input.documentSha256,
-    terms: paper.terms.map((v) => ({ hi: lang.fieldName[v.field], en: FIELD_EN[v.field], value: valueEn(v), evidence: v.evidence })),
+    terms: paper.terms.map((v) => {
+      const words = amountWords(v, lang);
+      const digits = valueShort(v, lang.strings, lang.code);
+      return { hi: lang.fieldName[v.field], en: FIELD_EN[v.field], value: words ? `${digits} — ${words}` : digits, evidence: v.evidence };
+    }),
     missing: paper.missing.map((f) => FIELD_EN[f]),
     ambiguous: paper.ambiguous.map((f) => FIELD_EN[f]),
     comparisons: [...byField.entries()].map(([field, all]) => {

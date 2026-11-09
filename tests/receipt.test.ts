@@ -127,7 +127,7 @@ describe("page 2+: evidence log", () => {
     expect(e.terms.find((t) => t.en === "Processing fee")).toEqual({
       hi: "प्रोसेसिंग फ़ीस",
       en: "Processing fee",
-      value: "₹1,500",
+      value: "₹१,५०० — पंद्रह सौ रुपये", // the receipt language's own digits, then the amount in words
       evidence: "Processing fee: ₹1,500 (deducted upfront)",
     });
   });
