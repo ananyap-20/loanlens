@@ -8,10 +8,21 @@
 //   (nominal vs APR vs flat) -> unable_to_verify, never conflict
 // - Otherwise exact comparison (INR exact, months exact): match or conflict
 
+import { plausibility } from "./plausibility";
 import { matchSeq, phrases, tokenize } from "./tokens";
 import { ALL_FIELDS, type Field, type Status, type Value } from "./types";
 
-export type SideComparison = { status: Status; spoken: Value[] };
+/** Why a side is "unable_to_verify" (shown to the user as one short reason line). */
+export type VerifyReason =
+  | "not_on_paper" // the paper does not state this field
+  | "no_number" // field addressed but no usable number
+  | "uncertain" // "pata nahi", "shayad"
+  | "several_numbers" // different numbers in one answer
+  | "unit_or_frequency" // weekly vs monthly, months vs weeks, tenure without a unit
+  | "implausible" // plausibility guard: not a sensible answer for this field, say it again
+  | "rate_basis"; // interest rate: nominal vs APR vs flat not comparable
+
+export type SideComparison = { status: Status; spoken: Value[]; reason?: VerifyReason };
 export type FieldComparison = { field: Field; paper?: Value; agent: SideComparison; borrower: SideComparison };
 
 type RateBasis = "apr" | "flat" | "reducing";
@@ -39,18 +50,23 @@ export function compareField(field: Field, paper: Value[], spoken: Value[]): Sid
   if (said.length === 0) return { status: "not_mentioned", spoken: said };
 
   const p = paper.find((v) => v.field === field && v.source === "paper");
-  const result = (status: Status): SideComparison => ({ status, spoken: said });
-  if (!p || p.amount === undefined) return result("unable_to_verify");
+  const result = (status: Status, reason?: VerifyReason): SideComparison =>
+    reason ? { status, spoken: said, reason } : { status, spoken: said };
+  const unable = (reason: VerifyReason) => result("unable_to_verify", reason);
+  if (!p || p.amount === undefined) return unable("not_on_paper");
 
-  if (said.some((v) => v.amount === undefined || v.confidence === "low")) return result("unable_to_verify");
+  if (said.some((v) => v.confidence === "low")) return unable("uncertain");
+  if (said.some((v) => v.amount === undefined)) return unable("no_number");
   const amounts = [...new Set(said.map((v) => v.amount as number))];
-  if (amounts.length > 1) return result("unable_to_verify");
+  if (amounts.length > 1) return unable("several_numbers");
 
   for (const v of said) {
-    if (field === "tenure" && !v.unit) return result("unable_to_verify"); // "12" could be months or weeks
-    if (v.unit && p.unit && v.unit !== p.unit) return result("unable_to_verify");
-    if (v.frequency && p.frequency && v.frequency !== p.frequency) return result("unable_to_verify");
+    if (field === "tenure" && !v.unit) return unable("unit_or_frequency"); // "12" could be months or weeks
+    if (v.unit && p.unit && v.unit !== p.unit) return unable("unit_or_frequency");
+    if (v.frequency && p.frequency && v.frequency !== p.frequency) return unable("unit_or_frequency");
   }
+  // Plausibility guard: never call an implausible number a difference.
+  if (said.some((v) => plausibility(v, paper) !== "ok")) return unable("implausible");
 
   const amount = amounts[0];
   if (field === "interest_rate") {
@@ -58,8 +74,8 @@ export function compareField(field: Field, paper: Value[], spoken: Value[]): Sid
     const sb = said.map((v) => rateBasis(v.evidence)).find(Boolean);
     const sameBasisKnown = pb !== undefined && sb !== undefined && pb === sb;
     const basisDiffers = pb !== undefined && sb !== undefined && pb !== sb;
-    if (amount === p.amount) return result(basisDiffers ? "unable_to_verify" : "match");
-    return result(sameBasisKnown ? "conflict" : "unable_to_verify");
+    if (amount === p.amount) return basisDiffers ? unable("rate_basis") : result("match");
+    return sameBasisKnown ? result("conflict") : unable("rate_basis");
   }
 
   return result(amount === p.amount ? "match" : "conflict");

@@ -5,7 +5,7 @@
 import { useEffect, useMemo } from "react";
 import { buzz, chime } from "@/lib/audio/cues";
 import { GATE_FIELDS, GATE_LABEL, type GateState } from "@/lib/engine/gate";
-import type { AgentCheck } from "@/lib/flow/agent";
+import { AGENT_CHANGED_HI, agentChangedEarlier, type AgentCheck } from "@/lib/flow/agent";
 import { FIELD_NAME_HI } from "@/lib/flow/scripts";
 import type { PaperInput } from "@/lib/flow/session";
 import { GATE_FIELD_HI, lenderQuestions, resultSpeech } from "@/lib/flow/teachback";
@@ -78,7 +78,10 @@ export function Result({
               <span>
                 {FIELD_ICON[c.field]} {FIELD_NAME_HI[c.field]}
               </span>
-              <StatusBadge status={c.status} />
+              <span className="flex flex-col items-end gap-1">
+                <StatusBadge status={c.status} />
+                {agentChangedEarlier(checks, c.field) && <span className="text-base font-bold text-amber-800">⚠️ {AGENT_CHANGED_HI}</span>}
+              </span>
             </div>
           ))}
         </section>

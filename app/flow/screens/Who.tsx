@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
+import { prefetchSpeech } from "@/lib/audio/voice";
 import type { Presence } from "@/lib/flow/session";
 import { SAY } from "@/lib/flow/scripts";
 import { primary, Screen } from "../ui";
 
 export function Who({ dots, onPick }: { dots: { total: number; current: number }; onPick: (p: Presence) => void }) {
+  useEffect(() => prefetchSpeech(SAY.paper), []);
   return (
     <Screen instruction={SAY.who} dots={dots}>
       <button aria-label="सिर्फ़ मैं — just me" className={`${primary} min-h-32 flex-col`} onClick={() => onPick("alone")}>

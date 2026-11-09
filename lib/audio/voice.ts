@@ -4,6 +4,7 @@ import { gnani } from "@/lib/gnani/queue";
 import { SLOW_SPEED } from "@/lib/engine/gate";
 import { samplesToWavBlob } from "./wav";
 import { resumeAudio } from "./cues";
+import { splitForSpeech } from "./chunks";
 
 let el: HTMLAudioElement | null = null;
 let seq = 0;
@@ -36,19 +37,42 @@ export function stopSpeaking() {
   finishCurrent = null;
 }
 
+const speakOptions = (slow: boolean) => (slow ? { speed: SLOW_SPEED } : {});
+
+/** Warm the cache with the FIRST chunk of a prompt that is about to be needed (it then starts at once). */
+export function prefetchSpeech(text: string, slow = false): void {
+  const first = splitForSpeech(text)[0];
+  if (first) void gnani.speak(first, speakOptions(slow)).catch(() => undefined);
+}
+
 /**
  * Speaks `text` (Devanagari, numbers already in words) with Timbre and resolves when it ends,
  * or when newer speech / stopSpeaking() replaces it. Throws GnaniClientError if Timbre fails.
+ * Long prompts are split into sentence chunks: chunk 1 plays while chunk 2 is generated, so the
+ * first words are heard much sooner.
  */
 export async function speak(text: string, slow = false): Promise<void> {
   stopSpeaking();
   const mine = seq;
-  const blob = await gnani.speak(text, slow ? { speed: SLOW_SPEED } : {});
-  if (mine !== seq) return; // replaced while Timbre was answering
+  const chunks = splitForSpeech(text);
+  let next: Promise<Blob> = gnani.speak(chunks[0], speakOptions(slow));
+  for (let i = 0; i < chunks.length; i++) {
+    const blob = await next;
+    if (mine !== seq) return; // replaced while Timbre was answering
+    if (i + 1 < chunks.length) {
+      next = gnani.speak(chunks[i + 1], speakOptions(slow)); // generate the next sentence while this one plays
+      next.catch(() => undefined); // reported when awaited
+    }
+    await play(blob);
+    if (mine !== seq) return; // stopped or replaced while playing
+  }
+}
+
+function play(blob: Blob): Promise<void> {
   const a = element();
   if (a.src.startsWith("blob:")) URL.revokeObjectURL(a.src);
   a.src = URL.createObjectURL(blob);
-  await new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     // Settle exactly once, whatever happens: ended, paused (stopSpeaking / audio focus lost), error,
     // a rejected play(), or a clip that never reports "ended" (guard = duration + 3 s, else 60 s).
     let guard = setTimeout(() => settle(), MAX_CLIP_MS);

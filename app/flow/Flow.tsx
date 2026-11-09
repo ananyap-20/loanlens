@@ -11,6 +11,9 @@ import { speak, stopSpeaking } from "@/lib/audio/voice";
 import { gnani } from "@/lib/gnani/queue";
 import { SpeechProvider } from "./speech";
 import { Receipt } from "./screens/Receipt";
+import { Handover } from "./screens/Handover";
+import { CONSENT_SAY } from "@/lib/flow/agent";
+import { TEACHBACK_INTRO } from "@/lib/flow/teachback";
 import { AgentCheck } from "./screens/AgentCheck";
 import { Consent } from "./screens/Consent";
 import { Explain } from "./screens/Explain";
@@ -37,6 +40,7 @@ export default function Flow() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [checks, setChecks] = useState<Check[]>([]);
   const [gate, setGate] = useState<GateState | null>(null);
+  const [handedTo, setHandedTo] = useState<"agent" | "borrower" | null>(null); // who has been handed the phone
   const nextId = useRef(1);
 
   // A PDF shared to LoanLens arrives as /?shared=1 (see public/sw.js). Read the flag once, clean the URL.
@@ -78,9 +82,21 @@ export default function Flow() {
     setRecordings([]);
     setChecks([]);
     setGate(null);
+    setHandedTo(null);
     nextId.current = 1;
     setStep("welcome");
     void speak(SAY.cleared).catch(() => undefined);
+  }
+
+  // Before every change of speaker, a full-screen handover.
+  const speakerFor: Partial<Record<Step, "agent" | "borrower">> = { consent: "agent", agent: "agent", teachback: "borrower" };
+  const needed = speakerFor[step];
+  if (needed && handedTo !== needed) {
+    return (
+      <SpeechProvider>
+        <Handover speaker={needed} next={needed === "agent" ? CONSENT_SAY : TEACHBACK_INTRO} onReady={() => setHandedTo(needed)} />
+      </SpeechProvider>
+    );
   }
 
   return (
@@ -105,7 +121,9 @@ export default function Flow() {
           }}
         />
       )}
-      {step === "explain" && paper && <Explain dots={dots} paper={paper} onNext={() => setStep(afterExplain)} />}
+      {step === "explain" && paper && (
+        <Explain dots={dots} paper={paper} nextSpeaker={presence === "with_agent" ? "agent" : "borrower"} onNext={() => setStep(afterExplain)} />
+      )}
       {step === "consent" && (
         <Consent
           dots={dots}
@@ -120,8 +138,8 @@ export default function Flow() {
           paper={paper}
           checks={checks}
           onClip={(r, c) => {
-            keep(r, "agent", "agent", c.field);
-            setChecks((all) => [...all, c]);
+            keep(r, "agent", "agent", c ? c.field : "navigation");
+            if (c) setChecks((all) => [...all, c]); // "next"/"skip" is kept as a recording, not as an answer
           }}
           onDone={() => setStep("teachback")}
         />

@@ -63,7 +63,7 @@ export function gatePrompt(next: NextStep, paper: Value[], last?: AnswerOutcome,
     case "ask":
       return { text: (first ? `${TEACHBACK_INTRO} ` : last === "pass" ? `${MATCHED_HI} ` : "") + GATE_ASK_HI[next.field], slow: false };
     case "follow_up":
-      return { text: FOLLOW_UP_HI[next.key], slow: false };
+      return { text: (last === "implausible" ? "यह नंबर इस सवाल का नहीं लगता। फिर से बोलिए। " : "") + FOLLOW_UP_HI[next.key], slow: false };
     case "re_explain_and_ask":
       return {
         text: `${last === "uncertain" ? "कोई बात नहीं।" : "यह कागज़ से नहीं मिला।"} ध्यान से सुनिए। ${reExplainHi(next.field, paper)} अब फिर से बताइए: ${GATE_ASK_HI[next.field]}`,
