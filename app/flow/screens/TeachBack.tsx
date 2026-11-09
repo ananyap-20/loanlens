@@ -2,6 +2,7 @@
 
 // Teach-back: the borrower explains in her own words. lib/engine/gate.ts decides every step
 // (random order, follow-ups, slow re-explain, max 3 tries); this screen only plays and records.
+// The transcript is normalised by the language pack first; the borrower's own words are what the receipt keeps.
 import { useState } from "react";
 import { cueFor } from "@/lib/audio/cues";
 import { isNavigationOnly } from "@/lib/engine";
@@ -18,9 +19,8 @@ import {
   type NextStep,
 } from "@/lib/engine/gate";
 import type { Field, Status } from "@/lib/engine/types";
-import { NAV_ONLY_HI, REASON_HI } from "@/lib/flow/scripts";
 import type { PaperInput } from "@/lib/flow/session";
-import { FOLLOW_UP_HI, GATE_ASK_HI, gatePrompt } from "@/lib/flow/teachback";
+import { useLang } from "../lang";
 import { RecordPanel } from "../RecordPanel";
 import { useSpeech } from "../speech";
 import { FIELD_ICON } from "../TermCard";
@@ -35,11 +35,7 @@ const OUTCOME_STATUS: Record<AnswerOutcome, Status> = {
   implausible: "unable_to_verify",
 };
 
-const OUTCOME_REASON: Partial<Record<AnswerOutcome, string>> = {
-  uncertain: REASON_HI.uncertain,
-  implausible: REASON_HI.implausible,
-  not_mentioned: REASON_HI.no_number,
-};
+const OUTCOME_REASON = { uncertain: "uncertain", implausible: "implausible", not_mentioned: "no_number" } as const;
 
 // Each teach-back point shown with the paper field it is about (icon + one-word label).
 const GATE_CHIP: Record<GateFieldId, Field> = {
@@ -61,35 +57,43 @@ export function TeachBack({
   onDone: (state: GateState) => void;
 }) {
   const { say } = useSpeech();
+  const { pack } = useLang();
+  const { say: t, ui } = pack;
   const [gate, setGate] = useState<{ state: GateState; next: NextStep }>(() => createGate(paper.terms, shuffledGateFields()));
   const [last, setLast] = useState<{ outcome: AnswerOutcome; transcript: string } | null>(null);
   const [turn, setTurn] = useState(0);
 
-  const prompt = gatePrompt(gate.next, paper.terms, last?.outcome, turn === 0);
+  const prompt = t.gatePrompt(gate.next, paper.terms, last?.outcome, turn === 0);
   const field = "field" in gate.next ? gate.next.field : null;
-  const questionText =
-    gate.next.kind === "follow_up" ? FOLLOW_UP_HI[gate.next.key] : field ? GATE_ASK_HI[field] : "";
+  const questionText = gate.next.kind === "follow_up" ? ui.followUp[gate.next.key] : field ? ui.gateAsk[field] : "";
 
   const rec = useClipRecorder((r) => {
     if (!field || gate.state.result !== "in_progress") return;
-    if (isNavigationOnly(r.transcript)) {
+    const engineText = pack.normalize(r.transcript);
+    if (isNavigationOnly(engineText)) {
       onClip(r, "navigation"); // kept as a recording, not an answer: no attempt is counted
-      void say(NAV_ONLY_HI);
+      void say(t.navOnly);
       return;
     }
-    const a = answerGate(gate.state, field, r.transcript);
+    const a = answerGate(gate.state, field, engineText);
+    const answers = a.state.fields[field].answers;
+    answers[answers.length - 1] = { ...answers[answers.length - 1], transcript: r.transcript }; // keep her own words
     onClip(r, field);
     cueFor(OUTCOME_STATUS[a.outcome]);
     setLast({ outcome: a.outcome, transcript: r.transcript });
     setGate({ state: a.state, next: a.next });
-    setTurn((t) => t + 1);
+    setTurn((n) => n + 1);
     if (a.next.kind === "passed" || a.next.kind === "stop") onDone(a.state);
   });
+
+  const reasonFor = (o: AnswerOutcome) => (o in OUTCOME_REASON ? ui.reason[OUTCOME_REASON[o as keyof typeof OUTCOME_REASON]] : undefined);
 
   return (
     <Screen instruction={prompt.text} slow={prompt.slow} playKey={turn} dots={dots} speaker="borrower">
       <Legend />
-      <p className="text-base text-gray-600">🔢 नंबर और शब्दों की जाँच ({GATE_LABEL})</p>
+      <p className="text-base text-gray-600">
+        {ui.numberKeywordCheck} ({GATE_LABEL})
+      </p>
 
       <div className="grid grid-cols-4 gap-2">
         {GATE_FIELDS.map((id) => {
@@ -105,12 +109,12 @@ export function TeachBack({
               mark={mark}
               extra={
                 tries > 0 && fs.status === "pending" ? (
-                  <span className="flex items-center gap-1" aria-label={`कोशिश ${tries}/${GATE_MAX_ATTEMPTS}`}>
+                  <span className="flex items-center gap-1" aria-label={`${ui.tries} ${tries}/${GATE_MAX_ATTEMPTS}`}>
                     {Array.from({ length: GATE_MAX_ATTEMPTS }, (_, k) => (
                       <span key={k} className={`h-2 w-2 rounded-full ${k < fs.failedAttempts ? "bg-red-500" : k < tries ? "bg-blue-500" : "bg-gray-300"}`} />
                     ))}
                     <span className="text-[10px] font-bold">
-                      कोशिश {tries}/{GATE_MAX_ATTEMPTS}
+                      {ui.tries} {tries}/{GATE_MAX_ATTEMPTS}
                     </span>
                   </span>
                 ) : undefined
@@ -130,7 +134,7 @@ export function TeachBack({
 
       {last && rec.phase === "idle" && (
         <div className="flex flex-col gap-2 rounded-2xl border-2 border-gray-200 bg-white p-3">
-          <StatusBadge status={OUTCOME_STATUS[last.outcome]} big reason={OUTCOME_REASON[last.outcome]} />
+          <StatusBadge status={OUTCOME_STATUS[last.outcome]} big reason={reasonFor(last.outcome)} />
           <p className="text-base text-gray-600">“{last.transcript}”</p>
         </div>
       )}

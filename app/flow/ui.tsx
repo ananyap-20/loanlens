@@ -1,11 +1,11 @@
 "use client";
 
 // Small shared pieces: the screen frame (auto-play + 🔁 + 🐢 + progress dots + speaker tint), big buttons,
-// status badges, labelled field chips and the status legend.
+// status badges, labelled field chips and the status legend. Words come from the selected language pack.
 import { useEffect } from "react";
 import type { Field, Status } from "@/lib/engine/types";
 import type { Speaker } from "@/lib/flow/session";
-import { FIELD_NAME_HI, FIELD_SHORT_HI } from "@/lib/flow/scripts";
+import { useLang } from "./lang";
 import { useSpeech } from "./speech";
 
 export const bigBtn =
@@ -14,10 +14,10 @@ export const primary = `${bigBtn} bg-blue-600 text-white`;
 export const secondary = `${bigBtn} border-2 border-blue-600 bg-white text-blue-700`;
 
 /** Who is speaking now: whole-screen tint + banner colour. agent = purple, borrower = pink. */
-export const SPEAKER_THEME: Record<Speaker, { icon: string; role: string; bg: string; banner: string; button: string }> = {
-  agent: { icon: "🧑‍💼", role: "एजेंट", bg: "bg-purple-50", banner: "bg-purple-700", button: "bg-purple-700" },
-  borrower: { icon: "👩", role: "उधार लेने वाली", bg: "bg-pink-50", banner: "bg-pink-600", button: "bg-pink-600" },
-  helper: { icon: "🤝", role: "मददगार", bg: "bg-teal-50", banner: "bg-teal-700", button: "bg-teal-700" },
+export const SPEAKER_THEME: Record<Speaker, { icon: string; bg: string; banner: string; button: string }> = {
+  agent: { icon: "🧑‍💼", bg: "bg-purple-50", banner: "bg-purple-700", button: "bg-purple-700" },
+  borrower: { icon: "👩", bg: "bg-pink-50", banner: "bg-pink-600", button: "bg-pink-600" },
+  helper: { icon: "🤝", bg: "bg-teal-50", banner: "bg-teal-700", button: "bg-teal-700" },
 };
 
 export function Dots({ total, current }: { total: number; current: number }) {
@@ -32,10 +32,11 @@ export function Dots({ total, current }: { total: number; current: number }) {
 
 /** Persistent banner: who should be speaking into the phone right now. */
 export function SpeakerBanner({ speaker }: { speaker: Speaker }) {
+  const { ui } = useLang().pack;
   const t = SPEAKER_THEME[speaker];
   return (
     <div className={`sticky top-0 z-10 -mx-4 -mt-4 flex items-center justify-center gap-2 px-4 py-3 text-xl font-bold text-white shadow ${t.banner}`} role="status">
-      🎤 अभी बोल रहे हैं: <span className="text-3xl">{t.icon}</span> {t.role}
+      {ui.speakingNow} <span className="text-3xl">{t.icon}</span> {ui.role[speaker]}
     </div>
   );
 }
@@ -61,6 +62,7 @@ export function Screen({
   children: React.ReactNode;
 }) {
   const { say, speaking, error } = useSpeech();
+  const { ui } = useLang().pack;
   useEffect(() => {
     if (instruction) void say(instruction, slow);
   }, [instruction, playKey, slow, say]);
@@ -81,12 +83,12 @@ export function Screen({
       </div>
       {speaking && (
         <p className="flex items-center gap-2 rounded-xl bg-blue-100 p-2 text-lg font-semibold text-blue-800" role="status">
-          <span className="animate-pulse text-2xl">📱</span> ऐप बोल रहा है… सुनिए
+          <span className="animate-pulse text-2xl">📱</span> {ui.appSpeaking}
         </p>
       )}
       {error && (
         <p className="rounded-xl bg-red-100 p-3 text-lg text-red-800" role="alert">
-          🔇 आवाज़ नहीं चल पाई ({error}). 🔁 दबाइए।
+          {ui.audioFailed.replace("{error}", error)}
         </p>
       )}
       {children}
@@ -94,21 +96,22 @@ export function Screen({
   );
 }
 
-const STATUS_UI: Record<Status, { icon: string; cls: string; word: string }> = {
-  match: { icon: "✅", cls: "bg-green-100 text-green-900 border-green-600", word: "मिलता है" },
-  conflict: { icon: "❌", cls: "bg-red-100 text-red-900 border-red-600", word: "अलग है" },
-  not_mentioned: { icon: "❔", cls: "bg-gray-100 text-gray-800 border-gray-400", word: "नहीं बोला" },
-  unable_to_verify: { icon: "❔", cls: "bg-gray-100 text-gray-800 border-gray-400", word: "जाँच नहीं पाए" },
+const STATUS_UI: Record<Status, { icon: string; cls: string }> = {
+  match: { icon: "✅", cls: "bg-green-100 text-green-900 border-green-600" },
+  conflict: { icon: "❌", cls: "bg-red-100 text-red-900 border-red-600" },
+  not_mentioned: { icon: "❔", cls: "bg-gray-100 text-gray-800 border-gray-400" },
+  unable_to_verify: { icon: "❔", cls: "bg-gray-100 text-gray-800 border-gray-400" },
 };
 
 /** Colour + icon + word (never colour alone), plus an optional reason line. Sound is played by the caller. */
 export function StatusBadge({ status, big = false, reason }: { status: Status; big?: boolean; reason?: string }) {
+  const { ui } = useLang().pack;
   const s = STATUS_UI[status];
   return (
     <span className="inline-flex flex-col gap-1">
       <span className={`inline-flex items-center gap-2 self-start rounded-xl border-2 px-3 py-1 font-bold ${s.cls} ${big ? "text-2xl" : "text-lg"}`}>
         <span className={big ? "text-4xl" : "text-2xl"}>{s.icon}</span>
-        {s.word}
+        {ui.status[status]}
       </span>
       {reason && <span className="text-base font-semibold text-gray-700">↳ {reason}</span>}
     </span>
@@ -117,9 +120,10 @@ export function StatusBadge({ status, big = false, reason }: { status: Status; b
 
 /** One-line legend shown on the check screens. */
 export function Legend() {
+  const { ui } = useLang().pack;
   return (
     <p className="rounded-xl bg-white/80 p-2 text-center text-base font-semibold" aria-label="legend">
-      ✅ मिलता है · ❌ अलग है · ❔ जाँच नहीं पाए
+      {ui.legend}
     </p>
   );
 }
@@ -139,15 +143,16 @@ export function FieldChip({
   extra?: React.ReactNode;
 }) {
   const { say } = useSpeech();
+  const { ui } = useLang().pack;
   return (
     <button
       type="button"
-      aria-label={FIELD_NAME_HI[field]}
-      onClick={() => void say(FIELD_NAME_HI[field])}
+      aria-label={ui.fieldName[field]}
+      onClick={() => void say(ui.fieldName[field])}
       className={`flex min-h-16 min-w-16 flex-col items-center justify-center gap-0.5 rounded-xl border-2 bg-white p-1 ${active ? "border-blue-600 ring-2 ring-blue-200" : "border-gray-200"}`}
     >
       <span className="text-2xl leading-none">{icon}</span>
-      <span className="text-xs font-bold leading-tight">{FIELD_SHORT_HI[field]}</span>
+      <span className="text-xs font-bold leading-tight">{ui.fieldShort[field]}</span>
       {mark !== undefined && <span className="h-5 text-base leading-none">{mark}</span>}
       {extra}
     </button>
