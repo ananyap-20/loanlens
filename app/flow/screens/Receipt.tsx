@@ -1,16 +1,17 @@
 "use client";
 
-// Receipt (CLAUDE.md section 8): fingerprints -> lines -> canvas PNG -> share (or download).
-// The PNG is made when the screen opens, so the Share tap can call navigator.share() immediately.
-import { useEffect, useRef, useState } from "react";
+// Receipt (CLAUDE.md section 8) as one PDF: fingerprints -> summary + evidence -> canvas pages -> PDF ->
+// SHA-256 of the PDF itself (both parties can compare copies) -> share (or download).
+// The PDF is made when the screen opens, so the Share tap can call navigator.share() immediately.
+import { useEffect, useState } from "react";
 import { chime } from "@/lib/audio/cues";
 import type { GateState } from "@/lib/engine/gate";
 import type { AgentCheck } from "@/lib/flow/agent";
 import { SAY } from "@/lib/flow/scripts";
 import type { PaperInput, Presence, Recording } from "@/lib/flow/session";
-import { buildReceipt, RECEIPT_LABEL, receiptFilename } from "@/lib/receipt/build";
+import { buildEvidence, buildSummary, RECEIPT_LABEL, receiptFilename } from "@/lib/receipt/build";
 import { sha256Hex } from "@/lib/receipt/hash";
-import { renderReceiptPng } from "@/lib/receipt/render";
+import { makeReceiptPdf } from "@/lib/receipt/pdf";
 import { shareOrDownload } from "@/lib/receipt/share";
 import { ClearButton } from "../ClearButton";
 import { useSpeech } from "../speech";
@@ -27,12 +28,13 @@ type Props = {
   onClear: () => void;
 };
 
+type Ready = { pdf: Blob; name: string; sha256: string; pages: number; previews: string[] };
+
 export function Receipt({ dots, presence, paper, recordings, checks, gate, onBack, onClear }: Props) {
   const { say } = useSpeech();
-  const [png, setPng] = useState<{ blob: Blob; url: string; name: string } | null>(null);
+  const [ready, setReady] = useState<Ready | null>(null);
   const [problem, setProblem] = useState("");
   const [done, setDone] = useState("");
-  const urlRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,12 +42,10 @@ export function Receipt({ dots, presence, paper, recordings, checks, gate, onBac
       const createdAt = new Date();
       const documentSha256 = paper.bytes ? await sha256Hex(paper.bytes) : null;
       const hashed = await Promise.all(recordings.map(async (r) => ({ ...r, sha256: await sha256Hex(r.blob) })));
-      const lines = buildReceipt({ createdAt, presence, paper, documentSha256, recordings: hashed, checks, gate });
-      const blob = await renderReceiptPng(lines);
-      if (cancelled) return;
-      const url = URL.createObjectURL(blob);
-      urlRef.current = url;
-      setPng({ blob, url, name: receiptFilename(createdAt) });
+      const input = { createdAt, presence, paper, documentSha256, recordings: hashed, checks, gate };
+      const out = await makeReceiptPdf(buildSummary(input), buildEvidence(input), createdAt);
+      const sha256 = await sha256Hex(out.pdf);
+      if (!cancelled) setReady({ pdf: out.pdf, name: receiptFilename(createdAt), sha256, pages: out.pages, previews: out.previews });
     })().catch((e) => {
       if (cancelled) return;
       setProblem(e instanceof Error ? e.message : String(e));
@@ -53,14 +53,13 @@ export function Receipt({ dots, presence, paper, recordings, checks, gate, onBac
     });
     return () => {
       cancelled = true;
-      if (urlRef.current) URL.revokeObjectURL(urlRef.current); // nothing left behind when leaving
     };
   }, [presence, paper, recordings, checks, gate, say]);
 
   async function share() {
-    if (!png) return;
+    if (!ready) return;
     try {
-      const outcome = await shareOrDownload(png.blob, png.name);
+      const outcome = await shareOrDownload(ready.pdf, ready.name);
       if (outcome === "cancelled") return;
       chime();
       setDone(outcome === "shared" ? "✅ 📤" : "✅ ⬇️");
@@ -75,18 +74,33 @@ export function Receipt({ dots, presence, paper, recordings, checks, gate, onBac
     <Screen instruction={SAY.receipt} dots={dots}>
       <p className="rounded-xl border-2 border-amber-500 bg-amber-50 p-2 text-center text-base font-semibold text-amber-900">{RECEIPT_LABEL}</p>
 
-      {png ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={png.url} alt="LoanLens receipt" className="max-h-[50vh] w-full rounded-xl border-2 border-gray-200 object-contain object-top" />
+      {ready ? (
+        <>
+          <div className="flex gap-2 overflow-x-auto" aria-label={`PDF, ${ready.pages} pages`}>
+            {ready.previews.map((src, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={i} src={src} alt={`receipt page ${i + 1}`} className="h-72 shrink-0 rounded-lg border-2 border-gray-300 bg-white" />
+            ))}
+          </div>
+          <p className="text-center text-lg font-semibold">
+            📄 PDF · {ready.pages} पन्ने · {(ready.pdf.size / 1024).toFixed(0)} KB
+          </p>
+          <div className="rounded-xl border-2 border-gray-300 bg-gray-50 p-3" aria-label="receipt fingerprint">
+            <p className="text-lg font-bold">🔏 रसीद फ़िंगरप्रिंट · Receipt fingerprint</p>
+            <p className="font-mono text-2xl font-bold tracking-wider">{ready.sha256.slice(0, 16).match(/.{4}/g)!.join(" ")}</p>
+            <p className="break-all font-mono text-xs text-gray-600">SHA-256: {ready.sha256}</p>
+            <p className="text-sm text-gray-700">दोनों के फ़ोन पर यह नंबर एक जैसा हो, तो रसीद एक ही है। · Same number on both phones = identical copies.</p>
+          </div>
+        </>
       ) : (
         !problem && (
           <p className="text-center text-2xl" role="status">
-            ⏳ 🧾
+            ⏳ 🧾 PDF…
           </p>
         )
       )}
 
-      <button className={primary} disabled={!png} onClick={share}>
+      <button className={primary} disabled={!ready} onClick={share}>
         <span className="text-4xl">📤</span> शेयर {done}
       </button>
       {problem && (
