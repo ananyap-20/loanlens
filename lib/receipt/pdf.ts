@@ -7,7 +7,7 @@ import type { ReceiptStrings } from "./strings";
 const PW = 1240; // A4 at 150 dpi
 const PH = 1754;
 const M = 64;
-const FOOTER = 96;
+const FOOTER = 156;
 const FONT = '"Noto Sans Devanagari", "Nirmala UI", "Mangal", "Segoe UI", Roboto, Arial, sans-serif';
 const MONO = 'ui-monospace, Consolas, "Courier New", monospace';
 const JPEG_QUALITY = 0.85;
@@ -306,6 +306,7 @@ function drawFooters(p: Pages, s: Summary) {
     ctx.fillRect(0, PH - FOOTER + 10, PW, 4);
     text(ctx, s.labelHi, M, PH - FOOTER + 22, PW - 2 * M - 120, 20, { weight: 700, color: "#78350f" });
     text(ctx, s.label, M, PH - FOOTER + 52, PW - 2 * M - 120, 17, { color: "#78350f" });
+    text(ctx, s.strings.disclaimer, M, PH - FOOTER + 84, PW - 2 * M, 15, { color: "#78350f" });
     ctx.font = font(24, 800);
     ctx.fillStyle = "#111827";
     const pn = `${i + 1}/${n}`;

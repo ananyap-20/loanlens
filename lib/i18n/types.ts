@@ -50,6 +50,10 @@ export type UiStrings = {
   start: string;
   replay: string;
   slow: string;
+  betaTag: string; // small tag: not ready / still being tested
+  reviewTag: string; // small tag: works, wording under review
+  notReady: string; // accessible label of a language that cannot be selected yet
+  disclaimer: string; // Welcome footer (the same text is on the receipt)
   chooseLanguage: string;
   female: string;
   male: string;

@@ -41,6 +41,7 @@ export type ReceiptStrings = {
   recCols: { who: string; what: string; time: string; transcript: string };
   speaker: { agent: string; borrower: string; helper: string };
   agentChanged: string;
+  disclaimer: string; // footer line on every page
 };
 
 export const HI_RECEIPT: ReceiptStrings = {
@@ -84,4 +85,6 @@ export const HI_RECEIPT: ReceiptStrings = {
   recCols: { who: "कौन", what: "क्या", time: "समय", transcript: "जो बोला" },
   speaker: { agent: "एजेंट", borrower: "ग्राहक", helper: "मददगार" },
   agentChanged: "एजेंट ने पहले अलग बताया था",
+  disclaimer:
+    "Beta चिह्न वाली भाषाओं की अभी जाँच चल रही है, और उनके शब्दों को किसी मूल वक्ता ने नहीं परखा है। LoanLens हस्ताक्षर के साथ समझ का सबूत देता है। यह हस्ताक्षर नहीं है और लोन की मंज़ूरी भी नहीं।",
 };
