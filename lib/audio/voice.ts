@@ -8,6 +8,7 @@ import { resumeAudio } from "./cues";
 let el: HTMLAudioElement | null = null;
 let seq = 0;
 let finishCurrent: (() => void) | null = null;
+const MAX_CLIP_MS = 60_000;
 
 function element(): HTMLAudioElement {
   el ??= new Audio();
@@ -48,9 +49,27 @@ export async function speak(text: string, slow = false): Promise<void> {
   if (a.src.startsWith("blob:")) URL.revokeObjectURL(a.src);
   a.src = URL.createObjectURL(blob);
   await new Promise<void>((resolve, reject) => {
-    finishCurrent = resolve;
-    a.onended = () => resolve();
-    a.onerror = () => reject(new Error("Audio playback failed"));
-    a.play().catch(reject);
+    // Settle exactly once, whatever happens: ended, paused (stopSpeaking / audio focus lost), error,
+    // a rejected play(), or a clip that never reports "ended" (guard = duration + 3 s, else 60 s).
+    let guard = setTimeout(() => settle(), MAX_CLIP_MS);
+    const settle = (err?: Error) => {
+      clearTimeout(guard);
+      a.onended = a.onpause = a.onerror = a.onloadedmetadata = null;
+      if (finishCurrent === done) finishCurrent = null;
+      if (err) reject(err);
+      else resolve();
+    };
+    const done = () => settle();
+    finishCurrent = done;
+    a.onended = done;
+    a.onpause = done;
+    a.onerror = () => settle(new Error("Audio playback failed"));
+    a.onloadedmetadata = () => {
+      if (Number.isFinite(a.duration)) {
+        clearTimeout(guard);
+        guard = setTimeout(() => settle(), a.duration * 1000 + 3000);
+      }
+    };
+    a.play().catch((e) => settle(e instanceof Error ? e : new Error(String(e))));
   });
 }

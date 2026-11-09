@@ -1,6 +1,6 @@
 // Money as pictures: split a rupee amount into Indian notes and coins (greedy, exact). Pure.
-export const NOTES = [500, 200, 100, 50, 20, 10] as const;
-export const COINS = [5, 2, 1] as const;
+export const NOTES = [500, 200, 100, 50, 20] as const;
+export const COINS = [10, 5, 2, 1] as const; // Rs 10 is drawn as a coin, like Rs 1, 2 and 5
 
 export type Piece = { denom: number; count: number; kind: "note" | "coin" };
 
