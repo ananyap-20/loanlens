@@ -11,6 +11,9 @@ import type { PaperInput, Presence, Recording } from "@/lib/flow/session";
 import { lenderQuestions } from "@/lib/flow/teachback";
 import type { VerifyReason } from "@/lib/engine";
 import type { PaperFacts } from "@/lib/flow/scripts";
+import { rupeesToHindi } from "@/lib/engine";
+import { nativeINR, nativeNumber } from "@/lib/i18n/numerals";
+import type { LangCode } from "@/lib/i18n/types";
 import { HI_RECEIPT, type ReceiptStrings } from "./strings";
 
 export const RECEIPT_LABEL = "Proof of understanding — not a signature, not a loan approval";
@@ -44,7 +47,7 @@ const GATE_EN: Record<GateFieldId, string> = {
 };
 
 export type Mark = "match" | "conflict" | "unable" | "not_mentioned" | "warn" | "none";
-export type Cell = { mark: Mark; hi: string; en: string };
+export type Cell = { mark: Mark; hi: string; en: string; words?: string };
 export type Row = { field: Field; hi: string; en: string; paper: Cell; agent: Cell; borrower: Cell; changed: boolean };
 
 export type Summary = {
@@ -112,31 +115,41 @@ export function valueEn(v: Value): string {
 
 /** The receipt's words in one language (Hindi by default). */
 export type ReceiptLang = {
+  /** Selects the digit script (Intl numbering system) for amounts. */
+  code: LangCode;
+  /** Whole rupees -> words in this language, or null when it has no verified number words (digits only). */
+  rupeesToWords: ((n: number) => string) | null;
   strings: ReceiptStrings;
   fieldName: Record<Field, string>;
   reason: Record<VerifyReason, string>;
   lenderQuestions: (paper: PaperFacts, checks?: AgentCheck[], gateFields?: Record<GateFieldId, { status: GateFieldStatus }>) => string[];
 };
-export const HI_RECEIPT_LANG: ReceiptLang = { strings: HI_RECEIPT, fieldName: FIELD_NAME_HI, reason: REASON_HI, lenderQuestions };
+export const HI_RECEIPT_LANG: ReceiptLang = { code: "hi", rupeesToWords: (n) => rupeesToHindi(n), strings: HI_RECEIPT, fieldName: FIELD_NAME_HI, reason: REASON_HI, lenderQuestions };
 
-/** A value with digits and the language's words: "₹2,666 हर महीने", "12 महीने", "₹0 (कहा: नहीं लगेगी)". */
-export function valueShort(v: Value, t: ReceiptStrings = HI_RECEIPT): string {
+/** A value in the language's own digits and words: "₹२,६६६ हर महीने", "१२ महीने", "₹0 (कहा: नहीं लगेगी)". */
+export function valueShort(v: Value, t: ReceiptStrings = HI_RECEIPT, code: LangCode = "hi"): string {
   if (v.negated && v.amount === 0) return t.cell.saidNotCharged;
   if (v.amount === undefined) return t.cell.noClearAmount;
   switch (v.unit) {
     case "INR":
-      return formatINR(v.amount) + (v.frequency ? t.freq[v.frequency] : "");
+      return nativeINR(v.amount, code) + (v.frequency ? t.freq[v.frequency] : "");
     case "percent":
-      return `${v.amount}%`;
+      return `${nativeNumber(v.amount, code)}%`;
     case "months":
-      return `${v.amount} ${t.months}`;
+      return `${nativeNumber(v.amount, code)} ${t.months}`;
     case "weeks":
-      return `${v.amount} ${t.weeks}`;
+      return `${nativeNumber(v.amount, code)} ${t.weeks}`;
     default:
-      return String(v.amount);
+      return nativeNumber(v.amount, code);
   }
 }
-export const valueHiShort = (v: Value) => valueShort(v, HI_RECEIPT);
+export const valueHiShort = (v: Value) => valueShort(v, HI_RECEIPT, "hi");
+
+/** The rupee amount in words, only for whole-rupee amounts in a language that has verified number words. */
+export function amountWords(v: Value, lang: ReceiptLang): string | undefined {
+  if (v.unit !== "INR" || v.amount === undefined || (v.negated && v.amount === 0) || !Number.isInteger(v.amount)) return undefined;
+  return lang.rupeesToWords ? lang.rupeesToWords(v.amount) : undefined;
+}
 
 export function formatIST(d: Date): string {
   return (
@@ -200,7 +213,7 @@ export function buildSummary(input: ReceiptInput, lang: ReceiptLang = HI_RECEIPT
     const paperCell: Cell = paper.ambiguous.includes(field)
       ? { mark: "warn", hi: t.cell.writtenTwice, en: "written twice, differently" }
       : pv
-        ? { mark: "none", hi: valueShort(pv, t), en: valueEn(pv) }
+        ? { mark: "none", hi: valueShort(pv, t, lang.code), en: valueEn(pv), words: amountWords(pv, lang) }
         : { mark: "unable", hi: t.cell.notOnPaper, en: "not on the paper" };
 
     let agentCell: Cell = DASH;
@@ -208,8 +221,9 @@ export function buildSummary(input: ReceiptInput, lang: ReceiptLang = HI_RECEIPT
     const changed = agentChangedEarlier(checks, field);
     if (input.presence === "with_agent" && forField.length) {
       const c = forField[forField.length - 1];
-      const spoken = c.spoken[0] && c.status !== "unable_to_verify" ? valueShort(c.spoken[0], t) : undefined;
+      const spoken = c.spoken[0] && c.status !== "unable_to_verify" ? valueShort(c.spoken[0], t, lang.code) : undefined;
       agentCell = statusCell(t, c.status, spoken);
+      if (spoken && c.spoken[0]) agentCell.words = amountWords(c.spoken[0], lang);
       if (c.status === "unable_to_verify" && c.reason) agentCell = { ...agentCell, hi: lang.reason[c.reason].split(" — ")[0] };
       if (changed) agentCell = { mark: "warn", hi: `${agentCell.hi} · ${t.agentChanged}`, en: `${agentCell.en}; earlier answer differed` };
     } else if (input.presence === "with_agent" && ["loan_amount", "installment", "processing_fee", "tenure", "late_fee"].includes(field)) {

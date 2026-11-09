@@ -42,7 +42,7 @@ export const NAV_ONLY_HI = "पहले जवाब दीजिए, फिर
 
 export const HANDOVER_HI = {
   agent: "अब एजेंट बोलेंगे। फ़ोन एजेंट को दीजिए। एजेंट जी, तैयार हों तो बड़ा बटन दबाइए।",
-  borrower: "अब फ़ोन उधार लेने वाली को दीजिए। आप तैयार हों तो बड़ा बटन दबाइए।",
+  borrower: "अब फ़ोन ग्राहक को दीजिए। आप तैयार हों तो बड़ा बटन दबाइए।",
 } as const;
 
 const FREQ_HI: Record<Frequency, string> = {

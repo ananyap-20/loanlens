@@ -46,11 +46,11 @@ export type ReceiptStrings = {
 export const HI_RECEIPT: ReceiptStrings = {
   title: "LoanLens रसीद",
   present: "मौजूद",
-  presence: { with_agent: "उधार लेने वाली और एजेंट", alone: "उधार लेने वाली" },
+  presence: { with_agent: "ग्राहक और एजेंट", alone: "ग्राहक" },
   docFingerprint: "दस्तावेज़ फ़िंगरप्रिंट",
   outcomePassed: "✅ समझ का सबूत, साइन के साथ",
   outcomeStopped: "✋ अभी साइन मत कीजिए — किसी भरोसे वाले को साथ लाइए",
-  cols: { item: "बात", paper: "📄 कागज़", agent: "🧑‍💼 एजेंट", borrower: "👩 उधार लेने वाली" },
+  cols: { item: "बात", paper: "📄 कागज़", agent: "🧑‍💼 एजेंट", borrower: "🧑 ग्राहक" },
   cell: {
     match: "मिलता है",
     conflict: "अलग है",
@@ -78,10 +78,10 @@ export const HI_RECEIPT: ReceiptStrings = {
   evidenceTitle: "सबूत",
   termsTitle: "कागज़ की बातें",
   agentVsPaperTitle: "एजेंट बनाम कागज़",
-  ownWordsTitle: "उधार लेने वाली के अपने शब्द",
+  ownWordsTitle: "ग्राहक के अपने शब्द",
   recordingsTitle: "सारी रिकॉर्डिंग (पहली और दोबारा वाली)",
   fullFingerprintsTitle: "पूरे फ़िंगरप्रिंट",
   recCols: { who: "कौन", what: "क्या", time: "समय", transcript: "जो बोला" },
-  speaker: { agent: "एजेंट", borrower: "उधार लेने वाली", helper: "मददगार" },
+  speaker: { agent: "एजेंट", borrower: "ग्राहक", helper: "मददगार" },
   agentChanged: "एजेंट ने पहले अलग बताया था",
 };

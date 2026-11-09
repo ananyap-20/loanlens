@@ -9,7 +9,7 @@ import type { ClipPhase } from "./useClipRecorder";
 
 export const SPEAKER_UI: Record<Speaker, { icon: string; cls: string }> = {
   agent: { icon: "🧑‍💼", cls: "bg-purple-100 text-purple-900 border-purple-500" },
-  borrower: { icon: "👩", cls: "bg-pink-100 text-pink-900 border-pink-500" },
+  borrower: { icon: "🧑", cls: "bg-pink-100 text-pink-900 border-pink-500" },
   helper: { icon: "🤝", cls: "bg-teal-100 text-teal-900 border-teal-500" },
 };
 

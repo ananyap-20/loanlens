@@ -105,12 +105,13 @@ function drawCell(ctx: CanvasRenderingContext2D, c: Cell, x: number, y: number, 
   let yy = y + 10;
   const label = m.icon ? `${m.icon} ${c.hi}` : c.hi;
   yy += text(ctx, label, x + 10, yy, w - 20, 25, { weight: 700, color: m.fg });
+  if (c.words) yy += text(ctx, c.words, x + 10, yy, w - 20, 19, { color: m.fg });
   if (c.en) text(ctx, c.en, x + 10, yy, w - 20, 17, { color: "#4b5563" });
 }
 
 function cellHeight(ctx: CanvasRenderingContext2D, c: Cell, w: number) {
   const m = MARK[c.mark];
-  return 20 + measure(ctx, m.icon ? `${m.icon} ${c.hi}` : c.hi, w - 20, 25) + (c.en ? measure(ctx, c.en, w - 20, 17) : 0);
+  return 20 + measure(ctx, m.icon ? `${m.icon} ${c.hi}` : c.hi, w - 20, 25) + (c.words ? measure(ctx, c.words, w - 20, 19) : 0) + (c.en ? measure(ctx, c.en, w - 20, 17) : 0);
 }
 
 function drawSummary(p: Pages, s: Summary) {
@@ -140,7 +141,7 @@ function drawSummary(p: Pages, s: Summary) {
       weight: 800,
       color: ok ? "#14532d" : "#7f1d1d",
     });
-    text(ctx, ok ? "Borrower explained the key terms in her own words (number-and-keyword check)" : "Stopped: do not sign yet", M + 28, p.y + 56, PW - 2 * M - 40, 18, {
+    text(ctx, ok ? "Borrower explained the key terms in their own words (number-and-keyword check)" : "Stopped: do not sign yet", M + 28, p.y + 56, PW - 2 * M - 40, 18, {
       color: "#374151",
     });
     p.y += h + 18;

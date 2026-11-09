@@ -47,7 +47,7 @@ export function Receipt({ dots, presence, paper, recordings, checks, gate, onBac
       const input = { createdAt, presence, paper, documentSha256, recordings: hashed, checks, gate };
       // The receipt in the selected language (labels); Hindi when a pack has no receipt words.
       const lang = pack.receipt
-        ? { strings: pack.receipt, fieldName: ui.fieldName, reason: ui.reason, lenderQuestions: t.lenderQuestions }
+        ? { code: pack.code, rupeesToWords: pack.rupeesToWords, strings: pack.receipt, fieldName: ui.fieldName, reason: ui.reason, lenderQuestions: t.lenderQuestions }
         : undefined;
       const out = await makeReceiptPdf(buildSummary(input, lang), buildEvidence(input, lang), createdAt);
       const sha256 = await sha256Hex(out.pdf);

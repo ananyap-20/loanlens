@@ -2,7 +2,7 @@
 // and builders that turn numbers into spoken Hindi for Timbre TTS
 // (CLAUDE.md: write numbers as words, e.g. "पंद्रह सौ रुपये", not "₹1,500").
 
-import { devanagariDigitsToAscii, normWord } from "./tokens";
+import { DIGIT_CLASS, devanagariDigitsToAscii, normWord } from "./tokens";
 
 /** Standard Hindi words for 0–99 (used for speech output). */
 export const HINDI_0_99: readonly string[] = [
@@ -159,7 +159,7 @@ export function weeksToHindi(n: number): string {
   return n === 1 ? "एक हफ़्ता" : `${numberToHindiWords(n)} हफ़्ते`;
 }
 
-const NUM = "[0-9\\u0966-\\u096F]+(?:,[0-9\\u0966-\\u096F]+)*(?:\\.[0-9\\u0966-\\u096F]+)?";
+const NUM = `[${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?`;
 
 /**
  * Rewrites digits in a TTS sentence as spoken Hindi:
