@@ -3,6 +3,7 @@
 // Small shared pieces: the screen frame (auto-play + 🔁 + 🐢 + progress dots + speaker tint), big buttons,
 // status badges, labelled field chips and the status legend. Words come from the selected language pack.
 import { useEffect } from "react";
+import { resumeAudio } from "@/lib/audio/cues";
 import type { Field, Status } from "@/lib/engine/types";
 import type { Speaker } from "@/lib/flow/session";
 import { useLang } from "./lang";
@@ -26,6 +27,26 @@ export function Dots({ total, current }: { total: number; current: number }) {
       {Array.from({ length: total }, (_, i) => (
         <span key={i} className={`h-3 w-3 rounded-full ${i < current ? "bg-blue-600" : i === current ? "bg-blue-600 ring-4 ring-blue-200" : "bg-gray-300"}`} />
       ))}
+    </div>
+  );
+}
+
+/** Big 🔁 replay and 🐢 slow (0.85) buttons for a screen's spoken text; labelled in the selected language. */
+export function ReplayButtons({ text, className = "" }: { text: string; className?: string }) {
+  const { say } = useSpeech();
+  const { ui } = useLang().pack;
+  const run = (slow: boolean) => {
+    void resumeAudio(); // a tap is the moment the browser allows audio (matters on Welcome, before any other tap)
+    void say(text, slow);
+  };
+  return (
+    <div className={`flex gap-2 ${className}`}>
+      <button aria-label={ui.replay} className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => run(false)}>
+        🔁
+      </button>
+      <button aria-label={ui.slow} className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => run(true)}>
+        🐢
+      </button>
     </div>
   );
 }
@@ -72,14 +93,7 @@ export function Screen({
       {speaker && <SpeakerBanner speaker={speaker} />}
       <div className="flex items-center justify-between gap-3">
         {dots ? <Dots {...dots} /> : <span />}
-        <div className="flex gap-2">
-          <button aria-label={ui.replay} className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => void say(instruction)}>
-            🔁
-          </button>
-          <button aria-label={ui.slow} className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => void say(instruction, true)}>
-            🐢
-          </button>
-        </div>
+        <ReplayButtons text={instruction} />
       </div>
       {speaking && (
         <p className="flex items-center gap-2 rounded-xl bg-blue-100 p-2 text-lg font-semibold text-blue-800" role="status">

@@ -2,7 +2,8 @@
 
 // Selected language pack + voice gender, remembered for this browser session only (sessionStorage).
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { setVoiceConfig } from "@/lib/audio/voice";
+import { setStaticKey, setVoiceConfig, warmUp } from "@/lib/audio/voice";
+import { staticKeyFor } from "@/lib/audio/staticAudio";
 import { getPack, voiceFor, type LangPack, type VoiceGender } from "@/lib/i18n";
 
 type Pack = ReturnType<typeof getPack>;
@@ -36,8 +37,10 @@ function write(code: string, gender: VoiceGender) {
 
 /** Points Timbre at the pack's voice. Hindi + female sends nothing extra (server default = Nalini, hi-IN). */
 export function applyVoice(pack: LangPack, gender: VoiceGender) {
+  const v = voiceFor(pack, gender);
   if (pack.code === "hi" && gender === "female") setVoiceConfig({});
-  else setVoiceConfig({ voice: voiceFor(pack, gender).voice, language: pack.timbre.language });
+  else setVoiceConfig({ voice: v.voice, language: pack.timbre.language });
+  setStaticKey(staticKeyFor(pack.code, v.gender)); // which pre-generated clips match this voice
 }
 
 export function LangProvider({ children }: { children: React.ReactNode }) {
@@ -45,6 +48,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   const [gender, setGenderState] = useState<VoiceGender>("female");
 
   useEffect(() => {
+    warmUp(); // wake the API routes and load the static clip list while the person reads the screen
     const saved = read();
     if (!saved) return;
     applyVoice(getPack(saved.code), saved.gender);

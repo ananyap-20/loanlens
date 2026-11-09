@@ -1,7 +1,14 @@
+import { connection } from "next/server";
 import { normaliseGnaniError } from "@/lib/gnani/errors";
 import { GNANI_BASE_URL, errorResponse, gnaniHeaders } from "@/lib/gnani/server";
 
 export const maxDuration = 30;
+
+/** Warm-up ping from the app on page load: wakes this function, calls nothing at Gnani, costs nothing. */
+export async function GET(): Promise<Response> {
+  await connection();
+  return new Response(null, { status: 204 });
+}
 
 const MAX_TEXT = 1000;
 

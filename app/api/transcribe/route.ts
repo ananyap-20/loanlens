@@ -1,7 +1,14 @@
+import { connection } from "next/server";
 import { normaliseGnaniError } from "@/lib/gnani/errors";
 import { GNANI_BASE_URL, errorResponse, gnaniHeaders, safeAudioFilename } from "@/lib/gnani/server";
 
 export const maxDuration = 30;
+
+/** Warm-up ping from the app on page load: wakes this function, calls nothing at Gnani, costs nothing. */
+export async function GET(): Promise<Response> {
+  await connection();
+  return new Response(null, { status: 204 });
+}
 
 const KEYTERMS = ["processing fee", "EMI", "किस्त", "बीमा", "ब्याज", "लोन", "KFS", "penalty"];
 const TOPIC = "A loan agent explains loan amount, EMI, processing fee, tenure and penalties.";
