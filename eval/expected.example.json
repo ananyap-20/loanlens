@@ -1,0 +1,29 @@
+{
+  "paper": "public/sample/kfs-sahyog.pdf",
+  "clips": [
+    {
+      "file": "fee-nahi-01.wav",
+      "speaker": "agent",
+      "field": "processing_fee",
+      "tag": "fee_conflict",
+      "note": "Agent says: processing fee nahi lagegi (paper: Rs 1,500)",
+      "expect": { "status": "conflict", "amount": 0 }
+    },
+    {
+      "file": "emi-ok-01.wav",
+      "speaker": "agent",
+      "field": "installment",
+      "tag": "emi_match",
+      "note": "Agent says: EMI do hazaar chhe sau chhiyasath har mahine",
+      "expect": { "status": "match", "amount": 2666 }
+    },
+    {
+      "file": "teachback-fee-01.wav",
+      "speaker": "borrower",
+      "field": "processing_fee",
+      "tag": "teachback_fee",
+      "note": "Borrower says: processing fee pandrah sau",
+      "expect": { "outcome": "pass" }
+    }
+  ]
+}

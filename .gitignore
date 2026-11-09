@@ -54,3 +54,7 @@ AGENTS.md
 
 .vercel
 .env*
+
+# eval: your own voice clips and run outputs stay local
+eval/clips/
+eval/out/
