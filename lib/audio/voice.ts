@@ -59,6 +59,11 @@ export function setStaticKey(key: string | null) {
 }
 const webConfig = () => ({ ...voiceConfig, staticKey });
 
+/** Preloads the shipped clips for texts that are likely next (no API call, nothing if no clip exists). */
+export function preloadSpeech(texts: string[]): void {
+  if (hasWebAudio()) void webSpeech().then((w) => w.preloadStaticWeb(texts, staticKey));
+}
+
 /** Wakes the API functions and loads the list of pre-generated clips. Costs no Timbre/Prisma credit. */
 export function warmUp(): void {
   if (typeof fetch === "undefined") return;

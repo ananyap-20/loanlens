@@ -98,8 +98,11 @@ describe("planSpeechChunks", () => {
     const sentences = [S(30), S(25), S(40), S(40), S(40), S(40), S(40), S(40), S(40), S(40)];
     const text = sentences.join(" ");
     const c = planSpeechChunks(text);
-    expect(c[0].length).toBeLessThanOrEqual(90);
-    for (const x of c.slice(1, -1)) {
+    // ramp: a small first chunk (fast start), a medium second one (generated while the first plays), then long ones
+    expect(c[0].length).toBeLessThanOrEqual(55);
+    expect(c[1].length).toBeLessThanOrEqual(120);
+    expect(c[1].length).toBeGreaterThanOrEqual(c[0].length);
+    for (const x of c.slice(2, -1)) {
       expect(x.length).toBeGreaterThanOrEqual(120);
       expect(x.length).toBeLessThanOrEqual(200);
     }
@@ -384,3 +387,24 @@ describe("speakWeb", () => {
 function resolveAll(s: FakeSource[]) {
   s.at(-1)?.onended?.();
 }
+
+describe("preloadStaticWeb", () => {
+  it("downloads only clips that exist and never calls Timbre", async () => {
+    const text = PACKS.hi.say!.who;
+    h.speakCalls.length = 0;
+    h.fetched.length = 0;
+    h.manifestFiles = [staticFile("hi-1", text)];
+    vi.resetModules();
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      h.fetched.push(url);
+      return url.endsWith("manifest.json") ? new Response(JSON.stringify({ files: h.manifestFiles })) : new Response(JSON.stringify({ sec: 2 }));
+    }));
+    const web = await import("@/lib/audio/webspeech");
+    await web.preloadStaticWeb([text, "कोई और वाक्य जिसकी क्लिप नहीं है।"], "hi-1");
+    await flush();
+    expect(h.fetched.filter((u) => u.endsWith(".mp3"))).toEqual([`/audio/${staticFile("hi-1", text)}`]);
+    expect(h.speakCalls.length).toBe(0);
+    vi.unstubAllGlobals();
+    h.manifestFiles = [];
+  });
+});

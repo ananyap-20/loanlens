@@ -2,7 +2,7 @@
 
 // Selected language pack + voice gender, remembered for this browser session only (sessionStorage).
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { setStaticKey, setVoiceConfig, warmUp } from "@/lib/audio/voice";
+import { preloadSpeech, setStaticKey, setVoiceConfig, warmUp } from "@/lib/audio/voice";
 import { staticKeyFor } from "@/lib/audio/staticAudio";
 import { getPack, voiceFor, type LangPack, type VoiceGender } from "@/lib/i18n";
 
@@ -50,8 +50,12 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     warmUp(); // wake the API routes and load the static clip list while the person reads the screen
     const saved = read();
-    if (!saved) return;
+    if (!saved) {
+      preloadSpeech([getPack("hi").greeting, getPack("hi").say.who]);
+      return;
+    }
     applyVoice(getPack(saved.code), saved.gender);
+    preloadSpeech([getPack(saved.code).greeting, getPack(saved.code).say.who]);
     queueMicrotask(() => {
       setCode(getPack(saved.code).code);
       setGenderState(saved.gender);
@@ -62,6 +66,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     (c: string) => {
       const p = getPack(c);
       applyVoice(p, gender);
+      preloadSpeech([p.say.who, p.say.paper]); // the screens after the language tap
       setCode(p.code);
       write(p.code, gender);
     },

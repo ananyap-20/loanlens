@@ -68,6 +68,17 @@ function loadStatic(ctx: BaseAudioContext, file: string): Promise<AudioBuffer> {
   return p;
 }
 
+/** Downloads and decodes the shipped clips for these texts (only those that exist; never calls Timbre). */
+export async function preloadStaticWeb(texts: string[], staticKey: string | null): Promise<void> {
+  const ctx = audioContext();
+  if (!ctx || !staticKey) return;
+  const have = await staticFiles();
+  for (const t of texts) {
+    const file = staticFile(staticKey, t);
+    if (have.has(file)) void loadStatic(ctx, file).catch(() => undefined);
+  }
+}
+
 /** Loads the manifest of static clips (cheap, no Timbre call). */
 export function warmStatic(): void {
   void staticFiles();
