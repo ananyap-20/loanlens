@@ -4,7 +4,7 @@
 //   npm run dev        (in another terminal)
 //   node scripts/make-static-audio.mjs http://localhost:3000
 import { createJiti } from "jiti";
-import { existsSync, mkdirSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,6 +13,12 @@ const jiti = createJiti(import.meta.url, { alias: { "@": root } });
 const { PACKS } = await jiti.import("../lib/i18n/index.ts");
 const { staticPrompts, staticVoices } = await jiti.import("../lib/i18n/staticPrompts.ts");
 const { staticFile } = await jiti.import("../lib/audio/staticAudio.ts");
+const { readPdfTerms } = await jiti.import("../lib/paper/pdf.ts");
+
+// The paper-explained narration for the SAMPLE KFS, from the real sample PDF (same code path the app uses).
+const sampleResult = await readPdfTerms(readFileSync(path.join(root, "public", "sample", "kfs-sahyog.pdf")));
+if (!sampleResult.ok) throw new Error("could not read the sample KFS: " + sampleResult.message);
+const sample = { terms: sampleResult.terms, missing: sampleResult.missing, ambiguous: sampleResult.ambiguous };
 
 const base = (process.argv[2] ?? "http://localhost:3000").replace(/\/$/, "");
 const dir = path.join(root, "public", "audio");
@@ -22,7 +28,7 @@ const wanted = new Map(); // file -> { text, voice, language }
 for (const code of ["hi", "en", "mr"]) {
   const pack = PACKS[code];
   for (const v of staticVoices(pack)) {
-    for (const p of staticPrompts(pack)) wanted.set(staticFile(v.key, p.text), { text: p.text, voice: v.voice, language: v.language, label: `${v.key} ${p.id}` });
+    for (const p of staticPrompts(pack, sample)) wanted.set(staticFile(v.key, p.text), { text: p.text, voice: v.voice, language: v.language, label: `${v.key} ${p.id}` });
   }
 }
 
