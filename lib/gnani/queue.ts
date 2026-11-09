@@ -130,6 +130,11 @@ export function createGnaniClient(config: QueueConfig = {}) {
     isSpeakCached(text: string, options: SpeakOptions = {}): boolean {
       return speakCache.has(speakKey(text, options));
     },
+
+    /** Forget every cached Timbre clip ("sab mitaayein": some prompts contain the loan figures). */
+    clearSpeakCache(): void {
+      speakCache.clear();
+    },
   };
 }
 
