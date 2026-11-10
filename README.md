@@ -1,5 +1,9 @@
 # LoanLens
 
+## Note on API access
+Registered for the Gnani AI challenge with the email used on the submission form (20ananya.pandey@gmail.com)
+Gnani API keys were issued under my institutional account (s23_pandey_ananya@mgmmumbai.ac.in).
+
 **A thumbprint proves who signed. LoanLens proves she understood.**
 
 One-page pitch: see PITCH.md
