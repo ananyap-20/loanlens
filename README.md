@@ -2,6 +2,8 @@
 
 **A thumbprint proves who signed. LoanLens proves she understood.**
 
+One-page pitch: see PITCH.md
+
 LoanLens is a voice-first, borrower-side loan understanding check. A loan agent reads the key terms aloud, the app checks what was said against the paper (a KFS PDF or QR code), the borrower explains the loan back in her own words (teach-back), and an understanding gate decides whether to produce a shareable receipt.
 
 > Voice is **not** a legal signature. The receipt is "proof of understanding, alongside the signature". It is not a loan approval and not a verdict on any lender.
