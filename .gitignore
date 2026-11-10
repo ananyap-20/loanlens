@@ -58,3 +58,7 @@ AGENTS.md
 # eval: your own voice clips and run outputs stay local
 eval/clips/
 eval/out/
+
+# demo video clips stay local
+video_clips/
+videos/
