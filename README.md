@@ -1,5 +1,9 @@
 # LoanLens
 
+> **Artificial intelligence is the tool. Real intelligence is the brain.**
+
+📄 **[Read the thinking behind LoanLens (3-page PDF)](docs/LoanLens_Thinking_Behind_It.pdf)**: why it is built this way, consent and privacy, what was researched, and how it differs.
+
 ## Note on API access
 Registered for the Gnani AI challenge with the email used on the submission form (20ananya.pandey@gmail.com)
 Gnani API keys were issued under my institutional account (s23_pandey_ananya@mgmmumbai.ac.in).
