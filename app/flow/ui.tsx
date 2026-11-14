@@ -24,6 +24,17 @@ export const SPEAKER_THEME: Record<Speaker, { icon: string; bg: string; banner: 
   helper: { icon: "🤝", bg: "bg-teal-50", banner: "bg-teal-700", button: "bg-teal-700" },
 };
 
+/**
+ * The one place the name is shown. It is always the logo artwork, never the name typed in a font:
+ * `logo` = the full logo (mark + "ARTH"), `mark` = the Devanagari mark with its saffron line and dot.
+ * Both SVGs are cut from the same source (brand/arth-logo-source.svg), so they cannot drift apart.
+ */
+export function Brand({ variant, className = "" }: { variant: "logo" | "mark"; className?: string }) {
+  const src = variant === "logo" ? "/arth-logo.svg" : "/arth-mark.svg";
+  // eslint-disable-next-line @next/next/no-img-element -- a small static SVG; next/image adds nothing here
+  return <img src={src} alt="Arth" className={className} />;
+}
+
 export function Dots({ total, current }: { total: number; current: number }) {
   return (
     <div className="flex items-center justify-center gap-2" aria-label={`step ${current + 1} of ${total}`}>
