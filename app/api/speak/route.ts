@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { normaliseGnaniError } from "@/lib/gnani/errors";
 import { GNANI_BASE_URL, errorResponse, gnaniHeaders } from "@/lib/gnani/server";
+import { checkLimit, speakLimiter, speakTextProblem, speedProblem } from "@/lib/server/rateLimit";
 
 export const maxDuration = 30;
 
@@ -9,8 +10,6 @@ export async function GET(): Promise<Response> {
   await connection();
   return new Response(null, { status: 204 });
 }
-
-const MAX_TEXT = 1000;
 
 type SpeakBody = {
   text?: unknown;
@@ -21,6 +20,9 @@ type SpeakBody = {
 };
 
 export async function POST(req: Request): Promise<Response> {
+  const limited = checkLimit(speakLimiter, req);
+  if (limited) return limited;
+
   const headers = gnaniHeaders();
   if (!headers) return errorResponse(500, "NO_API_KEY", "GNANI_API_KEY is not set on the server.");
 
@@ -31,10 +33,12 @@ export async function POST(req: Request): Promise<Response> {
     return errorResponse(400, "BAD_REQUEST", "Expected JSON.");
   }
   if (typeof b.text !== "string" || !b.text.trim()) return errorResponse(400, "BAD_REQUEST", "Missing text.");
-  if (b.text.length > MAX_TEXT) return errorResponse(400, "BAD_REQUEST", `Text longer than ${MAX_TEXT} characters.`);
+  const tooLong = speakTextProblem(b.text);
+  if (tooLong) return errorResponse(tooLong.status, tooLong.code, tooLong.message);
 
   const speed = typeof b.speed === "number" ? b.speed : 1.0;
-  if (speed < 0.85 || speed > 1.15) return errorResponse(400, "BAD_REQUEST", "speed must be 0.85–1.15.");
+  const badSpeed = speedProblem(speed);
+  if (badSpeed) return errorResponse(badSpeed.status, badSpeed.code, badSpeed.message);
 
   const payload = {
     text: b.text,

@@ -29,6 +29,16 @@ export type QueueConfig = {
 
 const realSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
+/** True when a 429 came from our own route limiter rather than from Gnani. Reads a clone, so the body stays readable. */
+async function isAppRateLimit(res: Response): Promise<boolean> {
+  try {
+    const body = await res.clone().json();
+    return body?.error?.type === "APP_RATE_LIMIT";
+  } catch {
+    return false;
+  }
+}
+
 export function createGnaniClient(config: QueueConfig = {}) {
   const fetchImpl: typeof fetch = config.fetchImpl ?? ((...a) => fetch(...a));
   const sleep = config.sleep ?? realSleep;
@@ -75,7 +85,8 @@ export function createGnaniClient(config: QueueConfig = {}) {
         clearTimeout(timer);
       }
 
-      if (res.status === 429 && attempt < maxRetries) {
+      // Our own route limiter (lib/server/rateLimit.ts, code APP_RATE_LIMIT) is a clear error, never retried.
+      if (res.status === 429 && attempt < maxRetries && !(await isAppRateLimit(res))) {
         await sleep(baseDelayMs * 2 ** attempt);
         continue;
       }

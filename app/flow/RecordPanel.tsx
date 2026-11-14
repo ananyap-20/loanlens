@@ -55,7 +55,8 @@ export function RecordPanel({
         <div
           role="status"
           className={`w-full rounded-xl p-3 text-center text-xl font-semibold ${
-            phase === "idle" && !speaking ? "bg-green-100 text-green-900 ring-2 ring-green-500" : "bg-gray-100"
+            // not green: green is reserved for ✅ match, and this box sits right above a ❌ result
+            phase === "idle" && !speaking ? "bg-blue-50 text-blue-900 ring-2 ring-blue-500" : "bg-gray-100"
           }`}
         >
           {phase === "requesting" && ui.micPermission}
