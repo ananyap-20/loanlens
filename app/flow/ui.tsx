@@ -142,7 +142,7 @@ export function Screen({
       {speaker && <SpeakerBanner speaker={speaker} />}
       <div className="flex items-center justify-between gap-3">
         {dots ? <Dots {...dots} /> : <span />}
-        <ReplayButtons text={instruction} />
+        <ReplayButtons compact text={instruction} />
       </div>
       {speaking && (
         <p className="flex items-center gap-2 rounded-chip border border-line bg-surface px-4 py-2 text-lg font-semibold text-ink" role="status">
