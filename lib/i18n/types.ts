@@ -57,6 +57,7 @@ export type UiStrings = {
   notReady: string; // accessible label of a language that cannot be selected yet
   disclaimer: string; // Welcome footer (the same text is on the receipt)
   chooseLanguage: string;
+  info: string; // the small "information" button on Welcome that opens the disclaimer
   female: string;
   male: string;
   alone: string;

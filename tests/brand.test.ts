@@ -34,18 +34,6 @@ describe("display name", () => {
     expect(hits).toEqual([]);
   });
 
-  it("the Welcome script row has the exact code points (no look-alike characters)", () => {
-    const welcome = readFileSync(path.join(ROOT, "app/flow/screens/Welcome.tsx"), "utf8");
-    const row = welcome.split("\n").find((l) => l.includes('lang="gu"'))!;
-    const words = Object.fromEntries([...row.matchAll(/<span lang="(\w+)">([^<]*)<\/span>/g)].map((m) => [m[1], m[2]]));
-    const cps = (s: string) => [...s].map((c) => c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")).join(" ");
-    expect(Object.keys(words)).toEqual(["hi", "sa", "bn", "gu"]);
-    expect(cps(words.hi)).toBe("0905 0930 094D 0925"); // अर्थ
-    expect(cps(words.sa)).toBe("0905 0930 094D 0925 092E 094D"); // अर्थम्
-    expect(cps(words.bn)).toBe("0985 09B0 09CD 09A5"); // অর্থ
-    expect(cps(words.gu)).toBe("0A85 0AB0 0ACD 0AA5"); // અર્થ
-  });
-
   it("the logo and the mark are cut from the same artwork, in the brand colours", () => {
     const read = (f: string) => readFileSync(path.join(ROOT, "public", f), "utf8");
     const logo = read("arth-logo.svg");
@@ -62,9 +50,14 @@ describe("display name", () => {
     }
   });
 
-  it("Welcome shows the new wordmark", () => {
-    const welcome = readFileSync(path.join(ROOT, "app/flow/screens/Welcome.tsx"), "utf8");
-    expect(welcome).toMatch(/<span lang="en"[^>]*>\s*Arth\b/);
-    expect(welcome).toContain("अर्थ");
+  it("the name is only ever the logo artwork: Welcome and Splash use Brand and never type it in a font", () => {
+    const read = (f: string) => readFileSync(path.join(ROOT, "app/flow/screens", f), "utf8");
+    expect(read("Welcome.tsx")).toContain('<Brand variant="mark"');
+    expect(read("Splash.tsx")).toContain('<Brand variant="logo"');
+    for (const f of ["Welcome.tsx", "Splash.tsx"]) {
+      const src = read(f);
+      expect(src).not.toMatch(/>\s*Arth\s*</); // no typed "Arth"
+      expect(src).not.toMatch(/>\s*अर्थ\s*</); // no typed "अर्थ"
+    }
   });
 });
