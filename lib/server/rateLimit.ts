@@ -9,7 +9,7 @@
 /** Sliding window length for both routes. */
 export const RATE_WINDOW_MS = 5 * 60 * 1000;
 /** Max /api/transcribe requests per IP per window. */
-export const TRANSCRIBE_LIMIT = 30;
+export const TRANSCRIBE_LIMIT = 60;
 /** Max /api/speak requests per IP per window. */
 export const SPEAK_LIMIT = 60;
 

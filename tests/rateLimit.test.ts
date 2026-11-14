@@ -23,7 +23,7 @@ const clock = (start = 1_000_000) => {
 
 describe("rate limiter (sliding window)", () => {
   it("has the documented limits", () => {
-    expect(TRANSCRIBE_LIMIT).toBe(30);
+    expect(TRANSCRIBE_LIMIT).toBe(60);
     expect(SPEAK_LIMIT).toBe(60);
     expect(RATE_WINDOW_MS).toBe(5 * 60 * 1000);
   });
