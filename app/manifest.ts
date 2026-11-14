@@ -9,8 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Proof of understanding, alongside the signature.",
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#2563eb",
+    background_color: "#1f2a44", // launch screen = the icon's navy (--color-ink), so the icon blends in
+    theme_color: "#1f2a44",
     icons: [
       { src: "/arth-icon-192.png", sizes: "192x192", type: "image/png" },
       { src: "/arth-icon-512.png", sizes: "512x512", type: "image/png" },
