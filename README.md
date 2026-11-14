@@ -17,6 +17,20 @@
   <b>🎬 Walkthrough video:</b> link coming <!-- WALKTHROUGH_VIDEO_LINK: paste here -->
 </p>
 
+> [!TIP]
+> **📲 Install it from Chrome (recommended).** Arth works in the browser, but it works best installed on the phone like an app: it opens full screen with no address bar, starts from its own icon, and shows up in the phone's **Share** menu, so a lender's KFS PDF received on WhatsApp can be sent straight to Arth.
+>
+> **Android (Chrome):**
+> 1. Open **https://loanlens-mauve.vercel.app** in Chrome.
+> 2. Tap the **⋮** menu (top right).
+> 3. Tap **Install app** (on some phones it says **Add to Home screen**), then **Install**.
+> 4. Open **Arth** from the new icon on the home screen.
+> 5. The first time you record, tap **Allow** when Chrome asks for the microphone.
+>
+> To send a KFS PDF to Arth: open the PDF (for example in WhatsApp), tap **Share**, and pick **Arth**.
+>
+> **iPhone (Safari):** open the link, tap **Share**, then **Add to Home Screen**. Sharing a PDF to Arth from other apps works only on Android.
+
 <p align="center">
   <a href="Arth_Thinking_Behind_It.pdf"><img src="docs/images/thinking-cover.png" alt="Page 1 of the PDF 'The thinking behind Arth': the problem, the idea, and how it works" width="430" /></a><br />
   <sub>Click the page to open the full 5-page PDF: the problem, the research, consent and privacy, the design choices, and what changed from plan to product.</sub>
@@ -35,22 +49,6 @@
 4. Follow the spoken instructions. Every screen speaks; 🔁 replays it and 🐢 plays it slower.
 
 The sample paper is synthetic: a fictional lender ("Sahyog Finance (fictional)") and fictional terms.
-
-## Install it from Chrome (recommended)
-
-Arth works in the browser, but it works best installed on the phone like an app: it opens full screen with no address bar, starts from its own icon, and shows up in the phone's **Share** menu, so a lender's KFS PDF received on WhatsApp can be sent straight to Arth.
-
-**Android (Chrome):**
-
-1. Open **https://loanlens-mauve.vercel.app** in Chrome.
-2. Tap the **⋮** menu (top right).
-3. Tap **Install app** (on some phones it says **Add to Home screen**), then **Install**.
-4. Open **Arth** from the new icon on the home screen.
-5. The first time you record, tap **Allow** when Chrome asks for the microphone.
-
-To send a KFS PDF to Arth: open the PDF (for example in WhatsApp), tap **Share**, and pick **Arth**.
-
-**iPhone (Safari):** open the link, tap **Share**, then **Add to Home Screen**. Sharing a PDF to Arth from other apps works only on Android.
 
 ## Screenshots
 
