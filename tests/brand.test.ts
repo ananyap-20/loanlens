@@ -34,6 +34,18 @@ describe("display name", () => {
     expect(hits).toEqual([]);
   });
 
+  it("the Welcome script row has the exact code points (no look-alike characters)", () => {
+    const welcome = readFileSync(path.join(ROOT, "app/flow/screens/Welcome.tsx"), "utf8");
+    const row = welcome.split("\n").find((l) => l.includes('lang="gu"'))!;
+    const words = Object.fromEntries([...row.matchAll(/<span lang="(\w+)">([^<]*)<\/span>/g)].map((m) => [m[1], m[2]]));
+    const cps = (s: string) => [...s].map((c) => c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")).join(" ");
+    expect(Object.keys(words)).toEqual(["hi", "sa", "bn", "gu"]);
+    expect(cps(words.hi)).toBe("0905 0930 094D 0925"); // अर्थ
+    expect(cps(words.sa)).toBe("0905 0930 094D 0925 092E 094D"); // अर्थम्
+    expect(cps(words.bn)).toBe("0985 09B0 09CD 09A5"); // অর্থ
+    expect(cps(words.gu)).toBe("0A85 0AB0 0ACD 0AA5"); // અર્થ
+  });
+
   it("Welcome shows the new wordmark", () => {
     const welcome = readFileSync(path.join(ROOT, "app/flow/screens/Welcome.tsx"), "utf8");
     expect(welcome).toContain(">Arth<");
