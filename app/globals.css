@@ -48,6 +48,17 @@ html {
   background: var(--color-cream);
 }
 
+/*
+ * Numbers in an Indian language's own digits (२८,५००, ২৮,৫০০ ...). Poppins also covers the Devanagari block but
+ * draws its Devanagari digits in Latin shapes (३ looks like 3), so these spans put the Noto script fonts first.
+ * Not used for English, which keeps Poppins digits.
+ */
+.num-native {
+  font-family:
+    var(--font-devanagari), var(--font-bengali), var(--font-gujarati), var(--font-gurmukhi), var(--font-kannada),
+    var(--font-malayalam), var(--font-tamil), var(--font-telugu), var(--font-poppins), system-ui, sans-serif;
+}
+
 body {
   background: var(--color-cream);
   color: var(--color-ink);

@@ -15,6 +15,9 @@ const NOTE_COLOUR: Record<number, string> = {
   20: "bg-lime-200 border-lime-500",
 };
 
+/** Class for text that shows numbers in the pack's own digits (see .num-native in globals.css). */
+export const numClass = (code: string) => (code === "en" ? "" : "num-native");
+
 function Note({ denom, label, className = "" }: { denom: number; label: string; className?: string }) {
   return (
     <span className={`note-paper flex h-7 w-11 shrink-0 items-center justify-center rounded-md border text-[10px] font-semibold text-ink shadow-sm ${NOTE_COLOUR[denom]} ${className}`}>
@@ -41,11 +44,11 @@ export function Money({ amount, compact = false }: { amount: number; compact?: b
   const words = pack.rupeesToWords && Number.isInteger(amount) && amount >= 0 ? pack.rupeesToWords(amount) : null;
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <span className={`font-semibold leading-none ${compact ? "text-[clamp(18px,6vw,28px)] [overflow-wrap:anywhere]" : "text-[40px] tracking-wide"}`}>
+      <span className={`font-semibold leading-none ${numClass(pack.code)} ${compact ? "text-[clamp(18px,6vw,28px)] [overflow-wrap:anywhere]" : "text-[40px] tracking-wide"}`}>
         {nativeINR(amount, pack.code)}
       </span>
       {words && <span className={`font-semibold text-muted ${compact ? "text-sm" : "text-base"}`}>{words}</span>}
-      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1" aria-hidden>
+      <div className={`flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 ${numClass(pack.code)}`} aria-hidden>
         {pieces.map((p) => {
           const Pic = p.kind === "note" ? Note : Coin;
           const label = nativeNumber(p.denom, pack.code);

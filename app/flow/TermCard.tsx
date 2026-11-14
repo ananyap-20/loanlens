@@ -4,7 +4,7 @@
 import type { Field, Value } from "@/lib/engine/types";
 import { nativeINR, nativeNumber } from "@/lib/i18n/numerals";
 import { useLang } from "./lang";
-import { Money } from "./Money";
+import { Money, numClass } from "./Money";
 
 export const FIELD_ICON: Record<Field, string> = {
   loan_amount: "💰",
@@ -19,7 +19,7 @@ export const FIELD_ICON: Record<Field, string> = {
 /** `compact`: for the two-column agent/call vs paper comparison, where 40px amounts would run into each other. */
 export function ValueView({ v, compact = false }: { v: Value; compact?: boolean }) {
   const { ui, code } = useLang().pack;
-  const big = compact ? "text-[clamp(18px,6vw,28px)] [overflow-wrap:anywhere]" : "text-[40px]";
+  const big = `${numClass(code)} ${compact ? "text-[clamp(18px,6vw,28px)] [overflow-wrap:anywhere]" : "text-[40px]"}`;
   if (v.negated && v.amount === 0) return <span className={`${big} font-semibold leading-none`}>{nativeINR(0, code)} 🚫</span>;
   if (v.amount === undefined) return <span className="text-3xl">❔</span>;
   if (v.unit === "INR") {
