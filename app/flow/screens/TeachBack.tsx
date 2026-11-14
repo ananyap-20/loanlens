@@ -21,7 +21,9 @@ import {
 import type { Field, Status } from "@/lib/engine/types";
 import type { PaperInput } from "@/lib/flow/session";
 import { statusPresentation } from "@/lib/flow/statusPresentation";
+import { nativeNumber } from "@/lib/i18n/numerals";
 import { useLang } from "../lang";
+import { numClass } from "../Money";
 import { RecordPanel } from "../RecordPanel";
 import { useSpeech } from "../speech";
 import { FIELD_ICON } from "../TermCard";
@@ -115,7 +117,10 @@ export function TeachBack({
                       <span key={k} className={`h-2 w-2 rounded-full ${k < fs.failedAttempts ? "bg-conflict" : k < tries ? "bg-primary" : "border border-sand-edge bg-sand-dot"}`} />
                     ))}
                     <span className="text-[10px] font-semibold">
-                      {ui.tries} {tries}/{GATE_MAX_ATTEMPTS}
+                      {ui.tries}{" "}
+                      <span className={numClass(pack.code)}>
+                        {nativeNumber(tries, pack.code)}/{nativeNumber(GATE_MAX_ATTEMPTS, pack.code)}
+                      </span>
                     </span>
                   </span>
                 ) : undefined
