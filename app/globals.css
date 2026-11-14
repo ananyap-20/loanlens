@@ -1,26 +1,103 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Arth design tokens: paper, ink and a saffron accent. Light only (no dark mode).
+ * Contrast (checked): ink on cream 13.2:1 · muted on cream 5.5:1 · white on primary 5.5:1 ·
+ * match text on its tint 4.8:1 · conflict text on its tint 5.9:1 · unknown-ink on its tint 6.9:1.
+ * Saffron #E8890C is 2.4:1 on cream, so it is used only for decoration (the wordmark dot); the focus ring and
+ * progress dots use saffron-strong (3.5:1). Upcoming dots are light sand with a 3.1:1 outline.
+ */
+@theme {
+  --color-cream: #fbf6ec;
+  --color-surface: #ffffff;
+  --color-line: #eadfcb;
+  --color-sand: #f3eadb;
+  --color-sand-dot: #e7dcc8;
+  --color-sand-edge: #9c8a70;
+
+  --color-ink: #1f2a44;
+  --color-muted: #5b6479;
+
+  --color-primary: #0f766e;
+  --color-primary-pressed: #0b5c56;
+
+  --color-saffron: #e8890c;
+  --color-saffron-strong: #c2700a;
+
+  --color-match: #15803d;
+  --color-match-soft: #ecfdf3;
+  --color-conflict: #b91c1c;
+  --color-conflict-soft: #fef2f2;
+  --color-unknown: #64748b;
+  --color-unknown-ink: #475569;
+  --color-unknown-soft: #f1f5f9;
+
+  --radius-card: 24px;
+  --radius-btn: 20px;
+  --radius-chip: 16px;
+
+  --shadow-soft: 0 6px 24px rgba(31, 42, 68, 0.08);
+
+  /* Latin + digits in Poppins; each Indian script falls through to its Noto Sans family (see app/fonts.ts). */
+  --font-sans:
+    var(--font-poppins), var(--font-devanagari), var(--font-bengali), var(--font-gujarati), var(--font-gurmukhi),
+    var(--font-kannada), var(--font-malayalam), var(--font-tamil), var(--font-telugu), system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-cream);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 18px;
+}
+
+/* Replay / slow buttons while the app is speaking: a gentle ring (CSS only). */
+@keyframes arth-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(194, 112, 10, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(194, 112, 10, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(194, 112, 10, 0);
+  }
+}
+.pulse-ring {
+  animation: arth-pulse-ring 1.6s ease-out infinite;
+}
+
+/* Bank notes: a faint paper grain, no image files. */
+.note-paper {
+  background-image:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 2px, transparent 2px 6px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.04));
+}
+
+/* Press feedback for big buttons: 1px down, a touch smaller, no shadow. */
+.press {
+  transition:
+    transform 120ms ease-out,
+    box-shadow 150ms ease-out,
+    background-color 150ms ease-out;
+}
+.press:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-ring,
+  .animate-pulse {
+    animation: none !important;
+  }
+  .press,
+  .press:active:not(:disabled) {
+    transition: none !important;
+    transform: none !important;
+  }
 }

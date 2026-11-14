@@ -7,6 +7,7 @@ import { buzz, chime } from "@/lib/audio/cues";
 import { GATE_FIELDS, GATE_LABEL, type GateState } from "@/lib/engine/gate";
 import { agentChangedEarlier, type AgentCheck } from "@/lib/flow/agent";
 import type { PaperInput } from "@/lib/flow/session";
+import { statusPresentation } from "@/lib/flow/statusPresentation";
 import { ClearButton } from "../ClearButton";
 import { useLang } from "../lang";
 import { FIELD_ICON } from "../TermCard";
@@ -41,27 +42,27 @@ export function Result({
   return (
     <Screen instruction={speech} dots={dots}>
       {kind === "passed" ? (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border-4 border-green-600 bg-green-100 p-4 text-center text-green-900">
+        <div className="flex flex-col items-center gap-2 rounded-card border-2 border-match bg-match-soft p-5 text-center text-match shadow-soft">
           <span className="text-7xl">✅</span>
-          <span className="text-2xl font-extrabold">{ui.proofTitle}</span>
+          <span className="text-2xl font-semibold leading-tight">{ui.proofTitle}</span>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border-4 border-red-600 bg-red-100 p-4 text-center text-red-900">
+        <div className="flex flex-col items-center gap-2 rounded-card border-2 border-conflict bg-conflict-soft p-5 text-center text-conflict shadow-soft">
           <span className="text-7xl">✋❌</span>
-          <span className="text-2xl font-extrabold">{ui.dontSign}</span>
-          <span className="text-lg">{ui.bringTrusted}</span>
+          <span className="text-2xl font-semibold leading-tight">{ui.dontSign}</span>
+          <span className="text-lg text-ink">{ui.bringTrusted}</span>
         </div>
       )}
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted">
         Proof of understanding, alongside the signature — not a signature, not a loan approval. ({GATE_LABEL})
       </p>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-xl font-bold">{ui.ownWords}</h2>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xl font-semibold">{ui.ownWords}</h2>
         {GATE_FIELDS.map((id) => {
           const s = gate.fields[id].status;
           return (
-            <div key={id} className="flex items-center justify-between gap-2 rounded-xl border-2 border-gray-200 p-2 text-lg">
+            <div key={id} className={`flex items-center justify-between gap-2 rounded-chip border border-line bg-surface p-3 text-lg shadow-soft ${statusPresentation(s === "passed" ? "match" : s === "failed" ? "conflict" : "unable_to_verify").stripe}`}>
               <span>{ui.gateFieldName[id]}</span>
               {/* pending = never asked because the check stopped earlier -> "couldn't check", not "not said" */}
               <StatusBadge status={s === "passed" ? "match" : s === "failed" ? "conflict" : "unable_to_verify"} />
@@ -71,24 +72,24 @@ export function Result({
       </section>
 
       {latest.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-xl font-bold">{ui.agentVsPaper}</h2>
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xl font-semibold">{ui.agentVsPaper}</h2>
           {latest.map((c) => (
-            <div key={c.field} className="flex items-center justify-between gap-2 rounded-xl border-2 border-gray-200 p-2 text-lg">
+            <div key={c.field} className={`flex items-center justify-between gap-2 rounded-chip border border-line bg-surface p-3 text-lg shadow-soft ${statusPresentation(c.status).stripe}`}>
               <span>
                 {FIELD_ICON[c.field]} {ui.fieldName[c.field]}
               </span>
               <span className="flex flex-col items-end gap-1">
                 <StatusBadge status={c.status} />
-                {agentChangedEarlier(checks, c.field) && <span className="text-base font-bold text-amber-800">⚠️ {ui.agentChanged}</span>}
+                {agentChangedEarlier(checks, c.field) && <span className="text-base font-semibold text-amber-800">⚠️ {ui.agentChanged}</span>}
               </span>
             </div>
           ))}
         </section>
       )}
 
-      <section className="flex flex-col gap-2 rounded-2xl border-2 border-amber-500 bg-amber-50 p-3">
-        <h2 className="text-xl font-bold">{ui.askLender}</h2>
+      <section className="flex flex-col gap-2 rounded-card border-2 border-amber-500 bg-amber-50 p-5">
+        <h2 className="text-xl font-semibold">{ui.askLender}</h2>
         {questions.map((q) => (
           <p key={q} className="text-lg">
             • {q}
@@ -96,8 +97,8 @@ export function Result({
         ))}
       </section>
 
-      <section className="flex flex-col gap-1 rounded-2xl border-2 border-gray-300 p-3 text-lg">
-        <h2 className="text-xl font-bold">{ui.complaint}</h2>
+      <section className="flex flex-col gap-2 rounded-card border border-line bg-surface p-5 text-lg shadow-soft">
+        <h2 className="text-xl font-semibold">{ui.complaint}</h2>
         <p>1. {paper.grievance ?? ui.grievanceMissing}</p>
         <p>
           2. RBI: <span className="font-bold">cms.rbi.org.in</span>

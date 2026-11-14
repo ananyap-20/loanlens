@@ -13,13 +13,37 @@ export type StatusTone = "match" | "conflict" | "unknown";
 export type StatusPresentation = {
   icon: "✅" | "❌" | "❔";
   tone: StatusTone;
-  cls: string; // badge colour classes
+  cls: string; // badge colour classes (soft tint + status text + status border)
+  stripe: string; // 6px left stripe on a card, in the status colour
+  soft: string; // the soft tinted background alone
   cue: Cue;
 };
 
-const MATCH: StatusPresentation = { icon: "✅", tone: "match", cls: "bg-green-100 text-green-900 border-green-600", cue: "chime" };
-const CONFLICT: StatusPresentation = { icon: "❌", tone: "conflict", cls: "bg-red-100 text-red-900 border-red-600", cue: "buzz" };
-const UNKNOWN: StatusPresentation = { icon: "❔", tone: "unknown", cls: "bg-gray-100 text-gray-800 border-gray-400", cue: "tick" };
+// Colour tokens are defined in app/globals.css (match green, conflict red, unknown slate).
+const MATCH: StatusPresentation = {
+  icon: "✅",
+  tone: "match",
+  cls: "bg-match-soft text-match border-match",
+  stripe: "border-l-[6px] border-l-match",
+  soft: "bg-match-soft",
+  cue: "chime",
+};
+const CONFLICT: StatusPresentation = {
+  icon: "❌",
+  tone: "conflict",
+  cls: "bg-conflict-soft text-conflict border-conflict",
+  stripe: "border-l-[6px] border-l-conflict",
+  soft: "bg-conflict-soft",
+  cue: "buzz",
+};
+const UNKNOWN: StatusPresentation = {
+  icon: "❔",
+  tone: "unknown",
+  cls: "bg-unknown-soft text-unknown-ink border-unknown",
+  stripe: "border-l-[6px] border-l-unknown",
+  soft: "bg-unknown-soft",
+  cue: "tick",
+};
 
 export function statusPresentation(status: Status): StatusPresentation {
   switch (status) {

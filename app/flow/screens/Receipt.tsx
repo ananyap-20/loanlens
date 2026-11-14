@@ -78,24 +78,24 @@ export function Receipt({ dots, presence, paper, recordings, checks, gate, onBac
 
   return (
     <Screen instruction={t.receipt} dots={dots}>
-      <p className="rounded-xl border-2 border-amber-500 bg-amber-50 p-2 text-center text-base font-semibold text-amber-900">{RECEIPT_LABEL}</p>
+      <p className="rounded-chip border-2 border-amber-500 bg-amber-50 p-3 text-center text-base font-semibold text-amber-900">{RECEIPT_LABEL}</p>
 
       {ready ? (
         <>
-          <div className="flex gap-2 overflow-x-auto" aria-label={`PDF, ${ready.pages} pages`}>
+          <div className="flex gap-3 overflow-x-auto pb-1" aria-label={`PDF, ${ready.pages} pages`}>
             {ready.previews.map((src, i) => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={src} alt={`receipt page ${i + 1}`} className="h-72 shrink-0 rounded-lg border-2 border-gray-300 bg-white" />
+              <img key={i} src={src} alt={`receipt page ${i + 1}`} className="h-72 shrink-0 rounded-chip border border-line bg-surface shadow-soft" />
             ))}
           </div>
           <p className="text-center text-lg font-semibold">
             📄 PDF · {ready.pages} {ui.pages} · {(ready.pdf.size / 1024).toFixed(0)} KB
           </p>
-          <div className="rounded-xl border-2 border-gray-300 bg-gray-50 p-3" aria-label="receipt fingerprint">
-            <p className="text-lg font-bold">{ui.receiptFingerprint}</p>
-            <p className="font-mono text-2xl font-bold tracking-wider">{ready.sha256.slice(0, 16).match(/.{4}/g)!.join(" ")}</p>
-            <p className="break-all font-mono text-xs text-gray-600">SHA-256: {ready.sha256}</p>
-            <p className="text-sm text-gray-700">{ui.fingerprintHelp}</p>
+          <div className="flex flex-col gap-1 rounded-card border border-line bg-surface p-5 shadow-soft" aria-label="receipt fingerprint">
+            <p className="text-lg font-semibold">{ui.receiptFingerprint}</p>
+            <p className="font-mono text-2xl font-semibold tracking-wider">{ready.sha256.slice(0, 16).match(/.{4}/g)!.join(" ")}</p>
+            <p className="break-all rounded-chip bg-sand p-2 font-mono text-xs text-muted">SHA-256: {ready.sha256}</p>
+            <p className="text-sm text-muted">{ui.fingerprintHelp}</p>
           </div>
         </>
       ) : (
@@ -110,7 +110,7 @@ export function Receipt({ dots, presence, paper, recordings, checks, gate, onBac
         <span className="text-4xl">📤</span> {ui.share} {done}
       </button>
       {problem && (
-        <p className="rounded-xl bg-red-100 p-3 text-lg text-red-800" role="alert">
+        <p className="rounded-chip border border-conflict/30 bg-conflict-soft p-3 text-lg text-conflict" role="alert">
           ❔ {problem}
         </p>
       )}

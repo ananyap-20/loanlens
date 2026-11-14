@@ -94,10 +94,10 @@ export function Paper({ dots, shared, onPaper }: Props) {
   return (
     <Screen instruction={t.paper} dots={dots}>
       <div className={scanning ? "flex flex-col gap-3" : "hidden"}>
-        <p className="flex items-center gap-2 rounded-xl bg-red-600 p-3 text-xl font-bold text-white" role="status">
+        <p className="flex items-center gap-3 rounded-full bg-conflict px-4 py-3 text-xl font-semibold text-white shadow-soft" role="status">
           <span className="h-4 w-4 animate-pulse rounded-full bg-white" /> {ui.cameraOn}
         </p>
-        <video ref={videoRef} playsInline muted className="w-full rounded-2xl bg-black" />
+        <video ref={videoRef} playsInline muted className="w-full rounded-card bg-black" />
         <button className={secondary} onClick={() => abortRef.current?.abort()}>
           {ui.cameraOff}
         </button>
@@ -133,7 +133,7 @@ export function Paper({ dots, shared, onPaper }: Props) {
         </p>
       )}
       {problem && (
-        <p className="rounded-xl bg-gray-100 p-3 text-lg" role="alert">
+        <p className="rounded-chip bg-unknown-soft p-3 text-lg text-unknown-ink" role="alert">
           ❔ {problem}
         </p>
       )}

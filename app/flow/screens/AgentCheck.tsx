@@ -70,29 +70,29 @@ export function AgentCheck({
         })}
       </div>
 
-      <p className="rounded-2xl border-2 border-purple-300 bg-white p-3 text-2xl font-bold leading-snug">{ui.agentQuestion[field]}</p>
+      <p className="rounded-card border border-line bg-surface p-5 text-[26px] font-semibold leading-tight shadow-soft">{ui.agentQuestion[field]}</p>
 
       <RecordPanel speaker="agent" {...rec} onToggle={rec.toggle} />
 
       {current && rec.phase === "idle" && (
-        <div className="flex flex-col gap-3 rounded-2xl border-2 border-gray-200 bg-white p-3">
+        <div className={`flex flex-col gap-4 rounded-card border border-line bg-surface p-5 shadow-soft ${statusPresentation(current.status).stripe}`}>
           <StatusBadge status={current.status} big reason={current.status === "unable_to_verify" && current.reason ? ui.reason[current.reason] : undefined} />
           {changed && (
-            <p className="rounded-xl border-2 border-amber-500 bg-amber-50 p-2 text-lg font-bold text-amber-900" role="alert">
+            <p className="rounded-chip border-2 border-amber-500 bg-amber-50 p-3 text-lg font-semibold text-amber-900" role="alert">
               ⚠️ {ui.agentChanged}
             </p>
           )}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 rounded-chip bg-sand p-3">
             <div className="flex flex-col gap-1">
-              <span className="text-lg font-bold">{ui.agentCol}</span>
+              <span className="text-lg font-semibold">{ui.agentCol}</span>
               {current.spoken[0] ? <ValueView v={current.spoken[0]} /> : <span className="text-3xl">❔</span>}
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-lg font-bold">{ui.paperCol}</span>
+              <span className="text-lg font-semibold">{ui.paperCol}</span>
               {current.paper ? <ValueView v={current.paper} /> : <span className="text-3xl">❔</span>}
             </div>
           </div>
-          <p className="text-base text-gray-600">“{current.transcript}”</p>
+          <p className="rounded-chip bg-sand p-3 text-base text-muted">“{current.transcript}”</p>
         </div>
       )}
 

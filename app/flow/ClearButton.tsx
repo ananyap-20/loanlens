@@ -20,7 +20,8 @@ export function ClearButton({ onClear }: { onClear: () => void }) {
   return (
     <button
       aria-label={armed ? `${ui.clearSure} — confirm clear everything` : `${ui.clear} — clear everything`}
-      className={`${bigBtn} ${armed ? "bg-red-700 text-white ring-8 ring-red-200" : "border-2 border-red-600 bg-white text-red-700"}`}
+      // visually secondary on purpose (outlined, never red-filled), so it is not tapped by accident
+      className={`${bigBtn} shadow-none ${armed ? "border-2 border-conflict bg-conflict-soft text-conflict ring-4 ring-conflict/20" : "border-2 border-line bg-transparent text-ink"}`}
       onClick={() => {
         if (armed) onClear();
         else {

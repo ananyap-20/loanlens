@@ -7,16 +7,16 @@ import { SAMPLE_PAPER } from "./fixtures/paper";
 const ALL: Status[] = ["match", "conflict", "not_mentioned", "unable_to_verify"];
 
 describe("status -> icon, colour, sound", () => {
-  it("match is ✅ green + chime", () => {
+  it("match is ✅ match green + chime", () => {
     expect(statusPresentation("match")).toMatchObject({ icon: "✅", tone: "match", cue: "chime" });
-    expect(statusPresentation("match").cls).toContain("green");
+    expect(statusPresentation("match").cls).toContain("match"); // green token (#15803D)
   });
 
-  it("conflict is ❌ red + buzz, never green or the chime", () => {
+  it("conflict is ❌ red + buzz, never the match green or the chime", () => {
     const p = statusPresentation("conflict");
     expect(p).toMatchObject({ icon: "❌", tone: "conflict", cue: "buzz" });
-    expect(p.cls).toContain("red");
-    expect(p.cls).not.toContain("green");
+    expect(p.cls).toContain("conflict"); // red token (#B91C1C)
+    expect(`${p.cls} ${p.stripe} ${p.soft}`).not.toContain("match");
     expect(p.icon).not.toBe("✅");
     expect(p.cue).not.toBe("chime");
   });
@@ -25,14 +25,15 @@ describe("status -> icon, colour, sound", () => {
     for (const s of ["not_mentioned", "unable_to_verify"] as const) {
       const p = statusPresentation(s);
       expect(p).toMatchObject({ icon: "❔", tone: "unknown", cue: "tick" });
-      expect(p.cls).not.toContain("green");
+      expect(`${p.cls} ${p.stripe} ${p.soft}`).not.toContain("match");
+      expect(p.cls).toContain("unknown"); // slate token
     }
   });
 
-  it("only match ever gets ✅, green or the chime", () => {
+  it("only match ever gets ✅, the match green or the chime", () => {
     for (const s of ALL) {
       const p = statusPresentation(s);
-      const looksLikeMatch = p.icon === "✅" || p.cue === "chime" || p.cls.includes("green");
+      const looksLikeMatch = p.icon === "✅" || p.cue === "chime" || `${p.cls} ${p.stripe} ${p.soft}`.includes("match");
       expect(looksLikeMatch).toBe(s === "match");
     }
   });

@@ -20,6 +20,7 @@ import {
 } from "@/lib/engine/gate";
 import type { Field, Status } from "@/lib/engine/types";
 import type { PaperInput } from "@/lib/flow/session";
+import { statusPresentation } from "@/lib/flow/statusPresentation";
 import { useLang } from "../lang";
 import { RecordPanel } from "../RecordPanel";
 import { useSpeech } from "../speech";
@@ -91,7 +92,7 @@ export function TeachBack({
   return (
     <Screen instruction={prompt.text} slow={prompt.slow} playKey={turn} dots={dots} speaker="borrower">
       <Legend />
-      <p className="text-base text-gray-600">
+      <p className="text-base text-muted">
         {ui.numberKeywordCheck} ({GATE_LABEL})
       </p>
 
@@ -111,9 +112,9 @@ export function TeachBack({
                 tries > 0 && fs.status === "pending" ? (
                   <span className="flex items-center gap-1" aria-label={`${ui.tries} ${tries}/${GATE_MAX_ATTEMPTS}`}>
                     {Array.from({ length: GATE_MAX_ATTEMPTS }, (_, k) => (
-                      <span key={k} className={`h-2 w-2 rounded-full ${k < fs.failedAttempts ? "bg-red-500" : k < tries ? "bg-blue-500" : "bg-gray-300"}`} />
+                      <span key={k} className={`h-2 w-2 rounded-full ${k < fs.failedAttempts ? "bg-conflict" : k < tries ? "bg-primary" : "border border-sand-edge bg-sand-dot"}`} />
                     ))}
-                    <span className="text-[10px] font-bold">
+                    <span className="text-[10px] font-semibold">
                       {ui.tries} {tries}/{GATE_MAX_ATTEMPTS}
                     </span>
                   </span>
@@ -125,7 +126,7 @@ export function TeachBack({
       </div>
 
       {questionText && (
-        <p className="rounded-2xl border-2 border-pink-300 bg-white p-3 text-2xl font-bold leading-snug">
+        <p className="rounded-card border border-line bg-surface p-5 text-[26px] font-semibold leading-tight shadow-soft">
           {field ? FIELD_ICON[GATE_CHIP[field]] : ""} {questionText}
         </p>
       )}
@@ -133,9 +134,9 @@ export function TeachBack({
       <RecordPanel speaker="borrower" {...rec} onToggle={rec.toggle} />
 
       {last && rec.phase === "idle" && (
-        <div className="flex flex-col gap-2 rounded-2xl border-2 border-gray-200 bg-white p-3">
+        <div className={`flex flex-col gap-3 rounded-card border border-line bg-surface p-5 shadow-soft ${statusPresentation(OUTCOME_STATUS[last.outcome]).stripe}`}>
           <StatusBadge status={OUTCOME_STATUS[last.outcome]} big reason={reasonFor(last.outcome)} />
-          <p className="text-base text-gray-600">“{last.transcript}”</p>
+          <p className="rounded-chip bg-sand p-3 text-base text-muted">“{last.transcript}”</p>
         </div>
       )}
     </Screen>

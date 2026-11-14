@@ -5,7 +5,7 @@ import { getPack, PACKS, voiceFor } from "@/lib/i18n";
 import { langStatus } from "@/lib/i18n/status";
 import { applyVoice, useLang } from "../lang";
 import { useSpeech } from "../speech";
-import { primary, ReplayButtons } from "../ui";
+import { focusRing, primary, ReplayButtons } from "../ui";
 
 // Language picker + voice (Voice 1 / Voice 2) + start. Each selectable language speaks a short line in that
 // language. Languages without a finished wording pack are listed with a "Beta" tag but cannot be selected
@@ -19,25 +19,26 @@ export function Welcome({ onStart }: { onStart: () => void }) {
   const tagText = (s: ReturnType<typeof langStatus>) => (s === "beta" ? pack.ui.betaTag : s === "review" ? pack.ui.reviewTag : "");
 
   return (
-    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center gap-3 bg-white p-3 text-center text-gray-900">
-      <ReplayButtons text={pack.greeting} className="absolute right-3 top-3" />
-      <div className="flex w-full flex-1 flex-col items-center justify-center gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icons/icon-192.png" alt="" className="h-16 w-16 rounded-2xl shadow-lg" />
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center gap-4 bg-cream px-5 pb-4 pt-4 text-center text-ink">
+      <ReplayButtons text={pack.greeting} className="absolute right-5 top-4" />
+      <div className="flex w-full flex-1 flex-col items-center justify-center gap-3 pt-16">
         <h1 className="flex items-baseline gap-3">
-          <span lang="en" className="text-4xl font-extrabold">Arth</span>
-          <span lang="hi" className="text-3xl font-bold">अर्थ</span>
+          <span lang="en" className="flex items-baseline text-5xl font-semibold tracking-tight">
+            Arth
+            <span aria-hidden="true" className="ml-1 inline-block h-2.5 w-2.5 rounded-full bg-saffron" />
+          </span>
+          <span lang="hi" className="text-4xl font-semibold text-muted">अर्थ</span>
         </h1>
-        <p className="text-base font-semibold">Arth: know what it means before you sign.</p>
-        <p className="text-xs text-gray-600">Arth, from the Sanskrit artha: meaning, and wealth.</p>
+        <p className="text-lg font-semibold leading-snug">Arth: know what it means before you sign.</p>
+        <p className="text-sm text-muted">Arth, from the Sanskrit artha: meaning, and wealth.</p>
         {/* decorative: the name in four scripts; not interactive and never spoken */}
-        <p aria-hidden="true" className="text-sm text-gray-500">
+        <p aria-hidden="true" className="text-base tracking-wide text-muted">
           <span lang="hi">अर्थ</span> · <span lang="sa">अर्थम्</span> · <span lang="bn">অর্থ</span> · <span lang="gu">અર્થ</span>
         </p>
-        <p className="text-sm text-gray-600">Proof of understanding, alongside the signature.</p>
+        <p className="text-sm text-muted">Proof of understanding, alongside the signature.</p>
 
-        <section className="flex w-full flex-col gap-2" aria-label="language">
-          <p className="text-base font-bold">🗣️ {pack.ui.chooseLanguage}</p>
+        <section className="mt-2 flex w-full flex-col gap-3" aria-label="language">
+          <p className="text-base font-semibold">🗣️ {pack.ui.chooseLanguage}</p>
           <div className="grid grid-cols-5 gap-1">
             {Object.values(PACKS).map((p) => {
               const ready = p.verified && !!p.say && !!p.ui;
@@ -51,8 +52,8 @@ export function Welcome({ onStart }: { onStart: () => void }) {
                   disabled={!ready}
                   aria-pressed={selected}
                   aria-label={ready ? `${p.name}${tag ? ` — ${tag}` : ""}` : `${p.name} — ${pack.ui.betaTag}, ${pack.ui.notReady}`}
-                  className={`flex min-h-14 flex-col items-center justify-center rounded-xl border-2 px-0 py-1 text-[11px] font-bold leading-tight disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${
-                    selected ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300 bg-white"
+                  className={`flex min-h-14 flex-col items-center justify-center rounded-chip border-2 px-0 py-1 text-xs font-semibold leading-tight disabled:cursor-not-allowed disabled:bg-sand disabled:text-muted ${focusRing} ${
+                    selected ? "border-primary bg-primary text-white" : "border-line bg-surface"
                   }`}
                   onClick={() => {
                     unlockAudio();
@@ -72,7 +73,7 @@ export function Welcome({ onStart }: { onStart: () => void }) {
             })}
           </div>
           {status !== "stable" && (
-            <p className="rounded-lg bg-amber-50 p-1 text-xs font-semibold text-amber-900" role="status">
+            <p className="rounded-chip bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-900" role="status">
               {pack.name}: {tagText(status)}
             </p>
           )}
@@ -84,7 +85,7 @@ export function Welcome({ onStart }: { onStart: () => void }) {
                   key={g}
                   disabled={!available}
                   aria-pressed={gender === g}
-                  className={`min-h-12 rounded-xl border-2 px-2 text-base font-bold disabled:opacity-40 ${gender === g ? "border-blue-600 bg-blue-50" : "border-gray-300 bg-white"}`}
+                  className={`min-h-14 rounded-chip border-2 px-2 text-base font-semibold disabled:opacity-40 ${focusRing} ${gender === g ? "border-primary bg-primary/10" : "border-line bg-surface"}`}
                   onClick={() => {
                     unlockAudio();
                     setGender(g);
@@ -100,7 +101,7 @@ export function Welcome({ onStart }: { onStart: () => void }) {
         </section>
 
         <button
-          className={`${primary} min-h-20 text-3xl`}
+          className={`${primary} mt-2 min-h-20 text-3xl`}
           onClick={() => {
             unlockAudio();
             onStart();
@@ -110,7 +111,7 @@ export function Welcome({ onStart }: { onStart: () => void }) {
         </button>
       </div>
 
-      <p className="sticky bottom-0 w-full bg-white/95 pt-1 text-[10px] leading-tight text-gray-600" aria-label="disclaimer">
+      <p className="sticky bottom-0 w-full bg-cream/95 pt-2 text-[10px] leading-tight text-muted" aria-label="disclaimer">
         {pack.ui.disclaimer}
       </p>
     </main>

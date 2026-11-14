@@ -5,6 +5,7 @@ import { MAX_RECORD_SECONDS } from "@/lib/audio/recorder";
 import type { Speaker } from "@/lib/flow/session";
 import { useLang } from "./lang";
 import { useSpeech } from "./speech";
+import { focusRing } from "./ui";
 import type { ClipPhase } from "./useClipRecorder";
 
 export const SPEAKER_UI: Record<Speaker, { icon: string; cls: string }> = {
@@ -19,7 +20,7 @@ export function SpeakerChip({ speaker }: { speaker: Speaker }) {
   const { ui } = useLang().pack;
   const s = SPEAKER_UI[speaker];
   return (
-    <span className={`inline-flex items-center gap-2 rounded-full border-2 px-3 py-1 text-lg font-bold ${s.cls}`}>
+    <span className={`inline-flex items-center gap-2 rounded-full border-2 px-4 py-1 text-lg font-semibold ${s.cls}`}>
       <span className="text-2xl">{s.icon}</span> {ui.role[speaker]}
     </span>
   );
@@ -44,19 +45,23 @@ export function RecordPanel({
   const { speaking } = useSpeech();
   const { ui } = useLang().pack;
   return (
-    <section className="flex flex-col items-center gap-3 rounded-2xl border-2 border-gray-200 p-4">
+    <section className="flex flex-col items-center gap-4 rounded-card border border-line bg-surface p-5 shadow-soft">
       <SpeakerChip speaker={speaker} />
       {recording ? (
-        <div role="status" className="flex w-full items-center justify-center gap-3 rounded-xl bg-red-600 p-3 text-xl font-bold text-white">
-          <span className="h-5 w-5 animate-pulse rounded-full bg-white" />
+        // Recording is impossible to miss: a solid red pill with a pulsing dot, the speaker and the timer.
+        <div role="status" className="flex w-full items-center justify-center gap-3 rounded-full bg-conflict px-4 py-3 text-xl font-semibold text-white shadow-soft">
+          <span className="relative flex h-5 w-5 items-center justify-center">
+            <span className="absolute h-5 w-5 animate-pulse rounded-full bg-white/50" />
+            <span className="h-3 w-3 rounded-full bg-white" />
+          </span>
           {ui.recording} · {SPEAKER_UI[speaker].icon} {fmt(elapsed)} / {fmt(MAX_RECORD_SECONDS)}
         </div>
       ) : (
         <div
           role="status"
-          className={`w-full rounded-xl p-3 text-center text-xl font-semibold ${
+          className={`w-full rounded-chip p-3 text-center text-xl font-semibold ${
             // not green: green is reserved for ✅ match, and this box sits right above a ❌ result
-            phase === "idle" && !speaking ? "bg-blue-50 text-blue-900 ring-2 ring-blue-500" : "bg-gray-100"
+            phase === "idle" && !speaking ? "bg-cream text-ink ring-2 ring-saffron-strong" : "bg-sand text-ink"
           }`}
         >
           {phase === "requesting" && ui.micPermission}
@@ -64,18 +69,28 @@ export function RecordPanel({
           {phase === "idle" && (speaking ? ui.appSpeakingListen : ui.yourTurn)}
         </div>
       )}
-      <button
-        aria-label={recording ? "stop recording" : "start recording"}
-        disabled={disabled || phase === "sending" || phase === "requesting"}
-        onClick={onToggle}
-        className={`flex h-32 w-32 items-center justify-center rounded-full text-6xl text-white shadow-lg active:scale-95 disabled:opacity-40 ${
-          recording ? "bg-red-600 ring-8 ring-red-200" : "bg-blue-600"
-        }`}
+      {/* calm timer ring: fills as the clip approaches its limit (only while recording) */}
+      <div
+        className="rounded-full p-2"
+        style={
+          recording
+            ? { background: `conic-gradient(#b91c1c ${Math.min(100, (elapsed / MAX_RECORD_SECONDS) * 100)}%, #f3eadb 0)` }
+            : undefined
+        }
       >
-        {recording ? "⏹️" : "🎤"}
-      </button>
+        <button
+          aria-label={recording ? "stop recording" : "start recording"}
+          disabled={disabled || phase === "sending" || phase === "requesting"}
+          onClick={onToggle}
+          className={`press flex h-32 w-32 items-center justify-center rounded-full border-4 border-surface text-6xl text-white shadow-soft disabled:opacity-40 ${focusRing} ${
+            recording ? "bg-conflict" : "bg-primary active:bg-primary-pressed"
+          }`}
+        >
+          {recording ? "⏹️" : "🎤"}
+        </button>
+      </div>
       {problem && (
-        <p className="w-full rounded-xl bg-gray-100 p-2 text-base text-gray-700" role="alert">
+        <p className="w-full rounded-chip bg-unknown-soft p-3 text-base text-unknown-ink" role="alert">
           ❔ {problem}
         </p>
       )}

@@ -30,13 +30,13 @@ export function Handover({
   return (
     <Screen instruction={say.handover[speaker]} speaker={speaker}>
       <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-        <span className={`flex h-44 w-44 items-center justify-center rounded-full text-8xl text-white shadow-xl ${t.banner}`} aria-hidden>
+        <span className={`flex h-44 w-44 items-center justify-center rounded-full border-8 border-surface text-8xl text-white shadow-soft ${t.banner}`} aria-hidden>
           {t.icon}
         </span>
-        <h1 className="text-3xl font-extrabold">
+        <h1 className="text-3xl font-semibold leading-tight">
           {t.icon} {ui.handoverTitle[speaker]}
         </h1>
-        <p className="text-2xl font-bold">{ui.role[speaker]}</p>
+        <p className="text-2xl font-semibold">{ui.role[speaker]}</p>
         <button className={`${bigBtn} min-h-28 text-3xl text-white ${t.button}`} onClick={onReady}>
           {ui.ready}
         </button>
