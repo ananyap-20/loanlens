@@ -61,8 +61,8 @@ Real screens from the app on a phone-sized screen.
 <p>
   <img src="docs/screens/01-welcome.png" alt="Welcome: the Arth logo, the language picker with Beta tags, two voices and the Start button" width="190" />
   <img src="docs/screens/02-who.png" alt="Who is here: only me, or me plus the agent" width="190" />
-  <img src="docs/screens/03-explain.png" alt="The sample paper explained as cards: loan amount, money in hand and processing fee, each with digits, words and ₹500 notes" width="190" />
-  <img src="docs/screens/04-teachback.png" alt="Teach-back: the borrower is asked how much the instalment is and how often, with point-by-point progress and a microphone button" width="190" />
+  <img src="docs/screens/03-explain.png" alt="The sample paper explained as cards: loan amount ₹३०,०००, money in hand ₹२८,५०० and processing fee ₹१,५००, each in Hindi digits and words with ₹500 notes" width="190" />
+  <img src="docs/screens/04-teachback.png" alt="Teach-back: the borrower is asked what happens if an instalment is missed, with point-by-point progress, the try counter and a microphone button" width="190" />
 </p>
 
 ## How it works
