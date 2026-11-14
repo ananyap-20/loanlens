@@ -9,8 +9,8 @@ export type PageImage = { bytes: Uint8Array; kind: "jpg" | "png" };
 export async function imagesToPdf(pages: PageImage[], meta: { title: string; createdAt: Date }): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   doc.setTitle(meta.title);
-  doc.setCreator("LoanLens");
-  doc.setProducer("LoanLens (pdf-lib)");
+  doc.setCreator("Arth");
+  doc.setProducer("Arth (pdf-lib)");
   doc.setCreationDate(meta.createdAt);
   doc.setModificationDate(meta.createdAt);
   for (const p of pages) {

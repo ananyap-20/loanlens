@@ -24,7 +24,16 @@ export function Welcome({ onStart }: { onStart: () => void }) {
       <div className="flex w-full flex-1 flex-col items-center justify-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icons/icon-192.png" alt="" className="h-16 w-16 rounded-2xl shadow-lg" />
-        <h1 className="text-3xl font-extrabold">LoanLens</h1>
+        <h1 className="flex items-baseline gap-3">
+          <span lang="en" className="text-4xl font-extrabold">Arth</span>
+          <span lang="hi" className="text-3xl font-bold">अर्थ</span>
+        </h1>
+        <p className="text-base font-semibold">Arth: know what it means before you sign.</p>
+        <p className="text-xs text-gray-600">Arth, from the Sanskrit artha: meaning, and wealth.</p>
+        {/* decorative: the name in four scripts; not interactive and never spoken */}
+        <p aria-hidden="true" className="text-sm text-gray-500">
+          <span lang="hi">अर्थ</span> · <span lang="sa">अर्थम्</span> · <span lang="bn">অর্থ</span> · <span lang="gu">અર્થ</span>
+        </p>
         <p className="text-sm text-gray-600">Proof of understanding, alongside the signature.</p>
 
         <section className="flex w-full flex-col gap-2" aria-label="language">

@@ -40,7 +40,7 @@ for (let r = 0; r < n; r++)
   for (let c = 0; c < n; c++)
     if (qr.modules.get(r, c))
       page.drawRectangle({ x: ox + (c + quiet) * cell, y: oy + side - (r + quiet + 1) * cell, width: cell, height: cell, color: rgb(0, 0, 0) });
-page.drawText("Scan to read these terms in LoanLens", { x: ox + side + 15, y: oy + side / 2, size: 11, font });
+page.drawText("Scan to read these terms in Arth", { x: ox + side + 15, y: oy + side / 2, size: 11, font });
 page.drawText("QR payload: " + PAYLOAD, { x: 50, y: 60, size: 5, font });
 mkdirSync("public/sample", { recursive: true });
 writeFileSync("public/sample/kfs-sahyog.pdf", await pdf.save());

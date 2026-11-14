@@ -325,5 +325,5 @@ export function buildEvidence(input: ReceiptInput, lang: ReceiptLang = HI_RECEIP
 
 export function receiptFilename(d: Date): string {
   const p = (n: number) => String(n).padStart(2, "0");
-  return `loanlens-receipt-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.pdf`;
+  return `arth-receipt-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.pdf`;
 }

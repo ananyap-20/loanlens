@@ -154,7 +154,7 @@ const phrases: Phrases = {
     no_text: "There is no written text in this PDF. Scan the QR code on the paper.",
     unreadable: "This file could not be opened. Try another file or the QR code.",
     no_terms: "The loan terms were not found on this paper. Try another file or the QR code.",
-    bad_qr: "This QR code is not a LoanLens code. Try the PDF file.",
+    bad_qr: "This QR code is not an Arth code. Try the PDF file.",
   },
   handover: {
     agent: "Now the agent will speak. Give the phone to the agent. Agent, when you are ready, press the big button.",
@@ -232,7 +232,7 @@ const phrases: Phrases = {
 };
 
 const receipt: ReceiptStrings = {
-  title: "LoanLens receipt",
+  title: "Arth receipt",
   present: "Present",
   presence: { with_agent: "borrower and agent", alone: "borrower" },
   docFingerprint: "Document fingerprint",
@@ -273,7 +273,7 @@ const receipt: ReceiptStrings = {
   speaker: { agent: "Agent", borrower: "Borrower", helper: "Helper" },
   agentChanged: "The agent said something different earlier",
   disclaimer:
-    "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. LoanLens gives proof of understanding alongside the signature. It is not a signature and not a loan approval.",
+    "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. Arth gives proof of understanding alongside the signature. It is not a signature and not a loan approval.",
 };
 
 export const en: LangPack = {
@@ -302,7 +302,7 @@ export const en: LangPack = {
     reviewTag: "Wording under review",
     notReady: "not available yet",
     disclaimer:
-      "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. LoanLens gives proof of understanding alongside the signature. It is not a signature and not a loan approval.",
+      "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. Arth gives proof of understanding alongside the signature. It is not a signature and not a loan approval.",
     chooseLanguage: "Language",
     female: "🔊 Voice 1",
     male: "🔊 Voice 2",

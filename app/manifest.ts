@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
 
-// Web Share Target: after install, "LoanLens" appears in the Android share sheet for PDFs/images
+// Web Share Target: after install, "Arth" appears in the Android share sheet for PDFs/images
 // (for example a KFS PDF sent on WhatsApp). public/sw.js receives the POST and opens /paper.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "LoanLens",
-    short_name: "LoanLens",
+    name: "Arth",
+    short_name: "Arth",
     description: "Proof of understanding, alongside the signature.",
     start_url: "/",
     display: "standalone",

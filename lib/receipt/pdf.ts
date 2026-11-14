@@ -327,7 +327,7 @@ export async function makeReceiptPdf(summary: Summary, evidence: Evidence, creat
   const jpegs = await Promise.all(p.pages.map((pg) => toJpeg(pg.canvas)));
   const bytes = await imagesToPdf(
     await Promise.all(jpegs.map(async (b) => ({ bytes: new Uint8Array(await b.arrayBuffer()), kind: "jpg" as const }))),
-    { title: "LoanLens receipt", createdAt },
+    { title: "Arth receipt", createdAt },
   );
   return {
     pdf: new Blob([bytes as BlobPart], { type: "application/pdf" }),

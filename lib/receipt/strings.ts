@@ -45,7 +45,7 @@ export type ReceiptStrings = {
 };
 
 export const HI_RECEIPT: ReceiptStrings = {
-  title: "LoanLens रसीद",
+  title: "अर्थ रसीद",
   present: "मौजूद",
   presence: { with_agent: "ग्राहक और एजेंट", alone: "ग्राहक" },
   docFingerprint: "दस्तावेज़ फ़िंगरप्रिंट",
@@ -86,5 +86,5 @@ export const HI_RECEIPT: ReceiptStrings = {
   speaker: { agent: "एजेंट", borrower: "ग्राहक", helper: "मददगार" },
   agentChanged: "एजेंट ने पहले अलग बताया था",
   disclaimer:
-    "Beta चिह्न वाली भाषाओं की अभी जाँच चल रही है, और उनके शब्दों को किसी मूल वक्ता ने नहीं परखा है। LoanLens हस्ताक्षर के साथ समझ का सबूत देता है। यह हस्ताक्षर नहीं है और लोन की मंज़ूरी भी नहीं।",
+    "Beta चिह्न वाली भाषाओं की अभी जाँच चल रही है, और उनके शब्दों को किसी मूल वक्ता ने नहीं परखा है। अर्थ हस्ताक्षर के साथ समझ का सबूत देता है। यह हस्ताक्षर नहीं है और लोन की मंज़ूरी भी नहीं।",
 };

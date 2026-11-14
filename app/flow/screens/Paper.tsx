@@ -12,7 +12,7 @@ import { primary, Screen, secondary } from "../ui";
 
 type Props = {
   dots: { total: number; current: number };
-  shared: string | null; // "1" = a file was shared to LoanLens, "failed" = share did not arrive
+  shared: string | null; // "1" = a file was shared to Arth, "failed" = share did not arrive
   onPaper: (p: PaperInput) => void;
 };
 
