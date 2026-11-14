@@ -15,6 +15,8 @@ export type LangCode = "hi" | "en" | "mr" | "bn" | "gu" | "kn" | "ml" | "pa" | "
 export type VoiceGender = "female" | "male";
 
 export type SpokenTemplates = {
+  splash: string; // spoken on the splash tap (before a language is chosen)
+  chooseLang: string; // the Welcome (language) screen instruction
   who: string;
   paper: string;
   micDenied: string;

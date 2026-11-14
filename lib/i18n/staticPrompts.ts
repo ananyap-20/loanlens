@@ -16,7 +16,9 @@ export function staticPrompts(pack: LangPack, sample?: PaperFacts): StaticPrompt
   if (!s) return [];
   const asks = (Object.keys(s.agentAsk) as (keyof typeof s.agentAsk)[]).map((f) => ({ id: `agent-ask-${f}`, text: s.agentAsk[f] }));
   return [
-    { id: "greeting", text: pack.greeting }, // Welcome
+    { id: "splash", text: s.splash }, // the splash tap
+    { id: "choose-lang", text: s.chooseLang }, // Welcome instruction
+    { id: "greeting", text: pack.greeting }, // Welcome, on a language tap
     { id: "who", text: s.who }, // who is present
     { id: "paper", text: s.paper },
     { id: "handover-agent", text: s.handover.agent },

@@ -51,11 +51,11 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     warmUp(); // wake the API routes and load the static clip list while the person reads the screen
     const saved = read();
     if (!saved) {
-      preloadSpeech([getPack("hi").greeting, getPack("hi").say.who]);
+      preloadSpeech([getPack("hi").say.splash, getPack("hi").say.chooseLang, getPack("hi").greeting, getPack("hi").say.who]);
       return;
     }
     applyVoice(getPack(saved.code), saved.gender);
-    preloadSpeech([getPack(saved.code).greeting, getPack(saved.code).say.who]);
+    preloadSpeech([getPack(saved.code).say.splash, getPack(saved.code).say.chooseLang, getPack(saved.code).greeting, getPack(saved.code).say.who]);
     queueMicrotask(() => {
       setCode(getPack(saved.code).code);
       setGenderState(saved.gender);

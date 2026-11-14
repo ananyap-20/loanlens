@@ -128,6 +128,8 @@ const phrases: Phrases = {
   value,
   fieldName: NAME,
   fixed: {
+    splash: "Welcome to Arth.",
+    chooseLang: "Choose your language. Press the button for your language.",
     who: "Who is here? If it is only you, press the first button. If you and the agent are both here, press the second button.",
     paper: "Now give the loan paper. If the paper has a QR code, press the camera button. If it is a PDF file, press the file button. To see a sample paper, press the third button.",
     micDenied: "Microphone permission was not given. Allow the microphone for this site in Chrome, then press the microphone button again.",
