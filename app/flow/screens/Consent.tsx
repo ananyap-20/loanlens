@@ -33,11 +33,11 @@ export function Consent({
 
   return (
     <Screen instruction={t.consentSay} dots={dots} speaker="agent">
-      <p className="rounded-2xl border-2 border-indigo-400 bg-indigo-50 p-4 text-2xl font-semibold leading-relaxed">🧑‍💼 “{ui.consentLine}”</p>
+      <p className="rounded-card border border-line bg-surface p-5 text-2xl font-semibold leading-relaxed shadow-soft">🧑‍💼 “{ui.consentLine}”</p>
       <RecordPanel speaker="agent" {...rec} onToggle={rec.toggle} />
       {consentTranscript && (
-        <p className="rounded-xl bg-green-50 p-3 text-lg">
-          ✅ <span className="text-gray-700">“{consentTranscript}”</span>
+        <p className="rounded-chip bg-match-soft p-3 text-lg">
+          ✅ <span className="text-muted">“{consentTranscript}”</span>
         </p>
       )}
       <button className={primary} disabled={!consentTranscript || rec.phase !== "idle"} onClick={onNext}>

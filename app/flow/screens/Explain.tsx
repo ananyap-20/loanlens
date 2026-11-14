@@ -26,18 +26,18 @@ export function Explain({
   const terms = ORDER.flatMap((f) => paper.terms.filter((v) => v.field === f));
   return (
     <Screen instruction={text} dots={dots}>
-      {paper.lender && <p className="text-lg font-semibold text-gray-600">🏦 {paper.lender}</p>}
-      <div className="flex flex-col gap-3">
+      {paper.lender && <p className="text-lg font-semibold text-muted">🏦 {paper.lender}</p>}
+      <div className="flex flex-col gap-4">
         {terms.map((v) => (
           <TermCard key={v.field} v={v} />
         ))}
         {paper.missing.map((f) => (
-          <div key={f} className="flex items-center gap-2 rounded-2xl border-2 border-dashed border-gray-400 bg-gray-50 p-3 text-xl">
+          <div key={f} className="flex items-center gap-2 rounded-card border-2 border-dashed border-unknown bg-unknown-soft p-5 text-xl">
             <span className="text-3xl">{FIELD_ICON[f]}</span> {ui.fieldName[f]} <span className="ml-auto text-3xl">❔</span>
           </div>
         ))}
         {paper.ambiguous.map((f) => (
-          <div key={f} className="flex items-center gap-2 rounded-2xl border-2 border-orange-500 bg-orange-50 p-3 text-xl">
+          <div key={f} className="flex items-center gap-2 rounded-card border-2 border-orange-500 bg-orange-50 p-5 text-xl">
             <span className="text-3xl">{FIELD_ICON[f]}</span> {ui.fieldName[f]} <span className="ml-auto text-3xl">⚠️❔</span>
           </div>
         ))}

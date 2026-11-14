@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { fontVariables } from "./fonts";
 import RegisterSw from "./RegisterSw";
 
 const TITLE = "Arth: know what it means before you sign";
@@ -34,8 +35,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="hi" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+    <html lang="hi" className={`h-full antialiased ${fontVariables}`}>
+      <body className="flex min-h-full flex-col bg-cream text-ink">
         <RegisterSw />
         {children}
       </body>

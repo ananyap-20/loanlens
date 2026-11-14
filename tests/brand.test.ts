@@ -48,7 +48,7 @@ describe("display name", () => {
 
   it("Welcome shows the new wordmark", () => {
     const welcome = readFileSync(path.join(ROOT, "app/flow/screens/Welcome.tsx"), "utf8");
-    expect(welcome).toContain(">Arth<");
+    expect(welcome).toMatch(/<span lang="en"[^>]*>\s*Arth\b/);
     expect(welcome).toContain("अर्थ");
   });
 });

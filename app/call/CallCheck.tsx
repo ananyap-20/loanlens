@@ -13,6 +13,7 @@ import { callStrings } from "@/lib/i18n/call";
 import { useLang } from "../flow/lang";
 import { useSpeech } from "../flow/speech";
 import { FIELD_ICON, ValueView } from "../flow/TermCard";
+import { statusPresentation } from "@/lib/flow/statusPresentation";
 import { primary, Screen, secondary, StatusBadge } from "../flow/ui";
 
 export function CallCheck({ paper, onBack }: { paper: PaperInput; onBack: () => void }) {
@@ -109,9 +110,9 @@ export function CallCheck({ paper, onBack }: { paper: PaperInput; onBack: () => 
 
   return (
     <Screen instruction={c.say.instruction}>
-      <h1 className="text-3xl font-extrabold">{c.ui.title}</h1>
-      <p className="rounded-xl border-2 border-amber-500 bg-amber-50 p-2 text-lg font-bold text-amber-900">{c.ui.syntheticOnly}</p>
-      <p className="text-sm text-gray-600">🔁 {c.ui.sameEngine}</p>
+      <h1 className="text-3xl font-semibold leading-tight">{c.ui.title}</h1>
+      <p className="rounded-chip border-2 border-amber-500 bg-amber-50 p-3 text-lg font-semibold text-amber-900">{c.ui.syntheticOnly}</p>
+      <p className="text-sm text-muted">🔁 {c.ui.sameEngine}</p>
 
       <label className={`${primary} cursor-pointer ${busy ? "pointer-events-none opacity-40" : ""}`}>
         {c.ui.upload}
@@ -137,16 +138,16 @@ export function CallCheck({ paper, onBack }: { paper: PaperInput; onBack: () => 
         </p>
       )}
       {problem && (
-        <p className="rounded-xl bg-red-100 p-3 text-lg text-red-800" role="alert">
+        <p className="rounded-chip border border-conflict/30 bg-conflict-soft p-3 text-lg text-conflict" role="alert">
           ❔ {problem}
         </p>
       )}
 
       {parts.length > 0 && (
-        <section className="flex flex-col gap-1 rounded-2xl border-2 border-gray-200 bg-white p-3">
-          <h2 className="text-lg font-bold">{c.ui.transcriptTitle}</h2>
+        <section className="flex flex-col gap-2 rounded-card border border-line bg-surface p-5 shadow-soft">
+          <h2 className="text-lg font-semibold">{c.ui.transcriptTitle}</h2>
           {parts.map((p, i) => (
-            <p key={i} className="text-base text-gray-700">
+            <p key={i} className="text-base text-muted">
               <b>
                 {c.ui.part} {i + 1}:
               </b>{" "}
@@ -160,26 +161,26 @@ export function CallCheck({ paper, onBack }: { paper: PaperInput; onBack: () => 
         <>
           <section className="flex flex-col gap-2">
             {result.rows.map((r) => (
-              <div key={r.field} className="flex flex-col gap-2 rounded-2xl border-2 border-gray-200 bg-white p-3">
-                <span className="flex items-center gap-2 text-xl font-bold">
+              <div key={r.field} className={`flex flex-col gap-3 rounded-card border border-line bg-surface p-5 shadow-soft ${statusPresentation(r.status).stripe}`}>
+                <span className="flex items-center gap-2 text-xl font-semibold">
                   <span className="text-3xl">{FIELD_ICON[r.field]}</span> {ui.fieldName[r.field]}
                 </span>
                 <StatusBadge status={r.status} reason={r.status === "unable_to_verify" && r.reason ? ui.reason[r.reason] : undefined} />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 rounded-chip bg-sand p-3">
                   <div className="flex flex-col gap-1">
-                    <span className="font-bold">{c.ui.callCol}</span>
+                    <span className="font-semibold">{c.ui.callCol}</span>
                     {r.spoken[0] ? <ValueView v={r.spoken[0]} /> : <span className="text-2xl">—</span>}
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="font-bold">{ui.paperCol}</span>
+                    <span className="font-semibold">{ui.paperCol}</span>
                     {r.paper ? <ValueView v={r.paper} /> : <span className="text-2xl">❔</span>}
                   </div>
                 </div>
               </div>
             ))}
           </section>
-          <section className="flex flex-col gap-2 rounded-2xl border-2 border-amber-500 bg-amber-50 p-3">
-            <h2 className="text-xl font-bold">{ui.askLender}</h2>
+          <section className="flex flex-col gap-2 rounded-card border-2 border-amber-500 bg-amber-50 p-5">
+            <h2 className="text-xl font-semibold">{ui.askLender}</h2>
             {questions.map((q) => (
               <p key={q} className="text-lg">
                 • {q}

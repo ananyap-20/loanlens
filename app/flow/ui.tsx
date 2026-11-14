@@ -10,10 +10,12 @@ import { statusPresentation } from "@/lib/flow/statusPresentation";
 import { useLang } from "./lang";
 import { useSpeech } from "./speech";
 
-export const bigBtn =
-  "flex min-h-20 w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-2xl font-bold shadow-md active:scale-[0.98] disabled:opacity-40";
-export const primary = `${bigBtn} bg-blue-600 text-white`;
-export const secondary = `${bigBtn} border-2 border-blue-600 bg-white text-blue-700`;
+/** Focus ring for every tappable thing: 3px saffron, shown for keyboard / switch focus. */
+export const focusRing =
+  "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-saffron-strong focus-visible:ring-offset-2 focus-visible:ring-offset-cream";
+export const bigBtn = `press flex min-h-16 w-full items-center justify-center gap-3 rounded-btn px-6 py-4 text-xl font-semibold shadow-soft disabled:opacity-40 ${focusRing}`;
+export const primary = `${bigBtn} bg-primary text-white active:bg-primary-pressed`;
+export const secondary = `${bigBtn} border-2 border-primary bg-surface text-primary`;
 
 /** Who is speaking now: whole-screen tint + banner colour. agent = purple, borrower = pink. */
 export const SPEAKER_THEME: Record<Speaker, { icon: string; bg: string; banner: string; button: string }> = {
@@ -24,9 +26,18 @@ export const SPEAKER_THEME: Record<Speaker, { icon: string; bg: string; banner: 
 
 export function Dots({ total, current }: { total: number; current: number }) {
   return (
-    <div className="flex justify-center gap-2" aria-label={`step ${current + 1} of ${total}`}>
+    <div className="flex items-center justify-center gap-2" aria-label={`step ${current + 1} of ${total}`}>
       {Array.from({ length: total }, (_, i) => (
-        <span key={i} className={`h-3 w-3 rounded-full ${i < current ? "bg-blue-600" : i === current ? "bg-blue-600 ring-4 ring-blue-200" : "bg-gray-300"}`} />
+        <span
+          key={i}
+          className={`rounded-full ${
+            i < current
+              ? "h-2.5 w-2.5 bg-saffron-strong"
+              : i === current
+                ? "h-3 w-3 bg-saffron-strong ring-4 ring-saffron/25"
+                : "h-2.5 w-2.5 border-[1.5px] border-sand-edge bg-sand-dot"
+          }`}
+        />
       ))}
     </div>
   );
@@ -34,18 +45,19 @@ export function Dots({ total, current }: { total: number; current: number }) {
 
 /** Big 🔁 replay and 🐢 slow (0.85) buttons for a screen's spoken text; labelled in the selected language. */
 export function ReplayButtons({ text, className = "" }: { text: string; className?: string }) {
-  const { say } = useSpeech();
+  const { say, speaking } = useSpeech();
   const { ui } = useLang().pack;
+  const round = `press flex h-16 w-16 items-center justify-center rounded-full border border-line bg-cream text-3xl text-ink shadow-soft ${focusRing} ${speaking ? "pulse-ring" : ""}`;
   const run = (slow: boolean) => {
     void resumeAudio(); // a tap is the moment the browser allows audio (matters on Welcome, before any other tap)
     void say(text, slow);
   };
   return (
-    <div className={`flex gap-2 ${className}`}>
-      <button aria-label={ui.replay} className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => run(false)}>
+    <div className={`flex gap-3 ${className}`}>
+      <button aria-label={ui.replay} className={round} onClick={() => run(false)}>
         🔁
       </button>
-      <button aria-label={ui.slow} className="h-14 w-14 rounded-full bg-white text-3xl shadow" onClick={() => run(true)}>
+      <button aria-label={ui.slow} className={round} onClick={() => run(true)}>
         🐢
       </button>
     </div>
@@ -57,7 +69,10 @@ export function SpeakerBanner({ speaker }: { speaker: Speaker }) {
   const { ui } = useLang().pack;
   const t = SPEAKER_THEME[speaker];
   return (
-    <div className={`sticky top-0 z-10 -mx-4 -mt-4 flex items-center justify-center gap-2 px-4 py-3 text-xl font-bold text-white shadow ${t.banner}`} role="status">
+    <div
+      className={`sticky top-0 z-10 -mx-5 -mt-4 flex items-center justify-center gap-2 rounded-b-card px-5 py-3 text-xl font-semibold text-white shadow-soft ${t.banner}`}
+      role="status"
+    >
       {ui.speakingNow} <span className="text-3xl">{t.icon}</span> {ui.role[speaker]}
     </div>
   );
@@ -90,19 +105,19 @@ export function Screen({
   }, [instruction, playKey, slow, say]);
 
   return (
-    <main className={`mx-auto flex w-full max-w-md flex-1 flex-col gap-5 p-4 text-gray-900 ${speaker ? SPEAKER_THEME[speaker].bg : "bg-white"}`}>
+    <main className={`mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-5 pb-8 pt-4 text-ink ${speaker ? SPEAKER_THEME[speaker].bg : "bg-cream"}`}>
       {speaker && <SpeakerBanner speaker={speaker} />}
       <div className="flex items-center justify-between gap-3">
         {dots ? <Dots {...dots} /> : <span />}
         <ReplayButtons text={instruction} />
       </div>
       {speaking && (
-        <p className="flex items-center gap-2 rounded-xl bg-blue-100 p-2 text-lg font-semibold text-blue-800" role="status">
+        <p className="flex items-center gap-2 rounded-chip border border-line bg-surface px-4 py-2 text-lg font-semibold text-ink" role="status">
           <span className="animate-pulse text-2xl">📱</span> {ui.appSpeaking}
         </p>
       )}
       {error && (
-        <p className="rounded-xl bg-red-100 p-3 text-lg text-red-800" role="alert">
+        <p className="rounded-chip border border-conflict/30 bg-conflict-soft p-3 text-lg text-conflict" role="alert">
           {ui.audioFailed.replace("{error}", error)}
         </p>
       )}
@@ -117,11 +132,11 @@ export function StatusBadge({ status, big = false, reason }: { status: Status; b
   const s = statusPresentation(status);
   return (
     <span className="inline-flex flex-col gap-1">
-      <span className={`inline-flex items-center gap-2 self-start rounded-xl border-2 px-3 py-1 font-bold ${s.cls} ${big ? "text-2xl" : "text-lg"}`}>
-        <span className={big ? "text-4xl" : "text-2xl"}>{s.icon}</span>
+      <span className={`inline-flex items-center gap-2 self-start rounded-chip border-2 py-1 pl-1 pr-3 font-semibold ${s.cls} ${big ? "text-2xl" : "text-lg"}`}>
+        <span className={`flex shrink-0 items-center justify-center rounded-full bg-surface ${big ? "h-12 w-12 text-3xl" : "h-9 w-9 text-xl"}`}>{s.icon}</span>
         {ui.status[status]}
       </span>
-      {reason && <span className="text-base font-semibold text-gray-700">↳ {reason}</span>}
+      {reason && <span className="text-base font-semibold text-muted">↳ {reason}</span>}
     </span>
   );
 }
@@ -130,7 +145,7 @@ export function StatusBadge({ status, big = false, reason }: { status: Status; b
 export function Legend() {
   const { ui } = useLang().pack;
   return (
-    <p className="rounded-xl bg-white/80 p-2 text-center text-base font-semibold" aria-label="legend">
+    <p className="rounded-chip border border-line bg-surface px-3 py-2 text-center text-base font-semibold" aria-label="legend">
       {ui.legend}
     </p>
   );
@@ -157,10 +172,12 @@ export function FieldChip({
       type="button"
       aria-label={ui.fieldName[field]}
       onClick={() => void say(ui.fieldName[field])}
-      className={`flex min-h-16 min-w-16 flex-col items-center justify-center gap-0.5 rounded-xl border-2 bg-white p-1 ${active ? "border-blue-600 ring-2 ring-blue-200" : "border-gray-200"}`}
+      className={`flex min-h-16 min-w-16 flex-col items-center justify-center gap-0.5 rounded-chip border-2 bg-surface p-1 ${focusRing} ${
+        active ? "border-primary ring-2 ring-primary/20" : "border-line"
+      }`}
     >
       <span className="text-2xl leading-none">{icon}</span>
-      <span className="text-xs font-bold leading-tight">{ui.fieldShort[field]}</span>
+      <span className="text-xs font-semibold leading-tight">{ui.fieldShort[field]}</span>
       {mark !== undefined && <span className="h-5 text-base leading-none">{mark}</span>}
       {extra}
     </button>
