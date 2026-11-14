@@ -15,6 +15,8 @@
   <a href="https://loanlens-mauve.vercel.app"><b>▶️ Try the live app</b></a>
   &nbsp;·&nbsp;
   <b>🎬 Walkthrough video:</b> link coming <!-- WALKTHROUGH_VIDEO_LINK: paste here -->
+  &nbsp;·&nbsp;
+  <a href="https://loanlens-mauve.vercel.app/sample/kfs-sahyog.pdf"><b>🧾 Sample loan paper (KFS PDF, fictional)</b></a>
 </p>
 
 > [!TIP]
@@ -28,6 +30,8 @@
 > 5. The first time you record, tap **Allow** when Chrome asks for the microphone.
 >
 > To send a KFS PDF to Arth: open the PDF (for example in WhatsApp), tap **Share**, and pick **Arth**.
+>
+> **🧾 Try it with the sample loan paper:** [download the sample KFS PDF](https://loanlens-mauve.vercel.app/sample/kfs-sahyog.pdf) (fictional lender "Sahyog Finance", fictional borrower). On the phone, share it to Arth as above. Or open it on a laptop screen and, in Arth, tap **📷 1 · QR** to scan the QR code printed on it.
 >
 > **iPhone (Safari):** open the link, tap **Share**, then **Add to Home Screen**. Sharing a PDF to Arth from other apps works only on Android.
 
