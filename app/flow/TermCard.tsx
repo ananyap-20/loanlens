@@ -16,20 +16,22 @@ export const FIELD_ICON: Record<Field, string> = {
   late_fee: "⏰",
 };
 
-export function ValueView({ v }: { v: Value }) {
+/** `compact`: for the two-column agent/call vs paper comparison, where 40px amounts would run into each other. */
+export function ValueView({ v, compact = false }: { v: Value; compact?: boolean }) {
   const { ui, code } = useLang().pack;
-  if (v.negated && v.amount === 0) return <span className="text-[40px] font-semibold leading-none">{nativeINR(0, code)} 🚫</span>;
+  const big = compact ? "text-[clamp(18px,6vw,28px)] [overflow-wrap:anywhere]" : "text-[40px]";
+  if (v.negated && v.amount === 0) return <span className={`${big} font-semibold leading-none`}>{nativeINR(0, code)} 🚫</span>;
   if (v.amount === undefined) return <span className="text-3xl">❔</span>;
   if (v.unit === "INR") {
     return (
-      <div className="flex flex-col gap-1">
-        <Money amount={v.amount} />
-        {v.frequency && v.frequency !== "once" && <span className="text-xl font-semibold">🔁 {ui.freq[v.frequency]}</span>}
+      <div className="flex min-w-0 flex-col gap-1">
+        <Money amount={v.amount} compact={compact} />
+        {v.frequency && v.frequency !== "once" && <span className={`${compact ? "text-base" : "text-xl"} font-semibold`}>🔁 {ui.freq[v.frequency]}</span>}
       </div>
     );
   }
   const unit = v.unit === "percent" ? "%" : v.unit === "months" ? ` ${ui.months}` : v.unit === "weeks" ? ` ${ui.weeks}` : "";
-  return <span className="text-[40px] font-semibold leading-none">{`${nativeNumber(v.amount, code)}${unit}`}</span>;
+  return <span className={`${big} font-semibold leading-none`}>{`${nativeNumber(v.amount, code)}${unit}`}</span>;
 }
 
 export function TermCard({ v, highlight }: { v: Value; highlight?: boolean }) {

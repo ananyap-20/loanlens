@@ -34,14 +34,17 @@ function Coin({ denom, label, className = "" }: { denom: number; label: string; 
   );
 }
 
-export function Money({ amount }: { amount: number }) {
+/** `compact`: for two amounts side by side (agent vs paper); the size follows the screen width so they never touch. */
+export function Money({ amount, compact = false }: { amount: number; compact?: boolean }) {
   const { pack } = useLang();
   const pieces = breakdown(amount);
   const words = pack.rupeesToWords && Number.isInteger(amount) && amount >= 0 ? pack.rupeesToWords(amount) : null;
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <span className="text-[40px] font-semibold leading-none tracking-wide">{nativeINR(amount, pack.code)}</span>
-      {words && <span className="text-base font-semibold text-muted">{words}</span>}
+      <span className={`font-semibold leading-none ${compact ? "text-[clamp(18px,6vw,28px)] [overflow-wrap:anywhere]" : "text-[40px] tracking-wide"}`}>
+        {nativeINR(amount, pack.code)}
+      </span>
+      {words && <span className={`font-semibold text-muted ${compact ? "text-sm" : "text-base"}`}>{words}</span>}
       <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1" aria-hidden>
         {pieces.map((p) => {
           const Pic = p.kind === "note" ? Note : Coin;

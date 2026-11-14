@@ -167,13 +167,13 @@ export function CallCheck({ paper, onBack }: { paper: PaperInput; onBack: () => 
                 </span>
                 <StatusBadge status={r.status} reason={r.status === "unable_to_verify" && r.reason ? ui.reason[r.reason] : undefined} />
                 <div className="grid grid-cols-2 gap-3 rounded-chip bg-sand p-3">
-                  <div className="flex flex-col gap-1">
+                  <div className="flex min-w-0 flex-col gap-1">
                     <span className="font-semibold">{c.ui.callCol}</span>
-                    {r.spoken[0] ? <ValueView v={r.spoken[0]} /> : <span className="text-2xl">—</span>}
+                    {r.spoken[0] ? <ValueView v={r.spoken[0]} compact /> : <span className="text-2xl">—</span>}
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex min-w-0 flex-col gap-1">
                     <span className="font-semibold">{ui.paperCol}</span>
-                    {r.paper ? <ValueView v={r.paper} /> : <span className="text-2xl">❔</span>}
+                    {r.paper ? <ValueView v={r.paper} compact /> : <span className="text-2xl">❔</span>}
                   </div>
                 </div>
               </div>

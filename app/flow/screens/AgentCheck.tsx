@@ -83,13 +83,13 @@ export function AgentCheck({
             </p>
           )}
           <div className="grid grid-cols-2 gap-3 rounded-chip bg-sand p-3">
-            <div className="flex flex-col gap-1">
+            <div className="flex min-w-0 flex-col gap-1">
               <span className="text-lg font-semibold">{ui.agentCol}</span>
-              {current.spoken[0] ? <ValueView v={current.spoken[0]} /> : <span className="text-3xl">❔</span>}
+              {current.spoken[0] ? <ValueView v={current.spoken[0]} compact /> : <span className="text-3xl">❔</span>}
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex min-w-0 flex-col gap-1">
               <span className="text-lg font-semibold">{ui.paperCol}</span>
-              {current.paper ? <ValueView v={current.paper} /> : <span className="text-3xl">❔</span>}
+              {current.paper ? <ValueView v={current.paper} compact /> : <span className="text-3xl">❔</span>}
             </div>
           </div>
           <p className="rounded-chip bg-sand p-3 text-base text-muted">“{current.transcript}”</p>
