@@ -161,7 +161,7 @@ describe("page 2+: evidence log", () => {
   });
 
   it("filename is a .pdf with local date and time", () => {
-    expect(receiptFilename(new Date(2026, 10, 9, 15, 4))).toBe("loanlens-receipt-20261109-1504.pdf");
+    expect(receiptFilename(new Date(2026, 10, 9, 15, 4))).toBe("arth-receipt-20261109-1504.pdf");
   });
 });
 
@@ -204,14 +204,14 @@ describe("PDF assembly", () => {
         { bytes: png(124, 175), kind: "png" },
         { bytes: png(124, 175), kind: "png" },
       ],
-      { title: "LoanLens receipt", createdAt: new Date("2026-11-09T09:34:05.000Z") },
+      { title: "Arth receipt", createdAt: new Date("2026-11-09T09:34:05.000Z") },
     );
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");
     const doc = await PDFDocument.load(bytes);
     expect(doc.getPageCount()).toBe(2);
     const { width, height } = doc.getPage(0).getSize();
     expect([Math.round(width), Math.round(height)]).toEqual([Math.round(A4.width), Math.round(A4.height)]);
-    expect(doc.getTitle()).toBe("LoanLens receipt");
+    expect(doc.getTitle()).toBe("Arth receipt");
   });
 
   it("same input -> identical bytes (so both parties' fingerprints match)", async () => {

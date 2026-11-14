@@ -109,7 +109,7 @@ describe("end-to-end against a stub /api/transcribe (no Gnani, no credits)", () 
   afterAll(() => new Promise<void>((r) => server.close(() => r())));
 
   it("runs all clips sequentially, retries a 429, prints the table and caches transcripts", async () => {
-    const dir = mkdtempSync(path.join(tmpdir(), "loanlens-eval-"));
+    const dir = mkdtempSync(path.join(tmpdir(), "arth-eval-"));
     mkdirSync(path.join(dir, "eval", "clips"), { recursive: true });
     const clips: [string, string][] = [
       ["fee1.wav", PRISMA],

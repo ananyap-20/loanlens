@@ -20,7 +20,7 @@ export async function readPaperFile(file: Blob): Promise<PaperResult> {
   }
 }
 
-/** A file shared to LoanLens (Web Share Target) is parked once by public/sw.js; read it and delete it. */
+/** A file shared to Arth (Web Share Target) is parked once by public/sw.js; read it and delete it. */
 export async function takeSharedFile(): Promise<Blob | null> {
   if (typeof caches === "undefined") return null;
   const cache = await caches.open("loanlens-shared");

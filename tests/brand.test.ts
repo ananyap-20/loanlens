@@ -1,0 +1,42 @@
+// The product's display name is Arth. Fails if the old working name "LoanLens" comes back in app code or text.
+// Allowed: the internal storage/cache keys (renaming them would reset saved settings or break an in-flight shared
+// file) and the unchanged Vercel URL. Git history, docs/ and the legacy PDF file names are outside app/ and lib/.
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+
+const ROOT = path.join(__dirname, "..");
+const DIRS = ["app", "lib"];
+const EXTRA_FILES = ["public/sw.js"];
+const ALLOWED = [/loanlens-shared/g, /loanlens\.lang/g, /loanlens-mauve\.vercel\.app/g];
+
+function files(dir: string): string[] {
+  return readdirSync(dir).flatMap((name) => {
+    const p = path.join(dir, name);
+    if (statSync(p).isDirectory()) return files(p);
+    return /\.(tsx?|jsx?|mjs|css|json)$/.test(name) ? [p] : [];
+  });
+}
+
+describe("display name", () => {
+  it('no "LoanLens" left in app/ or lib/ (apart from internal keys)', () => {
+    const all = [...DIRS.flatMap((d) => files(path.join(ROOT, d))), ...EXTRA_FILES.map((f) => path.join(ROOT, f))];
+    expect(all.length).toBeGreaterThan(50);
+    const hits: string[] = [];
+    for (const f of all) {
+      readFileSync(f, "utf8")
+        .split("\n")
+        .forEach((line, i) => {
+          const rest = ALLOWED.reduce((l, re) => l.replace(re, ""), line);
+          if (/loan[\s_-]?lens/i.test(rest)) hits.push(`${path.relative(ROOT, f)}:${i + 1}`);
+        });
+    }
+    expect(hits).toEqual([]);
+  });
+
+  it("Welcome shows the new wordmark", () => {
+    const welcome = readFileSync(path.join(ROOT, "app/flow/screens/Welcome.tsx"), "utf8");
+    expect(welcome).toContain(">Arth<");
+    expect(welcome).toContain("अर्थ");
+  });
+});

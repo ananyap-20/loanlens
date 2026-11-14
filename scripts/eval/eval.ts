@@ -98,7 +98,7 @@ export async function main(): Promise<number> {
   const table = formatTable(rows, errors);
   console.log(table);
   console.log(`Prisma calls this run: ${calls} (cached: ${rows.length - calls}).`);
-  writeFileSync(path.join(OUT, "report.md"), `# LoanLens eval\n\nServer: ${base}\nRun: ${new Date().toISOString()}\n\n${table}\n`);
+  writeFileSync(path.join(OUT, "report.md"), `# Arth eval\n\nServer: ${base}\nRun: ${new Date().toISOString()}\n\n${table}\n`);
   writeFileSync(path.join(OUT, "results.json"), JSON.stringify({ rows, errors }, null, 2));
   return errors.length ? 1 : 0;
 }

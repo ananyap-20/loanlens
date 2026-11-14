@@ -1,4 +1,4 @@
-// LoanLens service worker: ONLY receives a file shared to the app (Web Share Target).
+// Arth service worker: ONLY receives a file shared to the app (Web Share Target).
 // The file stays on the phone: it is parked in the Cache API for one page load, then deleted by the paper step.
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));

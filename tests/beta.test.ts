@@ -7,7 +7,7 @@ import { buildSummary } from "@/lib/receipt/build";
 import { SAMPLE_PAPER } from "./fixtures/paper";
 
 const EN =
-  "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. LoanLens gives proof of understanding alongside the signature. It is not a signature and not a loan approval.";
+  "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. Arth gives proof of understanding alongside the signature. It is not a signature and not a loan approval.";
 
 describe("language status tags", () => {
   it("docs.gnani.ai marks no individual language beta, so tags come from our review status", () => {
@@ -54,7 +54,7 @@ describe("disclaimer", () => {
       const p = PACKS[c];
       expect(p.ui!.disclaimer).toBe(p.receipt!.disclaimer);
       expect(p.ui!.disclaimer).toContain("Beta");
-      expect(p.ui!.disclaimer).toContain("LoanLens");
+      expect(p.ui!.disclaimer).toContain(c === "en" ? "Arth" : "अर्थ"); // the name in the pack's own script
       expect(p.ui!.disclaimer.length).toBeLessThan(330); // small footer
     }
     expect(PACKS.hi.ui!.disclaimer).not.toBe(EN);

@@ -50,7 +50,7 @@ function FlowSteps() {
   const [handedTo, setHandedTo] = useState<"agent" | "borrower" | null>(null); // who has been handed the phone
   const nextId = useRef(1);
 
-  // A PDF shared to LoanLens arrives as /?shared=1 (see public/sw.js). Read the flag once, clean the URL.
+  // A PDF shared to Arth arrives as /?shared=1 (see public/sw.js). Read the flag once, clean the URL.
   useEffect(() => {
     const flag = new URLSearchParams(window.location.search).get("shared");
     if (!flag) return;

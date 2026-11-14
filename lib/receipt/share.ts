@@ -5,7 +5,7 @@ export async function shareOrDownload(file: Blob, filename: string, nav: Navigat
   const f = new File([file], filename, { type: file.type || "application/pdf" });
   if (typeof nav.canShare === "function" && nav.canShare({ files: [f] })) {
     try {
-      await nav.share({ files: [f], title: "LoanLens receipt" });
+      await nav.share({ files: [f], title: "Arth receipt" });
       return "shared";
     } catch (e) {
       if ((e as DOMException)?.name === "AbortError") return "cancelled"; // the user closed the share sheet

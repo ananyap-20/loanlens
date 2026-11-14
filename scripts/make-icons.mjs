@@ -1,4 +1,4 @@
-// Draws the LoanLens icon (blue rounded square, white magnifier with a rupee sign) with plain maths:
+// Draws the Arth icon (blue rounded square, white magnifier with a rupee sign) with plain maths:
 // signed-distance shapes + anti-aliasing, written as an RGBA PNG. No image AI, no dependencies.
 // Run: node scripts/make-icons.mjs
 import { deflateSync } from "node:zlib";

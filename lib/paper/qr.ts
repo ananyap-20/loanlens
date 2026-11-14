@@ -4,7 +4,7 @@ import jsQR from "jsqr";
 import type { Field, Frequency, Unit, Value } from "@/lib/engine/types";
 import { finishTerms, paperValue, type PaperResult } from "./terms";
 
-const BAD = (message = "Yeh QR LoanLens ka nahi hai"): PaperResult => ({ ok: false, reason: "bad_qr", message });
+const BAD = (message = "Yeh QR Arth ka nahi hai"): PaperResult => ({ ok: false, reason: "bad_qr", message });
 const FREQS: readonly string[] = ["monthly", "weekly", "fortnightly"];
 
 type NumOpts = { min?: number; max?: number; int?: boolean };

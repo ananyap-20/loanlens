@@ -8,7 +8,7 @@ export type PaperFailure =
   | "no_text" // PDF has no text layer
   | "unreadable" // not a readable PDF / image
   | "no_terms" // readable, but none of the fields were found
-  | "bad_qr"; // QR payload is not valid LoanLens JSON
+  | "bad_qr"; // QR payload is not valid Arth JSON
 
 export type PaperResult =
   | { ok: true; terms: PaperTerms; lender?: string; grievance?: string; missing: Field[]; ambiguous: Field[] }
