@@ -305,9 +305,7 @@ export const en: LangPack = {
     notReady: "not available yet",
     disclaimer:
       "Languages marked Beta are still being tested, and their wording has not been reviewed by a native speaker. Arth gives proof of understanding alongside the signature. It is not a signature and not a loan approval.",
-    chooseLanguage: "Language",
-    info: "Information",
-    female: "🔊 Voice 1",
+    chooseLanguage: "Language",    female: "🔊 Voice 1",
     male: "🔊 Voice 2",
     alone: "1 · Only me",
     withAgent: "2 · Me + agent",
