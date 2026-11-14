@@ -46,6 +46,22 @@ describe("display name", () => {
     expect(cps(words.gu)).toBe("0A85 0AB0 0ACD 0AA5"); // અર્થ
   });
 
+  it("the logo and the mark are cut from the same artwork, in the brand colours", () => {
+    const read = (f: string) => readFileSync(path.join(ROOT, "public", f), "utf8");
+    const logo = read("arth-logo.svg");
+    const mark = read("arth-mark.svg");
+    const navyPaths = (s: string) => [...s.matchAll(/<path fill="#1F2A44"[^>]*\/>/g)].map((m) => m[0]);
+    expect(navyPaths(logo)).toHaveLength(3);
+    expect(navyPaths(mark)).toEqual(navyPaths(logo)); // identical glyphs
+    expect(mark).toContain("#E8890C"); // saffron line and dot
+    expect(mark).not.toContain("#0F766E"); // no "ARTH" letters in the mark
+    expect(logo).toContain("#0F766E"); // the logo has them
+    for (const s of [logo, mark]) {
+      expect(s).toMatch(/viewBox="\d+ \d+ \d+ \d+"/);
+      expect(s).not.toContain("<rect"); // transparent background, so it sits on any screen colour
+    }
+  });
+
   it("Welcome shows the new wordmark", () => {
     const welcome = readFileSync(path.join(ROOT, "app/flow/screens/Welcome.tsx"), "utf8");
     expect(welcome).toMatch(/<span lang="en"[^>]*>\s*Arth\b/);
