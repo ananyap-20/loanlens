@@ -4,6 +4,16 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST as speak } from "@/app/api/speak/route";
 import { POST as transcribe } from "@/app/api/transcribe/route";
 import { SPEAK_LIMIT, TRANSCRIBE_LIMIT } from "@/lib/server/rateLimit";
+import {
+  PRISMA_FORMATS,
+  PRISMA_LANGUAGES,
+  PRISMA_MODELS,
+  TIMBRE_LANGUAGES,
+  TIMBRE_MODELS,
+  TIMBRE_VOICES,
+} from "@/lib/gnani/allowed";
+import { PACKS } from "@/lib/i18n";
+import { SAMPLE_CALL_VOICES } from "../scripts/sample-call";
 
 const realFetch = globalThis.fetch;
 const realKey = process.env.GNANI_API_KEY;
@@ -49,6 +59,29 @@ describe("/api/speak guards", () => {
   });
 });
 
+describe("/api/speak allowlist", () => {
+  it("400 for a voice, model or language the app never uses", async () => {
+    const cases = [{ voice: "SomeoneElse" }, { model: "timbre-v9" }, { language: "xx-XX" }];
+    for (const [i, extra] of cases.entries()) {
+      const res = await speak(speakReq({ text: "नमस्ते", ...extra }, `198.51.100.${40 + i}`));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toMatchObject({ success: false, error: { type: "BAD_REQUEST" } });
+    }
+  });
+
+  it("every pack's voices and languages, and the sample-call voices, are allowed", () => {
+    for (const p of Object.values(PACKS)) {
+      expect(TIMBRE_LANGUAGES.has(p.timbre.language)).toBe(true);
+      expect(PRISMA_LANGUAGES.has(p.prisma.language_code)).toBe(true);
+      for (const v of Object.values(p.timbre.voices)) if (v) expect(TIMBRE_VOICES.has(v)).toBe(true);
+    }
+    for (const v of Object.values(SAMPLE_CALL_VOICES)) expect(TIMBRE_VOICES.has(v)).toBe(true);
+    expect(TIMBRE_MODELS.has("timbre-v2.5")).toBe(true);
+    expect(PRISMA_MODELS.has("prisma-v3.0") && PRISMA_MODELS.has("")).toBe(true);
+    expect(PRISMA_FORMATS.has("transcribe")).toBe(true);
+  });
+});
+
 describe("/api/transcribe guards", () => {
   it("413 for an audio file over 2 MB", async () => {
     const fd = new FormData();
@@ -72,6 +105,21 @@ describe("/api/transcribe guards", () => {
     const res = await transcribe(req());
     expect(res.status).toBe(429);
     expect(res.headers.get("Retry-After")).toBeTruthy();
+  });
+
+  it("400 for a model, language or format the app never uses", async () => {
+    const req = (field: string, value: string, i: number) => {
+      const fd = new FormData();
+      fd.append("audio_file", new File([new Uint8Array(10)], "clip.wav", { type: "audio/wav" }));
+      fd.append(field, value);
+      return new Request("http://localhost/api/transcribe", { method: "POST", body: fd, headers: { "x-forwarded-for": `198.51.100.${20 + i}` } });
+    };
+    const cases: [string, string][] = [["model", "some-other-model"], ["language_code", "xx-XX"], ["format", "raw"]];
+    for (const [i, [field, value]] of cases.entries()) {
+      const res = await transcribe(req(field, value, i));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toMatchObject({ success: false, error: { type: "BAD_REQUEST" } });
+    }
   });
 
   it("never called Gnani", () => {

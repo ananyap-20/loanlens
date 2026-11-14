@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { PRISMA_FORMATS, PRISMA_LANGUAGES, PRISMA_MODELS, notAllowed } from "@/lib/gnani/allowed";
 import { normaliseGnaniError } from "@/lib/gnani/errors";
 import { GNANI_BASE_URL, errorResponse, gnaniHeaders, safeAudioFilename } from "@/lib/gnani/server";
 import { MAX_AUDIO_BYTES, audioSizeProblem, checkLimit, transcribeLimiter } from "@/lib/server/rateLimit";
@@ -40,6 +41,11 @@ export async function POST(req: Request): Promise<Response> {
   const model = (incoming.get("model") as string | null) ?? "prisma-v3.0";
   const language = (incoming.get("language_code") as string | null) ?? "hi-IN,en-IN";
   const format = (incoming.get("format") as string | null) ?? "transcribe";
+  const refused =
+    notAllowed("model", model, PRISMA_MODELS) ??
+    notAllowed("language_code", language, PRISMA_LANGUAGES) ??
+    notAllowed("format", format, PRISMA_FORMATS);
+  if (refused) return errorResponse(400, "BAD_REQUEST", refused);
 
   const out = new FormData();
   out.append("audio_file", file, safeAudioFilename(file.name));

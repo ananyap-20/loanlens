@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { TIMBRE_LANGUAGES, TIMBRE_MODELS, TIMBRE_VOICES, notAllowed } from "@/lib/gnani/allowed";
 import { normaliseGnaniError } from "@/lib/gnani/errors";
 import { GNANI_BASE_URL, errorResponse, gnaniHeaders } from "@/lib/gnani/server";
 import { checkLimit, speakLimiter, speakTextProblem, speedProblem } from "@/lib/server/rateLimit";
@@ -40,11 +41,20 @@ export async function POST(req: Request): Promise<Response> {
   const badSpeed = speedProblem(speed);
   if (badSpeed) return errorResponse(badSpeed.status, badSpeed.code, badSpeed.message);
 
+  const voice = typeof b.voice === "string" ? b.voice : "Nalini";
+  const model = typeof b.model === "string" ? b.model : "timbre-v2.5";
+  const language = typeof b.language === "string" ? b.language : "hi-IN";
+  const refused =
+    notAllowed("voice", voice, TIMBRE_VOICES) ??
+    notAllowed("model", model, TIMBRE_MODELS) ??
+    notAllowed("language", language, TIMBRE_LANGUAGES);
+  if (refused) return errorResponse(400, "BAD_REQUEST", refused);
+
   const payload = {
     text: b.text,
-    voice: typeof b.voice === "string" ? b.voice : "Nalini",
-    model: typeof b.model === "string" ? b.model : "timbre-v2.5",
-    language: typeof b.language === "string" ? b.language : "hi-IN",
+    voice,
+    model,
+    language,
     speed,
     audio_config: { sample_rate: 24000, num_channels: 1, sample_width: 2, container: "mp3", bitrate: "64k" },
   };
