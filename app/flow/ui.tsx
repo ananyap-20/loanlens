@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { resumeAudio } from "@/lib/audio/cues";
 import type { Field, Status } from "@/lib/engine/types";
 import type { Speaker } from "@/lib/flow/session";
+import { statusPresentation } from "@/lib/flow/statusPresentation";
 import { useLang } from "./lang";
 import { useSpeech } from "./speech";
 
@@ -110,17 +111,10 @@ export function Screen({
   );
 }
 
-const STATUS_UI: Record<Status, { icon: string; cls: string }> = {
-  match: { icon: "✅", cls: "bg-green-100 text-green-900 border-green-600" },
-  conflict: { icon: "❌", cls: "bg-red-100 text-red-900 border-red-600" },
-  not_mentioned: { icon: "❔", cls: "bg-gray-100 text-gray-800 border-gray-400" },
-  unable_to_verify: { icon: "❔", cls: "bg-gray-100 text-gray-800 border-gray-400" },
-};
-
 /** Colour + icon + word (never colour alone), plus an optional reason line. Sound is played by the caller. */
 export function StatusBadge({ status, big = false, reason }: { status: Status; big?: boolean; reason?: string }) {
   const { ui } = useLang().pack;
-  const s = STATUS_UI[status];
+  const s = statusPresentation(status);
   return (
     <span className="inline-flex flex-col gap-1">
       <span className={`inline-flex items-center gap-2 self-start rounded-xl border-2 px-3 py-1 font-bold ${s.cls} ${big ? "text-2xl" : "text-lg"}`}>

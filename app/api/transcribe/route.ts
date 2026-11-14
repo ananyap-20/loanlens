@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { normaliseGnaniError } from "@/lib/gnani/errors";
 import { GNANI_BASE_URL, errorResponse, gnaniHeaders, safeAudioFilename } from "@/lib/gnani/server";
+import { MAX_AUDIO_BYTES, audioSizeProblem, checkLimit, transcribeLimiter } from "@/lib/server/rateLimit";
 
 export const maxDuration = 30;
 
@@ -12,9 +13,15 @@ export async function GET(): Promise<Response> {
 
 const KEYTERMS = ["processing fee", "EMI", "किस्त", "बीमा", "ब्याज", "लोन", "KFS", "penalty"];
 const TOPIC = "A loan agent explains loan amount, EMI, processing fee, tenure and penalties.";
-const MAX_BYTES = 4 * 1024 * 1024; // 30 s of 16 kHz mono WAV is ~1 MB
+const MULTIPART_SLACK = 64 * 1024; // form boundaries and the small text fields around the audio
 
 export async function POST(req: Request): Promise<Response> {
+  const limited = checkLimit(transcribeLimiter, req);
+  if (limited) return limited;
+  // Refuse an oversized upload before reading it, when the size is declared.
+  const declared = Number(req.headers.get("content-length") ?? "0");
+  if (declared > MAX_AUDIO_BYTES + MULTIPART_SLACK) return errorResponse(413, "TOO_LARGE", "Audio file larger than 2 MB.");
+
   const headers = gnaniHeaders();
   if (!headers) return errorResponse(500, "NO_API_KEY", "GNANI_API_KEY is not set on the server.");
 
@@ -26,7 +33,8 @@ export async function POST(req: Request): Promise<Response> {
   }
   const file = incoming.get("audio_file");
   if (!(file instanceof File)) return errorResponse(400, "BAD_REQUEST", "Missing audio_file.");
-  if (file.size > MAX_BYTES) return errorResponse(413, "TOO_LARGE", "Audio file too large.");
+  const tooBig = audioSizeProblem(file.size);
+  if (tooBig) return errorResponse(tooBig.status, tooBig.code, tooBig.message);
 
   // Defaults per CLAUDE.md section 4; a caller may pass model="" to use v2.5.
   const model = (incoming.get("model") as string | null) ?? "prisma-v3.0";

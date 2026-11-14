@@ -9,6 +9,7 @@ import { prefetchSpeech } from "@/lib/audio/voice";
 import { isNavigationOnly } from "@/lib/engine";
 import { AGENT_FIELDS, agentChangedEarlier, checkAgentClip, type AgentCheck as Check } from "@/lib/flow/agent";
 import type { PaperInput } from "@/lib/flow/session";
+import { statusPresentation } from "@/lib/flow/statusPresentation";
 import { useLang } from "../lang";
 import { useSpeech } from "../speech";
 import { RecordPanel } from "../RecordPanel";
@@ -64,7 +65,7 @@ export function AgentCheck({
       <div className="flex justify-center gap-2" aria-label="fields">
         {AGENT_FIELDS.map((f, k) => {
           const c = latest(f);
-          const mark = c ? (c.status === "match" ? "✅" : c.status === "conflict" ? "❌" : "❔") : "";
+          const mark = c ? statusPresentation(c.status).icon : "";
           return <FieldChip key={f} field={f} icon={FIELD_ICON[f]} active={k === i} mark={mark + (agentChangedEarlier(checks, f) ? "⚠️" : "")} />;
         })}
       </div>

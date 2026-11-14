@@ -58,6 +58,22 @@ describe("queue: 429 retry with exponential backoff", () => {
     expect(delays).toEqual([1000, 2000, 4000, 8000]);
   });
 
+  it("does not retry our own route limiter's 429 (APP_RATE_LIMIT)", async () => {
+    let n = 0;
+    const fetchImpl = (async () => (n++, json({ success: false, error: { type: "APP_RATE_LIMIT", message: "Too many requests." } }, 429))) as unknown as typeof fetch;
+    const c = createGnaniClient({ fetchImpl, sleep: async () => {} });
+    await expect(c.transcribe(wav)).rejects.toMatchObject({ status: 429, code: "APP_RATE_LIMIT", message: "Too many requests." });
+    expect(n).toBe(1);
+  });
+
+  it("does not retry 413 (too large)", async () => {
+    let n = 0;
+    const fetchImpl = (async () => (n++, json({ success: false, error: { type: "TOO_LARGE", message: "Text longer than 600 characters." } }, 413))) as unknown as typeof fetch;
+    const c = createGnaniClient({ fetchImpl, sleep: async () => {} });
+    await expect(c.speak("x")).rejects.toMatchObject({ status: 413, code: "TOO_LARGE" });
+    expect(n).toBe(1);
+  });
+
   it("does not retry other errors (402, 400, 500)", async () => {
     for (const status of [400, 402, 500]) {
       let n = 0;

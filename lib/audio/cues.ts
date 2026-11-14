@@ -1,5 +1,7 @@
 // Status sounds made with the Web Audio API (oscillators, no audio files, no AI).
 // chime = match, buzz = different. One shared AudioContext, resumed by the Welcome tap.
+import type { Status } from "@/lib/engine/types";
+import { statusPresentation } from "@/lib/flow/statusPresentation";
 
 let ctx: AudioContext | null = null;
 
@@ -51,9 +53,10 @@ export function tick() {
   tone(520, 0, 0.12, "triangle", 0.15);
 }
 
-/** Sound for a comparison status: chime = match, buzz = different, tick = not mentioned / couldn't check. */
-export function cueFor(status: "match" | "conflict" | "not_mentioned" | "unable_to_verify") {
-  if (status === "match") chime();
-  else if (status === "conflict") buzz();
+/** Sound for a comparison status (from lib/flow/statusPresentation): chime = match, buzz = different, tick = rest. */
+export function cueFor(status: Status) {
+  const cue = statusPresentation(status).cue;
+  if (cue === "chime") chime();
+  else if (cue === "buzz") buzz();
   else tick();
 }
