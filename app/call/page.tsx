@@ -22,7 +22,7 @@ function CallDoor() {
   if (step === "start") {
     return (
       <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 bg-cream px-5 py-6 text-center text-ink">
-        <ReplayButtons text={c.say.instruction} className="absolute right-5 top-4" />
+        <ReplayButtons compact text={c.say.instruction} className="absolute right-5 top-4" />
         <h1 className="text-4xl font-semibold leading-tight">{c.ui.title}</h1>
         <p className="rounded-chip border-2 border-amber-500 bg-amber-50 p-3 text-lg font-semibold text-amber-900">{c.ui.syntheticOnly}</p>
         <button
