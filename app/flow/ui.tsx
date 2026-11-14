@@ -58,10 +58,23 @@ export function Dots({ total, current }: { total: number; current: number }) {
  * Big 🔁 replay and 🐢 slow (0.85) buttons for a screen's spoken text: icon on top, the pack's own
  * "say again" / "say slowly" word below (icon only if the pack has no word). Same place on every screen.
  */
-export function ReplayButtons({ text, className = "", onTap }: { text: string; className?: string; onTap?: () => void }) {
+export function ReplayButtons({
+  text,
+  className = "",
+  onTap,
+  compact = false,
+}: {
+  text: string;
+  className?: string;
+  onTap?: () => void;
+  /** Quiet icon-only circles (56px tap area); the word stays as the accessible name and tooltip. */
+  compact?: boolean;
+}) {
   const { say, speaking } = useSpeech();
   const { ui } = useLang().pack;
-  const btn = `press flex min-h-16 min-w-[88px] flex-col items-center justify-center gap-0.5 rounded-btn border border-line bg-cream px-2 py-1.5 text-ink shadow-soft ${focusRing} ${speaking ? "pulse-ring" : ""}`;
+  const btn = compact
+    ? `press flex h-14 w-14 items-center justify-center rounded-full border border-line bg-surface text-ink ${focusRing} ${speaking ? "pulse-ring" : ""}`
+    : `press flex min-h-16 min-w-[88px] flex-col items-center justify-center gap-0.5 rounded-btn border border-line bg-cream px-2 py-1.5 text-ink shadow-soft ${focusRing} ${speaking ? "pulse-ring" : ""}`;
   const run = (slow: boolean) => {
     onTap?.();
     void resumeAudio(); // a tap is the moment the browser allows audio (matters on Welcome, before any other tap)
@@ -72,11 +85,11 @@ export function ReplayButtons({ text, className = "", onTap }: { text: string; c
       {([false, true] as const).map((slow) => {
         const label = slow ? ui.slow : ui.replay;
         return (
-          <button key={String(slow)} aria-label={label} className={btn} onClick={() => run(slow)}>
-            <span aria-hidden="true" className="text-3xl leading-none">
+          <button key={String(slow)} aria-label={label} title={compact ? label : undefined} className={btn} onClick={() => run(slow)}>
+            <span aria-hidden="true" className={`${compact ? "text-2xl" : "text-3xl"} leading-none`}>
               {slow ? "🐢" : "🔁"}
             </span>
-            {label && <span className="text-[15px] font-semibold leading-tight">{label}</span>}
+            {!compact && label && <span className="text-[15px] font-semibold leading-tight">{label}</span>}
           </button>
         );
       })}

@@ -87,6 +87,16 @@ describe("replay / slow buttons", () => {
     expect(html).toContain("🐢");
     expect(html.match(/min-h-16 min-w-\[88px\]/g)).toHaveLength(2); // ≥64px tall, ≥88px wide
   });
+  it("compact: icon-only 56px circles that keep the words as the accessible name", () => {
+    const html = renderToStaticMarkup(
+      createElement(LangProvider, null, createElement(SpeechProvider, null, createElement(ReplayButtons, { text: "x", compact: true }))),
+    );
+    const ui = PACKS.hi.ui!;
+    expect(html).toContain(`aria-label="${ui.replay}"`);
+    expect(html).toContain(`aria-label="${ui.slow}"`);
+    expect(html).not.toContain(`>${ui.replay}</span>`); // no visible word
+    expect(html.match(/h-14 w-14/g)).toHaveLength(2); // 56px tap area
+  });
   it("every selectable pack has both label words", () => {
     for (const code of ["hi", "en", "mr"] as const) {
       expect(PACKS[code].ui!.replay.length).toBeGreaterThan(0);
