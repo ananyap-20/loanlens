@@ -36,6 +36,22 @@
 
 The sample paper is synthetic: a fictional lender ("Sahyog Finance (fictional)") and fictional terms.
 
+## Install it from Chrome (recommended)
+
+Arth works in the browser, but it works best installed on the phone like an app: it opens full screen with no address bar, starts from its own icon, and shows up in the phone's **Share** menu, so a lender's KFS PDF received on WhatsApp can be sent straight to Arth.
+
+**Android (Chrome):**
+
+1. Open **https://loanlens-mauve.vercel.app** in Chrome.
+2. Tap the **⋮** menu (top right).
+3. Tap **Install app** (on some phones it says **Add to Home screen**), then **Install**.
+4. Open **Arth** from the new icon on the home screen.
+5. The first time you record, tap **Allow** when Chrome asks for the microphone.
+
+To send a KFS PDF to Arth: open the PDF (for example in WhatsApp), tap **Share**, and pick **Arth**.
+
+**iPhone (Safari):** open the link, tap **Share**, then **Add to Home Screen**. Sharing a PDF to Arth from other apps works only on Android.
+
 ## Screenshots
 
 Real screens from the app on a phone-sized screen.
