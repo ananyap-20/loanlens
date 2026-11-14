@@ -1,4 +1,4 @@
-# Arth � one-page pitch
+# Arth: one-page pitch
 
 **A thumbprint proves who signed. Arth checks that the borrower understood.**
 
@@ -28,7 +28,7 @@ Arth is a voice-first, borrower-side understanding check. **Everything is said o
 No other AI or ML model is used: no OCR, no third-party LLM, no browser speech recognition, no voice biometrics.
 
 ## Design choices
-- **No LLM decides anything.** Extraction, comparison and the teach-back check are deterministic, unit-tested TypeScript rules (538 tests). Unknown stays unknown and is never treated as zero; only like-for-like fields are compared.
+- **No LLM decides anything.** Extraction, comparison and the teach-back check are deterministic, unit-tested TypeScript rules (553 tests). Unknown stays unknown and is never treated as zero; only like-for-like fields are compared.
 - **Never claims a verdict.** No "safe", "approved", "verified" or "fraud". Colour, icon and sound back every spoken result.
 - **Privacy:** nothing records in the background, the recording state is always visible, there is no login or database, and one button erases the session. Demo data is synthetic only. The API key stays on the server.
 

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Arth: the thinking behind it</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Devanagari:wght@500;700&family=Noto+Sans+Bengali:wght@500&family=Noto+Sans+Gujarati:wght@500&display=block" rel="stylesheet" />
+<style>
+  /* Arth tokens (app/globals.css) */
+  :root {
+    --cream: #fbf6ec; --surface: #ffffff; --line: #eadfcb; --sand: #f3eadb;
+    --ink: #1f2a44; --muted: #5b6479; --primary: #0f766e; --primary-soft: #e3f1ef;
+    --saffron: #e8890c; --saffron-strong: #c2700a; --saffron-soft: #fdf0dc;
+    --match: #15803d; --match-soft: #ecfdf3; --conflict: #b91c1c; --conflict-soft: #fef2f2;
+    --unknown-ink: #475569; --unknown-soft: #f1f5f9;
+  }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--cream); }
+  body { font-family: "Poppins", "Noto Sans Devanagari", "Noto Sans Bengali", "Noto Sans Gujarati", sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 210mm; height: 297mm; position: relative; overflow: hidden; background: var(--cream); page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  .body { padding: 9mm 15mm 0; }
+
+  /* header */
+  .hero { background: var(--ink); color: var(--cream); padding: 9mm 15mm 8mm; border-bottom: 2.2mm solid var(--saffron); display: flex; gap: 9mm; align-items: center; }
+  .hero .logo { width: 38mm; flex: none; }
+  .hero .logo svg { width: 100%; height: auto; display: block; }
+  .hero .meta { font-size: 8.5pt; color: #b9c0d0; letter-spacing: .02em; margin-bottom: 2mm; }
+  .hero h1 { font-size: 25pt; line-height: 1.1; font-weight: 700; letter-spacing: -.01em; }
+  .hero .tag { font-size: 11pt; color: #dfe3ec; margin-top: 2mm; }
+  .hero .motto { font-size: 10.5pt; color: var(--saffron); font-weight: 600; margin-top: 1.5mm; }
+  .bar { background: var(--ink); color: var(--cream); padding: 5mm 15mm; border-bottom: 1.6mm solid var(--saffron); display: flex; justify-content: space-between; align-items: center; }
+  .bar .small-logo { height: 12mm; }
+  .bar .small-logo svg { height: 100%; width: auto; display: block; }
+  .bar span { font-size: 9pt; color: #b9c0d0; }
+
+  h2 { font-size: 15pt; font-weight: 700; margin: 5.5mm 0 3mm; display: flex; align-items: center; gap: 3mm; }
+  h2::before { content: ""; width: 1.4mm; height: 6mm; border-radius: 1mm; background: var(--h, var(--saffron)); }
+  .lead { background: var(--surface); border: 1px solid var(--line); border-left: 1.6mm solid var(--saffron); border-radius: 4mm; padding: 5mm 6mm; font-size: 10.5pt; }
+  .lead b { font-weight: 600; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .card { border-radius: 4mm; padding: 4.5mm 5mm; display: flex; gap: 4mm; align-items: flex-start; }
+  .num { flex: none; width: 8mm; height: 8mm; border-radius: 50%; color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 10pt; }
+  .card h3 { font-size: 10.5pt; font-weight: 600; margin-bottom: .8mm; }
+  .card p { font-size: 9pt; color: var(--muted); line-height: 1.45; }
+  .c1 { background: var(--saffron-soft); } .c1 .num { background: var(--saffron-strong); }
+  .c2 { background: var(--match-soft); } .c2 .num { background: var(--match); }
+  .c3 { background: var(--primary-soft); } .c3 .num { background: var(--primary); }
+  .c4 { background: var(--conflict-soft); } .c4 .num { background: var(--conflict); }
+
+  /* flow */
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5mm; position: relative; margin-top: 1mm; }
+  .box { background: var(--surface); border: 1px solid var(--line); border-radius: 3mm; padding: 3mm 2mm; text-align: center; position: relative; }
+  .box b { display: block; font-size: 9.5pt; font-weight: 600; }
+  .box small { font-size: 8pt; color: var(--muted); }
+  .box.dark { background: var(--ink); border-color: var(--ink); color: var(--cream); }
+  .box.dark small { color: #b9c0d0; }
+  .flow .box:not(:last-child)::after { content: "→"; position: absolute; right: -4.4mm; top: 50%; transform: translateY(-55%); color: var(--muted); font-size: 11pt; }
+  .branch { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5mm; margin-top: 5mm; align-items: center; }
+  .pill { border-radius: 3mm; padding: 3mm 2mm; text-align: center; font-size: 9pt; }
+  .pill b { display: block; font-weight: 600; font-size: 9.5pt; }
+  .pill.ok { background: var(--match-soft); color: var(--match); border: 1px solid #b7e3c6; }
+  .pill.retry { background: var(--saffron-soft); color: var(--saffron-strong); border: 1px solid #f2cf9f; }
+  .pill.stop { background: var(--conflict-soft); color: var(--conflict); border: 1px solid #f3c1c1; }
+  .note { font-size: 8.5pt; color: var(--muted); margin-top: 3mm; }
+
+  /* rows */
+  .rows { border-radius: 4mm; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+  .row { display: grid; grid-template-columns: 50mm 1fr; gap: 5mm; padding: 3.2mm 5mm; border-top: 1px solid var(--line); }
+  .row:first-child { border-top: 0; }
+  .row b { font-size: 9.5pt; font-weight: 600; }
+  .row p { font-size: 9pt; color: var(--muted); }
+  .row.alt { background: #fffdf8; }
+
+  .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .vs .item { background: var(--surface); border: 1px solid var(--line); border-radius: 4mm; padding: 4mm 5mm; border-top: 1.4mm solid var(--c); }
+  .vs h3 { font-size: 10.5pt; font-weight: 600; margin-bottom: 1mm; }
+  .vs .them { font-size: 8.5pt; color: var(--muted); font-style: italic; }
+  .vs .us { font-size: 9pt; margin-top: 1mm; }
+
+  .checks { background: var(--surface); border: 1px solid var(--line); border-radius: 4mm; padding: 2mm 5mm; }
+  .check { display: grid; grid-template-columns: 6mm 52mm 1fr; gap: 2mm; padding: 2.2mm 0; border-top: 1px dashed var(--line); align-items: start; }
+  .check:first-child { border-top: 0; }
+  .tick { width: 5mm; height: 5mm; border-radius: 50%; background: var(--match); color: #fff; font-size: 7pt; display: grid; place-items: center; font-weight: 700; margin-top: .4mm; }
+  .check b { font-size: 9.5pt; font-weight: 600; }
+  .check p { font-size: 9pt; color: var(--muted); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 2.5mm; }
+  .chip { background: var(--conflict-soft); color: var(--conflict); border: 1px solid #f3c1c1; border-radius: 10mm; padding: 1.2mm 4mm; font-size: 8.5pt; font-weight: 500; }
+
+  .changes { display: grid; gap: 3mm; }
+  .chg { display: grid; grid-template-columns: 40mm 1fr; gap: 5mm; background: var(--surface); border: 1px solid var(--line); border-radius: 3.5mm; padding: 3.2mm 5mm; }
+  .chg .k { font-size: 9.5pt; font-weight: 600; }
+  .chg .k small { display: block; font-size: 8pt; color: var(--muted); font-weight: 400; }
+  .chg p { font-size: 9pt; color: var(--muted); }
+  .chg p b { color: var(--ink); font-weight: 600; }
+
+  table.lang { width: 100%; border-collapse: collapse; font-size: 9pt; background: var(--surface); border-radius: 4mm; overflow: hidden; }
+  table.lang td { padding: 2.2mm 4mm; border-top: 1px solid var(--line); }
+  table.lang tr:first-child td { border-top: 0; }
+  .st { display: inline-block; padding: .4mm 3mm; border-radius: 10mm; font-size: 8pt; font-weight: 600; }
+  .st.s { background: var(--match-soft); color: var(--match); }
+  .st.r { background: var(--saffron-soft); color: var(--saffron-strong); }
+  .st.b { background: var(--unknown-soft); color: var(--unknown-ink); }
+
+  .limits { background: var(--unknown-soft); border-radius: 4mm; padding: 4mm 5mm; display: grid; grid-template-columns: 30mm 1fr; gap: 5mm; font-size: 9pt; color: var(--unknown-ink); }
+  .limits b { color: var(--ink); font-weight: 600; font-size: 10pt; }
+
+  .foot { position: absolute; left: 0; right: 0; bottom: 0; background: var(--ink); color: var(--cream); padding: 5mm 15mm; border-top: 1.6mm solid var(--saffron); }
+  .foot .l1 { font-weight: 600; font-size: 10pt; }
+  .foot .l2 { font-size: 8.5pt; color: #b9c0d0; margin-top: 1mm; display: flex; justify-content: space-between; }
+  .foot .l2 a { color: var(--saffron); text-decoration: none; font-weight: 600; }
+  .pageno { position: absolute; right: 15mm; bottom: 6mm; font-size: 8pt; color: var(--muted); }
+  /* Opened in a browser (not printed): show the pages as separate sheets that never clip or overlap. */
+  @media screen {
+    html, body { background: #d9d3c7; }
+    .page { height: auto; min-height: 297mm; overflow: visible; margin: 8mm auto; padding-bottom: 26mm; box-shadow: 0 4px 20px rgba(31, 42, 68, .18); }
+    .page:has(.foot) { padding-bottom: 34mm; }
+  }
+  .deva { font-family: "Noto Sans Devanagari", "Noto Sans Bengali", "Noto Sans Gujarati", "Poppins", sans-serif; }
+  /* #cover: only page 1, edge to edge (used for the README preview image). */
+  html.cover, html.cover body { background: var(--cream); }
+  html.cover .page { margin: 0; box-shadow: none; height: 297mm; min-height: 0; overflow: hidden; padding-bottom: 0; }
+  html.cover .page ~ .page { display: none; }
+</style>
+<script>if (location.hash === "#cover") document.documentElement.classList.add("cover");</script>
+</head>
+<body>
+
+<!-- ============ PAGE 1 ============ -->
+<section class="page">
+  <header class="hero">
+    <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="274 261 510 511" role="img" aria-label="Arth"><path fill="#FBF6EC" transform="translate(274.89,585.00) scale(0.33000,-0.33000)" d="M306.0 79.0Q254.0 79.0 208.0 106.5Q162.0 134.0 128.0 180.0Q69.0 263.0 34.0 353.0L78.0 378.0Q148.0 221.0 213.0 178.0Q243.0 159.0 276.0 159.0Q333.0 159.0 366.0 191.0Q399.0 223.0 399.0 275.0Q399.0 327.0 353.0 367.0Q318.0 343.0 259.0 320.0L211.0 399.0Q375.0 455.0 375.0 536.0Q375.0 565.0 354.5 584.0Q334.0 603.0 306.0 603.0Q245.0 603.0 185.0 539.0L122.0 602.0Q192.0 684.0 278.0 684.0Q341.0 684.0 392.5 623.0Q444.0 562.0 444.0 498.0Q444.0 449.0 398.0 406.0Q435.0 376.0 491.0 376.0Q522.0 376.0 553.5 390.5Q585.0 405.0 596.0 425.0V602.0H513.0Q501.0 622.0 483.0 647.5Q465.0 673.0 464.0 675.0H788.0L837.0 602.0H685.0V0.0L596.0 52.0L602.0 317.0Q573.0 298.0 536.0 298.0Q499.0 298.0 447.0 322.0Q471.0 283.0 471.0 238.0Q471.0 171.0 427.0 125.0Q383.0 79.0 306.0 79.0Z"/><path fill="#FBF6EC" transform="translate(529.65,585.00) scale(0.33000,-0.33000)" d="M351.5 431.5Q310.0 396.0 270.5 372.5Q231.0 349.0 226.0 345.5Q221.0 342.0 217.0 339.5Q213.0 337.0 211.5 336.0Q210.0 335.0 206.5 332.5Q203.0 330.0 202.0 328.0Q189.0 316.0 188.0 310.0Q187.0 304.0 187.0 300.0Q187.0 267.0 220.5 245.5Q254.0 224.0 299.0 224.0Q344.0 224.0 399.5 261.5Q455.0 299.0 489.0 345.0V602.0H422.0L373.0 675.0H685.0L734.0 602.0H578.0V0.0L489.0 57.0L494.0 229.0Q458.0 190.0 414.5 168.5Q371.0 147.0 332.0 147.0Q252.0 147.0 173.5 214.5Q95.0 282.0 95.0 349.0Q95.0 368.0 116.0 381.0Q124.0 386.0 169.5 410.0Q215.0 434.0 242.0 451.0Q269.0 468.0 295.5 496.0Q322.0 524.0 322.0 550.5Q322.0 577.0 301.0 597.0Q280.0 617.0 249.5 617.0Q219.0 617.0 196.5 597.5Q174.0 578.0 174.0 547.5Q174.0 517.0 205.0 491.0L166.0 464.0Q104.0 520.0 104.0 580.0Q104.0 623.0 139.0 653.0Q174.0 683.0 221.0 683.0Q287.0 683.0 340.0 626.0Q393.0 569.0 393.0 518.0Q393.0 467.0 351.5 431.5Z"/><path fill="#FBF6EC" transform="translate(749.11,585.00) scale(0.33000,-0.33000)" d="M-58.0 881.0Q-100.0 881.0 -128.5 855.5Q-157.0 830.0 -157.0 782.0Q-157.0 714.0 -92.0 664.0L-134.0 646.0Q-174.0 673.0 -200.5 721.5Q-227.0 770.0 -227.0 823.0Q-227.0 876.0 -189.5 910.0Q-152.0 944.0 -98.0 944.0Q-44.0 944.0 6.0 913.0L-16.0 874.0Q-36.0 881.0 -58.0 881.0Z"/><line x1="437.0" y1="650" x2="569.0" y2="650" stroke="#E8890C" stroke-width="5" stroke-linecap="round"/><circle cx="587.0" cy="650" r="9" fill="#E8890C"/><path fill="#0F766E" transform="translate(407.25,760.00) scale(0.04600,-0.04600)" d="M494.0 142.0H203.0L153.0 0.0H34.0L283.0 696.0H415.0L664.0 0.0H544.0L494.0 142.0ZM462.0 235.0 349.0 558.0 235.0 235.0H462.0Z"/><path fill="#0F766E" transform="translate(469.31,760.00) scale(0.04600,-0.04600)" d="M436.0 0.0 276.0 278.0H189.0V0.0H75.0V695.0H315.0Q395.0 695.0 450.5 667.0Q506.0 639.0 533.5 592.0Q561.0 545.0 561.0 487.0Q561.0 419.0 521.5 363.5Q482.0 308.0 400.0 288.0L572.0 0.0H436.0ZM189.0 369.0H315.0Q379.0 369.0 411.5 401.0Q444.0 433.0 444.0 487.0Q444.0 541.0 412.0 571.5Q380.0 602.0 315.0 602.0H189.0V369.0Z"/><path fill="#0F766E" transform="translate(528.38,760.00) scale(0.04600,-0.04600)" d="M524.0 695.0V602.0H339.0V0.0H225.0V602.0H39.0V695.0H524.0Z"/><path fill="#0F766E" transform="translate(584.32,760.00) scale(0.04600,-0.04600)" d="M630.0 695.0V0.0H516.0V304.0H189.0V0.0H75.0V695.0H189.0V397.0H516.0V695.0H630.0Z"/></svg></div>
+    <div>
+      <div class="meta">Gnani AI &nbsp;|&nbsp; Great Indian AI Internship Challenge 2026</div>
+      <h1>The thinking behind Arth</h1>
+      <div class="tag">A thumbprint proves who signed. Arth checks that the borrower understood.</div>
+      <div class="motto">Artificial intelligence is the tool. Real intelligence is the brain.</div>
+    </div>
+  </header>
+  <div class="body">
+    <h2>The problem</h2>
+    <div class="lead">
+      A thumbprint proves who signed a loan. It does not prove the borrower understood it. The RBI's Key Facts
+      Statement circular (<b>RBI/2024-25/18</b>, 15 April 2024) asks lenders to give the KFS in a language the borrower
+      understands, explain it, and take an acknowledgement that the borrower understood. For someone who cannot
+      read, that acknowledgement can still be a mark on a page they cannot read. <b>Arth</b> (<span class="deva">अर्थ</span>,
+      from the Sanskrit <i>artha</i>: meaning, and wealth) is built for that gap. It checks, out loud, whether the
+      borrower understood what is on the paper, before they sign.
+    </div>
+
+    <h2 style="--h: var(--match)">The idea</h2>
+    <div class="grid2">
+      <div class="card c1"><div class="num">1</div><div><h3>Everything is said out loud</h3><p>Every screen speaks its own instruction in the borrower's language, with replay and slow buttons. Nobody has to read or type.</p></div></div>
+      <div class="card c2"><div class="num">2</div><div><h3>Teach-back, not tick-box</h3><p>The borrower explains the loan in their own words. Open questions come in random order.</p></div></div>
+      <div class="card c3"><div class="num">3</div><div><h3>One engine, three doors</h3><p>In person with the agent, online with the lender's KFS PDF or QR, and a call check on a synthetic sales call.</p></div></div>
+      <div class="card c4"><div class="num">4</div><div><h3>A shared receipt</h3><p>A PDF of what was checked, with fingerprints of the paper and every clip. Not a signature, not a loan approval.</p></div></div>
+    </div>
+
+    <h2 style="--h: var(--primary)">How it works</h2>
+    <div class="flow">
+      <div class="box"><b>Paper terms</b><small>PDF, QR or sample</small></div>
+      <div class="box"><b>Agent reads aloud</b><small>Gnani Prisma hears</small></div>
+      <div class="box"><b>Borrower explains</b><small>Timbre asks · Prisma hears</small></div>
+      <div class="box dark"><b>Fixed rules</b><small>compare with the paper</small></div>
+    </div>
+    <div class="branch">
+      <div class="pill ok"><b>✅ Every answer matches</b>shared receipt, proof of understanding</div>
+      <div class="pill retry"><b>🔁 One answer differs</b>slow re-explain of that point, ask again</div>
+      <div class="pill stop"><b>✋ Three tries on one point</b>do not sign yet, bring someone you trust</div>
+    </div>
+    <p class="note">The agent's words are checked too: "no processing fee" against a paper that says ₹1,500 is ❌ different. Results are matched, different, not mentioned or couldn't check, plus the question to ask. Fixed rules decide, not an AI model.</p>
+  </div>
+  <div class="pageno">1 / 5</div>
+</section>
+
+<!-- ============ PAGE 2 ============ -->
+<section class="page">
+  <div class="bar"><div class="small-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="274 261 510 511" role="img" aria-label="Arth"><path fill="#FBF6EC" transform="translate(274.89,585.00) scale(0.33000,-0.33000)" d="M306.0 79.0Q254.0 79.0 208.0 106.5Q162.0 134.0 128.0 180.0Q69.0 263.0 34.0 353.0L78.0 378.0Q148.0 221.0 213.0 178.0Q243.0 159.0 276.0 159.0Q333.0 159.0 366.0 191.0Q399.0 223.0 399.0 275.0Q399.0 327.0 353.0 367.0Q318.0 343.0 259.0 320.0L211.0 399.0Q375.0 455.0 375.0 536.0Q375.0 565.0 354.5 584.0Q334.0 603.0 306.0 603.0Q245.0 603.0 185.0 539.0L122.0 602.0Q192.0 684.0 278.0 684.0Q341.0 684.0 392.5 623.0Q444.0 562.0 444.0 498.0Q444.0 449.0 398.0 406.0Q435.0 376.0 491.0 376.0Q522.0 376.0 553.5 390.5Q585.0 405.0 596.0 425.0V602.0H513.0Q501.0 622.0 483.0 647.5Q465.0 673.0 464.0 675.0H788.0L837.0 602.0H685.0V0.0L596.0 52.0L602.0 317.0Q573.0 298.0 536.0 298.0Q499.0 298.0 447.0 322.0Q471.0 283.0 471.0 238.0Q471.0 171.0 427.0 125.0Q383.0 79.0 306.0 79.0Z"/><path fill="#FBF6EC" transform="translate(529.65,585.00) scale(0.33000,-0.33000)" d="M351.5 431.5Q310.0 396.0 270.5 372.5Q231.0 349.0 226.0 345.5Q221.0 342.0 217.0 339.5Q213.0 337.0 211.5 336.0Q210.0 335.0 206.5 332.5Q203.0 330.0 202.0 328.0Q189.0 316.0 188.0 310.0Q187.0 304.0 187.0 300.0Q187.0 267.0 220.5 245.5Q254.0 224.0 299.0 224.0Q344.0 224.0 399.5 261.5Q455.0 299.0 489.0 345.0V602.0H422.0L373.0 675.0H685.0L734.0 602.0H578.0V0.0L489.0 57.0L494.0 229.0Q458.0 190.0 414.5 168.5Q371.0 147.0 332.0 147.0Q252.0 147.0 173.5 214.5Q95.0 282.0 95.0 349.0Q95.0 368.0 116.0 381.0Q124.0 386.0 169.5 410.0Q215.0 434.0 242.0 451.0Q269.0 468.0 295.5 496.0Q322.0 524.0 322.0 550.5Q322.0 577.0 301.0 597.0Q280.0 617.0 249.5 617.0Q219.0 617.0 196.5 597.5Q174.0 578.0 174.0 547.5Q174.0 517.0 205.0 491.0L166.0 464.0Q104.0 520.0 104.0 580.0Q104.0 623.0 139.0 653.0Q174.0 683.0 221.0 683.0Q287.0 683.0 340.0 626.0Q393.0 569.0 393.0 518.0Q393.0 467.0 351.5 431.5Z"/><path fill="#FBF6EC" transform="translate(749.11,585.00) scale(0.33000,-0.33000)" d="M-58.0 881.0Q-100.0 881.0 -128.5 855.5Q-157.0 830.0 -157.0 782.0Q-157.0 714.0 -92.0 664.0L-134.0 646.0Q-174.0 673.0 -200.5 721.5Q-227.0 770.0 -227.0 823.0Q-227.0 876.0 -189.5 910.0Q-152.0 944.0 -98.0 944.0Q-44.0 944.0 6.0 913.0L-16.0 874.0Q-36.0 881.0 -58.0 881.0Z"/><line x1="437.0" y1="650" x2="569.0" y2="650" stroke="#E8890C" stroke-width="5" stroke-linecap="round"/><circle cx="587.0" cy="650" r="9" fill="#E8890C"/><path fill="#0F766E" transform="translate(407.25,760.00) scale(0.04600,-0.04600)" d="M494.0 142.0H203.0L153.0 0.0H34.0L283.0 696.0H415.0L664.0 0.0H544.0L494.0 142.0ZM462.0 235.0 349.0 558.0 235.0 235.0H462.0Z"/><path fill="#0F766E" transform="translate(469.31,760.00) scale(0.04600,-0.04600)" d="M436.0 0.0 276.0 278.0H189.0V0.0H75.0V695.0H315.0Q395.0 695.0 450.5 667.0Q506.0 639.0 533.5 592.0Q561.0 545.0 561.0 487.0Q561.0 419.0 521.5 363.5Q482.0 308.0 400.0 288.0L572.0 0.0H436.0ZM189.0 369.0H315.0Q379.0 369.0 411.5 401.0Q444.0 433.0 444.0 487.0Q444.0 541.0 412.0 571.5Q380.0 602.0 315.0 602.0H189.0V369.0Z"/><path fill="#0F766E" transform="translate(528.38,760.00) scale(0.04600,-0.04600)" d="M524.0 695.0V602.0H339.0V0.0H225.0V602.0H39.0V695.0H524.0Z"/><path fill="#0F766E" transform="translate(584.32,760.00) scale(0.04600,-0.04600)" d="M630.0 695.0V0.0H516.0V304.0H189.0V0.0H75.0V695.0H189.0V397.0H516.0V695.0H630.0Z"/></svg></div><span>The thinking behind it</span></div>
+  <div class="body">
+    <h2>Why it is different</h2>
+    <div class="vs">
+      <div class="item" style="--c: var(--saffron)"><h3>Who is checked</h3><div class="them">Many tools explain terms or screen calls.</div><div class="us">Arth checks whether the <b>borrower understood</b>, in their own words, and whether the <b>agent said</b> what the paper says.</div></div>
+      <div class="item" style="--c: var(--match)"><h3>Who decides</h3><div class="them">Many tools let an AI model judge.</div><div class="us">Fixed rules with unit tests decide. No AI judge, so every result traces back to evidence.</div></div>
+      <div class="item" style="--c: var(--primary)"><h3>How it is used</h3><div class="them">Many tools assume reading and typing.</div><div class="us">Zero reading: every screen speaks, buttons are large, no typing, and status is colour, icon and sound together.</div></div>
+      <div class="item" style="--c: var(--conflict)"><h3>Which models</h3><div class="them">Many tools mix several AI services.</div><div class="us">Only Gnani: Prisma listens, Timbre speaks. Real calls, nothing faked.</div></div>
+    </div>
+
+    <h2 style="--h: var(--primary)">What we researched</h2>
+    <div class="rows">
+      <div class="row"><b>The rule behind the gap</b><p>The RBI Key Facts Statement circular (RBI/2024-25/18, 15 Apr 2024). It decided which terms we check: loan amount, money in hand, instalment and how often, processing fee, tenure and late fee.</p></div>
+      <div class="row alt"><b>The Gnani APIs, read and tested</b><p>Prisma takes at most 30 seconds per clip and reads the format from the file name, so the browser encodes its own 16 kHz WAV. Prisma v3.0 returns numbers as digits. Only one request runs at a time, so every call shares one queue with retry. Timbre needs numbers written as words.</p></div>
+      <div class="row"><b>A real Hindi and English test</b><p>A spoken sample in the Gnani playground showed that the Hindi "nahi" comes <i>after</i> the field name: <span class="deva">आपको 30,000 का loan मिलेगा। EMI 2666 और processing fee नहीं लगेगी।</span> That exact output became a unit-test fixture.</p></div>
+      <div class="row alt"><b>The other entries</b><p>We looked at what others in the challenge built, to be sure we were solving a different problem: understanding, not explaining or scam-spotting.</p></div>
+      <div class="row"><b>The law on voice</b><p>Voice is not a legal e-signature in India; recordings can be evidence, and hashes help. So the wording is always "proof of understanding, alongside the signature".</p></div>
+      <div class="row alt"><b>Who we designed for</b><p>Someone who may not read the paper at all, helped by an agent, a family member or an SHG <i>didi</i>. That is where the zero-reading design and the helper mode come from.</p></div>
+    </div>
+
+  </div>
+  <div class="pageno">2 / 5</div>
+</section>
+
+<!-- ============ PAGE 3 ============ -->
+<section class="page">
+  <div class="bar"><div class="small-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="274 261 510 511" role="img" aria-label="Arth"><path fill="#FBF6EC" transform="translate(274.89,585.00) scale(0.33000,-0.33000)" d="M306.0 79.0Q254.0 79.0 208.0 106.5Q162.0 134.0 128.0 180.0Q69.0 263.0 34.0 353.0L78.0 378.0Q148.0 221.0 213.0 178.0Q243.0 159.0 276.0 159.0Q333.0 159.0 366.0 191.0Q399.0 223.0 399.0 275.0Q399.0 327.0 353.0 367.0Q318.0 343.0 259.0 320.0L211.0 399.0Q375.0 455.0 375.0 536.0Q375.0 565.0 354.5 584.0Q334.0 603.0 306.0 603.0Q245.0 603.0 185.0 539.0L122.0 602.0Q192.0 684.0 278.0 684.0Q341.0 684.0 392.5 623.0Q444.0 562.0 444.0 498.0Q444.0 449.0 398.0 406.0Q435.0 376.0 491.0 376.0Q522.0 376.0 553.5 390.5Q585.0 405.0 596.0 425.0V602.0H513.0Q501.0 622.0 483.0 647.5Q465.0 673.0 464.0 675.0H788.0L837.0 602.0H685.0V0.0L596.0 52.0L602.0 317.0Q573.0 298.0 536.0 298.0Q499.0 298.0 447.0 322.0Q471.0 283.0 471.0 238.0Q471.0 171.0 427.0 125.0Q383.0 79.0 306.0 79.0Z"/><path fill="#FBF6EC" transform="translate(529.65,585.00) scale(0.33000,-0.33000)" d="M351.5 431.5Q310.0 396.0 270.5 372.5Q231.0 349.0 226.0 345.5Q221.0 342.0 217.0 339.5Q213.0 337.0 211.5 336.0Q210.0 335.0 206.5 332.5Q203.0 330.0 202.0 328.0Q189.0 316.0 188.0 310.0Q187.0 304.0 187.0 300.0Q187.0 267.0 220.5 245.5Q254.0 224.0 299.0 224.0Q344.0 224.0 399.5 261.5Q455.0 299.0 489.0 345.0V602.0H422.0L373.0 675.0H685.0L734.0 602.0H578.0V0.0L489.0 57.0L494.0 229.0Q458.0 190.0 414.5 168.5Q371.0 147.0 332.0 147.0Q252.0 147.0 173.5 214.5Q95.0 282.0 95.0 349.0Q95.0 368.0 116.0 381.0Q124.0 386.0 169.5 410.0Q215.0 434.0 242.0 451.0Q269.0 468.0 295.5 496.0Q322.0 524.0 322.0 550.5Q322.0 577.0 301.0 597.0Q280.0 617.0 249.5 617.0Q219.0 617.0 196.5 597.5Q174.0 578.0 174.0 547.5Q174.0 517.0 205.0 491.0L166.0 464.0Q104.0 520.0 104.0 580.0Q104.0 623.0 139.0 653.0Q174.0 683.0 221.0 683.0Q287.0 683.0 340.0 626.0Q393.0 569.0 393.0 518.0Q393.0 467.0 351.5 431.5Z"/><path fill="#FBF6EC" transform="translate(749.11,585.00) scale(0.33000,-0.33000)" d="M-58.0 881.0Q-100.0 881.0 -128.5 855.5Q-157.0 830.0 -157.0 782.0Q-157.0 714.0 -92.0 664.0L-134.0 646.0Q-174.0 673.0 -200.5 721.5Q-227.0 770.0 -227.0 823.0Q-227.0 876.0 -189.5 910.0Q-152.0 944.0 -98.0 944.0Q-44.0 944.0 6.0 913.0L-16.0 874.0Q-36.0 881.0 -58.0 881.0Z"/><line x1="437.0" y1="650" x2="569.0" y2="650" stroke="#E8890C" stroke-width="5" stroke-linecap="round"/><circle cx="587.0" cy="650" r="9" fill="#E8890C"/><path fill="#0F766E" transform="translate(407.25,760.00) scale(0.04600,-0.04600)" d="M494.0 142.0H203.0L153.0 0.0H34.0L283.0 696.0H415.0L664.0 0.0H544.0L494.0 142.0ZM462.0 235.0 349.0 558.0 235.0 235.0H462.0Z"/><path fill="#0F766E" transform="translate(469.31,760.00) scale(0.04600,-0.04600)" d="M436.0 0.0 276.0 278.0H189.0V0.0H75.0V695.0H315.0Q395.0 695.0 450.5 667.0Q506.0 639.0 533.5 592.0Q561.0 545.0 561.0 487.0Q561.0 419.0 521.5 363.5Q482.0 308.0 400.0 288.0L572.0 0.0H436.0ZM189.0 369.0H315.0Q379.0 369.0 411.5 401.0Q444.0 433.0 444.0 487.0Q444.0 541.0 412.0 571.5Q380.0 602.0 315.0 602.0H189.0V369.0Z"/><path fill="#0F766E" transform="translate(528.38,760.00) scale(0.04600,-0.04600)" d="M524.0 695.0V602.0H339.0V0.0H225.0V602.0H39.0V695.0H524.0Z"/><path fill="#0F766E" transform="translate(584.32,760.00) scale(0.04600,-0.04600)" d="M630.0 695.0V0.0H516.0V304.0H189.0V0.0H75.0V695.0H189.0V397.0H516.0V695.0H630.0Z"/></svg></div><span>The thinking behind it</span></div>
+  <div class="body">
+    <h2>Consent, privacy and security, built in</h2>
+    <div class="checks">
+      <div class="check"><div class="tick">✓</div><b>Consent comes first.</b><p>In agent mode the agent records a spoken consent line before anything about the loan.</p></div>
+      <div class="check"><div class="tick">✓</div><b>Recording is always visible.</b><p>Recording starts only on a tap, with a red pill and timer on screen. Nothing records in the background.</p></div>
+      <div class="check"><div class="tick">✓</div><b>Every clip is labelled.</b><p>Agent, borrower or helper, so it is clear who said what.</p></div>
+      <div class="check"><div class="tick">✓</div><b>The borrower stays in control.</b><p>Any answer can be said again. There is no typing anywhere.</p></div>
+      <div class="check"><div class="tick">✓</div><b>One button wipes it.</b><p><span class="deva">"सब मिटाएँ"</span> clears the whole session. No login, no database: nothing is kept.</p></div>
+      <div class="check"><div class="tick">✓</div><b>The key never leaves the server.</b><p>The Gnani key lives only in server settings, never in the browser or in Git. Audio and document text are never logged.</p></div>
+      <div class="check"><div class="tick">✓</div><b>Hardened against misuse.</b><p>Rate limits and size caps on both voice routes, which accept only the models, voices and languages the app uses. Security headers on every page.</p></div>
+      <div class="check"><div class="tick">✓</div><b>Not a signature.</b><p>Voice is proof of understanding, alongside the signature.</p></div>
+    </div>
+
+    <h2 style="--h: var(--conflict)">Foul play we planned for</h2>
+    <div class="rows">
+      <div class="row"><b>From the agent</b><p>Verbal mis-selling ("no fee"), coaching the answers, "the app says it's fine". Answered by the field-by-field agent check, random teach-back questions and no verdict words.</p></div>
+      <div class="row alt"><b>From either side</b><p>"Nobody explained", or a disputed recording. Answered by speaker labels, the agent's consent clip, and SHA-256 fingerprints of the paper and every clip on one receipt shared with both sides.</p></div>
+      <div class="row"><b>Out of scope, said openly</b><p>An agent and a borrower working together to fool the check. And Arth does not prove whose voice it heard.</p></div>
+    </div>
+  </div>
+  <div class="pageno">3 / 5</div>
+</section>
+
+<!-- ============ PAGE 4 (design) ============ -->
+<section class="page">
+  <div class="bar"><div class="small-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="274 261 510 511" role="img" aria-label="Arth"><path fill="#FBF6EC" transform="translate(274.89,585.00) scale(0.33000,-0.33000)" d="M306.0 79.0Q254.0 79.0 208.0 106.5Q162.0 134.0 128.0 180.0Q69.0 263.0 34.0 353.0L78.0 378.0Q148.0 221.0 213.0 178.0Q243.0 159.0 276.0 159.0Q333.0 159.0 366.0 191.0Q399.0 223.0 399.0 275.0Q399.0 327.0 353.0 367.0Q318.0 343.0 259.0 320.0L211.0 399.0Q375.0 455.0 375.0 536.0Q375.0 565.0 354.5 584.0Q334.0 603.0 306.0 603.0Q245.0 603.0 185.0 539.0L122.0 602.0Q192.0 684.0 278.0 684.0Q341.0 684.0 392.5 623.0Q444.0 562.0 444.0 498.0Q444.0 449.0 398.0 406.0Q435.0 376.0 491.0 376.0Q522.0 376.0 553.5 390.5Q585.0 405.0 596.0 425.0V602.0H513.0Q501.0 622.0 483.0 647.5Q465.0 673.0 464.0 675.0H788.0L837.0 602.0H685.0V0.0L596.0 52.0L602.0 317.0Q573.0 298.0 536.0 298.0Q499.0 298.0 447.0 322.0Q471.0 283.0 471.0 238.0Q471.0 171.0 427.0 125.0Q383.0 79.0 306.0 79.0Z"/><path fill="#FBF6EC" transform="translate(529.65,585.00) scale(0.33000,-0.33000)" d="M351.5 431.5Q310.0 396.0 270.5 372.5Q231.0 349.0 226.0 345.5Q221.0 342.0 217.0 339.5Q213.0 337.0 211.5 336.0Q210.0 335.0 206.5 332.5Q203.0 330.0 202.0 328.0Q189.0 316.0 188.0 310.0Q187.0 304.0 187.0 300.0Q187.0 267.0 220.5 245.5Q254.0 224.0 299.0 224.0Q344.0 224.0 399.5 261.5Q455.0 299.0 489.0 345.0V602.0H422.0L373.0 675.0H685.0L734.0 602.0H578.0V0.0L489.0 57.0L494.0 229.0Q458.0 190.0 414.5 168.5Q371.0 147.0 332.0 147.0Q252.0 147.0 173.5 214.5Q95.0 282.0 95.0 349.0Q95.0 368.0 116.0 381.0Q124.0 386.0 169.5 410.0Q215.0 434.0 242.0 451.0Q269.0 468.0 295.5 496.0Q322.0 524.0 322.0 550.5Q322.0 577.0 301.0 597.0Q280.0 617.0 249.5 617.0Q219.0 617.0 196.5 597.5Q174.0 578.0 174.0 547.5Q174.0 517.0 205.0 491.0L166.0 464.0Q104.0 520.0 104.0 580.0Q104.0 623.0 139.0 653.0Q174.0 683.0 221.0 683.0Q287.0 683.0 340.0 626.0Q393.0 569.0 393.0 518.0Q393.0 467.0 351.5 431.5Z"/><path fill="#FBF6EC" transform="translate(749.11,585.00) scale(0.33000,-0.33000)" d="M-58.0 881.0Q-100.0 881.0 -128.5 855.5Q-157.0 830.0 -157.0 782.0Q-157.0 714.0 -92.0 664.0L-134.0 646.0Q-174.0 673.0 -200.5 721.5Q-227.0 770.0 -227.0 823.0Q-227.0 876.0 -189.5 910.0Q-152.0 944.0 -98.0 944.0Q-44.0 944.0 6.0 913.0L-16.0 874.0Q-36.0 881.0 -58.0 881.0Z"/><line x1="437.0" y1="650" x2="569.0" y2="650" stroke="#E8890C" stroke-width="5" stroke-linecap="round"/><circle cx="587.0" cy="650" r="9" fill="#E8890C"/><path fill="#0F766E" transform="translate(407.25,760.00) scale(0.04600,-0.04600)" d="M494.0 142.0H203.0L153.0 0.0H34.0L283.0 696.0H415.0L664.0 0.0H544.0L494.0 142.0ZM462.0 235.0 349.0 558.0 235.0 235.0H462.0Z"/><path fill="#0F766E" transform="translate(469.31,760.00) scale(0.04600,-0.04600)" d="M436.0 0.0 276.0 278.0H189.0V0.0H75.0V695.0H315.0Q395.0 695.0 450.5 667.0Q506.0 639.0 533.5 592.0Q561.0 545.0 561.0 487.0Q561.0 419.0 521.5 363.5Q482.0 308.0 400.0 288.0L572.0 0.0H436.0ZM189.0 369.0H315.0Q379.0 369.0 411.5 401.0Q444.0 433.0 444.0 487.0Q444.0 541.0 412.0 571.5Q380.0 602.0 315.0 602.0H189.0V369.0Z"/><path fill="#0F766E" transform="translate(528.38,760.00) scale(0.04600,-0.04600)" d="M524.0 695.0V602.0H339.0V0.0H225.0V602.0H39.0V695.0H524.0Z"/><path fill="#0F766E" transform="translate(584.32,760.00) scale(0.04600,-0.04600)" d="M630.0 695.0V0.0H516.0V304.0H189.0V0.0H75.0V695.0H189.0V397.0H516.0V695.0H630.0Z"/></svg></div><span>The thinking behind it</span></div>
+  <div class="body">
+    <h2 style="--h: var(--match)">Why it is built this way</h2>
+    <div class="rows">
+      <div class="row"><b>Voice-first, zero reading</b><p>The borrower may not read. Every screen speaks, buttons are large, and status is colour plus icon plus sound: ✅ chime, ❌ buzz, ❔ grey.</p></div>
+      <div class="row alt"><b>Teach-back, not a quiz</b><p>Explaining in their own words shows more than tapping "yes". Open questions come in random order, including "what happens if you miss an instalment?"</p></div>
+      <div class="row"><b>No LLM decides anything</b><p>Money terms cannot be guessed. Fixed rules with <b>553 unit tests</b> make every comparison traceable to evidence.</p></div>
+      <div class="row alt"><b>Unknown stays unknown</b><p>A missing value is "not mentioned", never zero. A different unit or frequency (weekly vs monthly) is "couldn't check", never a conflict.</p></div>
+      <div class="row"><b>Money as pictures</b><p>Amounts are shown as notes and coins with digits (₹1,500 = 3 × ₹500), and spoken as words.</p></div>
+      <div class="row alt"><b>Careful words</b><p>Matched, different, not mentioned or couldn't check, plus the question to ask. Never "safe", "approved", "verified" or "fraud".</p></div>
+    </div>
+
+    <h2 style="--h: var(--conflict)">What we chose not to do</h2>
+    <div class="chips">
+      <span class="chip">No AI judge</span><span class="chip">No OCR</span><span class="chip">No voice biometrics</span><span class="chip">No voice cloning</span>
+      <span class="chip">No face recognition</span><span class="chip">No APR unless validated</span><span class="chip">No real data</span><span class="chip">No legal-signature claim</span>
+    </div>
+    <h2 style="--h: var(--primary)">Languages today</h2>
+    <table class="lang">
+      <tr><td><b>Hindi</b>, <b>English</b></td><td><span class="st s">Stable</span></td><td>Full flow, two voices each</td></tr>
+      <tr><td><b>Marathi</b></td><td><span class="st r">Under review</span></td><td>Selectable, wording being checked by a native speaker</td></tr>
+      <tr><td>Bengali, Gujarati, Kannada, Malayalam, Punjabi, Tamil, Telugu</td><td><span class="st b">Beta</span></td><td>Listed, not selectable yet</td></tr>
+    </table>
+
+  </div>
+  <div class="pageno">4 / 5</div>
+</section>
+
+<!-- ============ PAGE 5 ============ -->
+<section class="page">
+  <div class="bar"><div class="small-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="274 261 510 511" role="img" aria-label="Arth"><path fill="#FBF6EC" transform="translate(274.89,585.00) scale(0.33000,-0.33000)" d="M306.0 79.0Q254.0 79.0 208.0 106.5Q162.0 134.0 128.0 180.0Q69.0 263.0 34.0 353.0L78.0 378.0Q148.0 221.0 213.0 178.0Q243.0 159.0 276.0 159.0Q333.0 159.0 366.0 191.0Q399.0 223.0 399.0 275.0Q399.0 327.0 353.0 367.0Q318.0 343.0 259.0 320.0L211.0 399.0Q375.0 455.0 375.0 536.0Q375.0 565.0 354.5 584.0Q334.0 603.0 306.0 603.0Q245.0 603.0 185.0 539.0L122.0 602.0Q192.0 684.0 278.0 684.0Q341.0 684.0 392.5 623.0Q444.0 562.0 444.0 498.0Q444.0 449.0 398.0 406.0Q435.0 376.0 491.0 376.0Q522.0 376.0 553.5 390.5Q585.0 405.0 596.0 425.0V602.0H513.0Q501.0 622.0 483.0 647.5Q465.0 673.0 464.0 675.0H788.0L837.0 602.0H685.0V0.0L596.0 52.0L602.0 317.0Q573.0 298.0 536.0 298.0Q499.0 298.0 447.0 322.0Q471.0 283.0 471.0 238.0Q471.0 171.0 427.0 125.0Q383.0 79.0 306.0 79.0Z"/><path fill="#FBF6EC" transform="translate(529.65,585.00) scale(0.33000,-0.33000)" d="M351.5 431.5Q310.0 396.0 270.5 372.5Q231.0 349.0 226.0 345.5Q221.0 342.0 217.0 339.5Q213.0 337.0 211.5 336.0Q210.0 335.0 206.5 332.5Q203.0 330.0 202.0 328.0Q189.0 316.0 188.0 310.0Q187.0 304.0 187.0 300.0Q187.0 267.0 220.5 245.5Q254.0 224.0 299.0 224.0Q344.0 224.0 399.5 261.5Q455.0 299.0 489.0 345.0V602.0H422.0L373.0 675.0H685.0L734.0 602.0H578.0V0.0L489.0 57.0L494.0 229.0Q458.0 190.0 414.5 168.5Q371.0 147.0 332.0 147.0Q252.0 147.0 173.5 214.5Q95.0 282.0 95.0 349.0Q95.0 368.0 116.0 381.0Q124.0 386.0 169.5 410.0Q215.0 434.0 242.0 451.0Q269.0 468.0 295.5 496.0Q322.0 524.0 322.0 550.5Q322.0 577.0 301.0 597.0Q280.0 617.0 249.5 617.0Q219.0 617.0 196.5 597.5Q174.0 578.0 174.0 547.5Q174.0 517.0 205.0 491.0L166.0 464.0Q104.0 520.0 104.0 580.0Q104.0 623.0 139.0 653.0Q174.0 683.0 221.0 683.0Q287.0 683.0 340.0 626.0Q393.0 569.0 393.0 518.0Q393.0 467.0 351.5 431.5Z"/><path fill="#FBF6EC" transform="translate(749.11,585.00) scale(0.33000,-0.33000)" d="M-58.0 881.0Q-100.0 881.0 -128.5 855.5Q-157.0 830.0 -157.0 782.0Q-157.0 714.0 -92.0 664.0L-134.0 646.0Q-174.0 673.0 -200.5 721.5Q-227.0 770.0 -227.0 823.0Q-227.0 876.0 -189.5 910.0Q-152.0 944.0 -98.0 944.0Q-44.0 944.0 6.0 913.0L-16.0 874.0Q-36.0 881.0 -58.0 881.0Z"/><line x1="437.0" y1="650" x2="569.0" y2="650" stroke="#E8890C" stroke-width="5" stroke-linecap="round"/><circle cx="587.0" cy="650" r="9" fill="#E8890C"/><path fill="#0F766E" transform="translate(407.25,760.00) scale(0.04600,-0.04600)" d="M494.0 142.0H203.0L153.0 0.0H34.0L283.0 696.0H415.0L664.0 0.0H544.0L494.0 142.0ZM462.0 235.0 349.0 558.0 235.0 235.0H462.0Z"/><path fill="#0F766E" transform="translate(469.31,760.00) scale(0.04600,-0.04600)" d="M436.0 0.0 276.0 278.0H189.0V0.0H75.0V695.0H315.0Q395.0 695.0 450.5 667.0Q506.0 639.0 533.5 592.0Q561.0 545.0 561.0 487.0Q561.0 419.0 521.5 363.5Q482.0 308.0 400.0 288.0L572.0 0.0H436.0ZM189.0 369.0H315.0Q379.0 369.0 411.5 401.0Q444.0 433.0 444.0 487.0Q444.0 541.0 412.0 571.5Q380.0 602.0 315.0 602.0H189.0V369.0Z"/><path fill="#0F766E" transform="translate(528.38,760.00) scale(0.04600,-0.04600)" d="M524.0 695.0V602.0H339.0V0.0H225.0V602.0H39.0V695.0H524.0Z"/><path fill="#0F766E" transform="translate(584.32,760.00) scale(0.04600,-0.04600)" d="M630.0 695.0V0.0H516.0V304.0H189.0V0.0H75.0V695.0H189.0V397.0H516.0V695.0H630.0Z"/></svg></div><span>The thinking behind it</span></div>
+  <div class="body">
+    <h2>From plan to product: what changed, and why</h2>
+    <div class="changes">
+      <div class="chg"><div class="k">LoanLens → Arth<small>name</small></div><p>The plan was called LoanLens. The product became <b>Arth</b> (<span class="deva">अर्थ</span>): one word that means both "meaning" and "wealth", and is understood across many Indian languages (<span class="deva">अर्थ</span> · অর্থ · અર્થ).</p></div>
+      <div class="chg"><div class="k">Camera OCR dropped<small>paper input</small></div><p>Reading a photo needs a third-party AI model. Arth reads <b>text-based KFS PDFs and a QR code</b> with plain code instead; "lenders print one QR on the KFS".</p></div>
+      <div class="chg"><div class="k">Teach-back made exact<small>the gate</small></div><p>Checked <b>point by point</b>: money in hand, instalment and how often, fee, and what a missed instalment costs. A wrong number re-explains only that point; three tries on one point stops the flow.</p></div>
+      <div class="chg"><div class="k">More than Hindi<small>languages</small></div><p>Hindi and English are stable, Marathi is under native review, and seven more Gnani languages are listed as Beta but cannot be selected until a native speaker checks the wording.</p></div>
+      <div class="chg"><div class="k">Instant, still real<small>speed</small></div><p>Fixed prompts were generated once with <b>real Timbre calls</b> and stored, so screens speak at once. Anything else is spoken live; all listening is live Prisma.</p></div>
+      <div class="chg"><div class="k">Share to Arth<small>phone</small></div><p>Installed on an Android phone, Arth appears in the share sheet, so a KFS PDF received on WhatsApp opens straight in the app.</p></div>
+      <div class="chg"><div class="k">Security pass<small>before judging</small></div><p>Key and Git history audited (no leaks), voice routes locked to the app's own settings, test pages hidden, security headers added, dependencies patched.</p></div>
+    </div>
+
+    <h2 style="--h: var(--saffron)">Honest limits</h2>
+    <div class="limits"><b>A prototype</b><div>Accuracy has not been measured on real borrowers, so no accuracy figure is claimed. Hindi is the most tested flow. Arth does not prove whose voice it heard, and it checks only the listed terms. All data is synthetic, and the call check runs on a synthetic call only.</div></div>
+  </div>
+  <footer class="foot">
+    <div class="l1">Built with Gnani Prisma v3.0 (listens) and Gnani Timbre v2.5 (speaks). Plain rules decide.</div>
+    <div class="l2"><span><a href="https://loanlens-mauve.vercel.app">loanlens-mauve.vercel.app</a> &nbsp; #GnaniAI #GreatIndianAIInternshipChallenge &nbsp;·&nbsp; Built solo by Ananya Pandey</span><span>5 / 5</span></div>
+    <div class="l2"><span>Sample data only. Proof of understanding, not a signature and not a loan approval.</span></div>
+  </footer>
+</section>
+
+</body>
+</html>

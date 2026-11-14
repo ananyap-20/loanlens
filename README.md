@@ -1,41 +1,50 @@
-# Arth · अर्थ
+<p align="center">
+  <img src="brand/arth-logo-with-background.svg" alt="Arth (अर्थ) logo" width="130" />
+</p>
 
-**Arth: know what it means before you sign.**
+<h1 align="center">Arth · अर्थ</h1>
 
-**A thumbprint proves who signed. Arth checks that the borrower understood.**
+<p align="center">
+  <b>Know what it means before you sign.</b><br />
+  A thumbprint proves who signed. Arth checks that the borrower understood.
+</p>
+
+<p align="center">
+  <a href="Arth_Thinking_Behind_It.pdf"><b>📄 Read the thinking behind Arth (PDF)</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://loanlens-mauve.vercel.app"><b>▶️ Try the live app</b></a>
+  &nbsp;·&nbsp;
+  <b>🎬 Walkthrough video:</b> link coming <!-- WALKTHROUGH_VIDEO_LINK: paste here -->
+</p>
+
+<p align="center">
+  <a href="Arth_Thinking_Behind_It.pdf"><img src="docs/images/thinking-cover.png" alt="Page 1 of the PDF 'The thinking behind Arth': the problem, the idea, and how it works" width="430" /></a><br />
+  <sub>Click the page to open the full 5-page PDF: the problem, the research, consent and privacy, the design choices, and what changed from plan to product.</sub>
+</p>
 
 > **Artificial intelligence is the tool. Real intelligence is the brain.**
-
-*Arth, from the Sanskrit artha: meaning, and wealth.*
-
-अर्थ · अर्थम् · অর্থ · અર્થ
-
-📄 Read [the thinking behind Arth (PDF, written under the earlier working name LoanLens)](docs/LoanLens_Thinking_Behind_It.pdf): why it is built this way, consent and privacy, what was researched, and how it differs. There is also [the one-page pitch (PDF, written under the earlier working name LoanLens)](LoanLens_Pitch.pdf) and its text version, [PITCH.md](PITCH.md).
+> Arth, from the Sanskrit *artha*: meaning, and wealth. Built solo for the Gnani AI Great Indian AI Internship Challenge, using only Gnani AI models.
 
 > Voice is **not** a legal signature. The receipt is **proof of understanding, alongside the signature**. It is not a signature, not a loan approval, and not a verdict on any lender.
-
-## Watch the 90-second walkthrough
-
-▶️ Walkthrough video: **[link to be added]** <!-- WALKTHROUGH_VIDEO_LINK: paste here -->
 
 ## Try it in 60 seconds
 
 1. Open **https://loanlens-mauve.vercel.app** on a phone (Chrome on Android works best), with the sound on.
-2. Tap **शुरू करें** (Start), then **1 · सिर्फ़ मैं** (only me).
-3. Tap **3 · नमूना** (Sample) to load the built-in sample paper.
+2. Tap **→**, then **▶️ शुरू करें** (Start), then **1 · सिर्फ़ मैं** (only me).
+3. Tap **🧪 3 · नमूना** (Sample) to load the built-in sample paper.
 4. Follow the spoken instructions. Every screen speaks; 🔁 replays it and 🐢 plays it slower.
 
 The sample paper is synthetic: a fictional lender ("Sahyog Finance (fictional)") and fictional terms.
 
 ## Screenshots
 
+Real screens from the app on a phone-sized screen.
+
 <p>
-  <img src="docs/screens/01-welcome.png" alt="Welcome screen: the Arth wordmark, language picker and Start button" width="180" />
-  <img src="docs/screens/02-explain.png" alt="The sample paper explained as picture cards with notes and coins" width="180" />
-  <img src="docs/screens/03-agent-conflict.png" alt="Agent check: the agent said no processing fee, the paper says ₹1,500, shown as ❌ different" width="180" />
-  <img src="docs/screens/04-teachback.png" alt="Teach-back: the borrower explains the loan in their own words" width="180" />
-  <img src="docs/screens/05-result.png" alt="Result: what matched, what was different, questions to ask the lender and where to complain" width="180" />
-  <img src="docs/screens/06-receipt.png" alt="Receipt: PDF pages and the receipt fingerprint, ready to share" width="180" />
+  <img src="docs/screens/01-welcome.png" alt="Welcome: the Arth logo, the language picker with Beta tags, two voices and the Start button" width="190" />
+  <img src="docs/screens/02-who.png" alt="Who is here: only me, or me plus the agent" width="190" />
+  <img src="docs/screens/03-explain.png" alt="The sample paper explained as cards: loan amount, money in hand and processing fee, each with digits, words and ₹500 notes" width="190" />
+  <img src="docs/screens/04-teachback.png" alt="Teach-back: the borrower is asked how much the instalment is and how often, with point-by-point progress and a microphone button" width="190" />
 </p>
 
 ## How it works
@@ -92,13 +101,34 @@ What we ran into while building this project:
 - **Timbre needs numbers written as spoken words** ("पंद्रह सौ रुपये", not "₹1,500"), so every spoken amount is converted to words first.
 - **Static prompts are cached**: pre-generated clips for the fixed prompts, and an in-memory cache for anything already spoken in the session.
 
-## Privacy and safety
+## Privacy and security
 
 - Nothing is recorded in the background. Recording starts only on a tap and is always shown on screen (a red "recording" pill with a timer).
 - The agent records a spoken consent line before anything about the loan is recorded.
 - One big button clears everything from the session. There is no database and no login.
-- `GNANI_API_KEY` is read only on the server (`lib/gnani/server.ts`), is never sent to the browser, and `.env*` is gitignored. The API routes do not log audio, text or request bodies.
-- The two API routes have a best-effort per-IP rate limit (60 requests per 5 minutes each), a 2 MB cap on uploaded audio and a 600-character cap on text to speak.
+- `GNANI_API_KEY` is read only on the server (`lib/gnani/server.ts`), is never sent to the browser, and `.env*` is gitignored. Git history has been checked: the key was never committed. The API routes do not log audio, text or request bodies.
+- The two API routes have a best-effort per-IP rate limit (60 requests per 5 minutes each), a 2 MB cap on uploaded audio and a 600-character cap on text to speak, and they accept only the models, voices and languages the app uses (`lib/gnani/allowed.ts`).
+- Every page is served with security headers (no framing by other sites, no content-type sniffing, microphone and camera allowed for this site only). Developer test pages (`/smoke`, `/paper`) exist only under `npm run dev`.
+
+## What's where
+
+| Path | What it holds |
+|---|---|
+| [`Arth_Thinking_Behind_It.pdf`](Arth_Thinking_Behind_It.pdf) | The planning and design write-up (5 pages) |
+| [`docs/PITCH.md`](docs/PITCH.md) | One-page pitch, as text |
+| `docs/source/` | Source of the PDF; `node docs/source/build-pdf.mjs` rebuilds it and its README preview |
+| `docs/screens/`, `docs/images/` | README screenshots and the PDF preview |
+| `app/` | Next.js screens (`app/flow/`), the call check (`app/call/`) and the two API routes (`app/api/`) |
+| `lib/engine/` | The deterministic rules: number parsing, claim extraction, comparison |
+| `lib/paper/` | Reading the KFS from a PDF or QR |
+| `lib/audio/` | Recording, WAV encoding, playback, stored prompts |
+| `lib/gnani/` | Server-side Gnani access, the request queue and the allowed settings |
+| `lib/i18n/` | Language packs (Hindi, English, Marathi, Beta languages) |
+| `lib/receipt/` | The shareable PDF receipt and SHA-256 fingerprints |
+| `tests/` | Unit tests (vitest) |
+| `scripts/`, `eval/` | Clip generators and the evaluation runner |
+| `public/` | Icons, stored Timbre prompts (`public/audio`), the sample KFS and sample call |
+| `brand/` | Logo sources |
 
 ## Run locally
 
@@ -113,7 +143,7 @@ npm run build
 
 ## Tests
 
-`npm test` runs **538 tests** (29 files, all passing at the time of writing): number parsing in Hindi, Hinglish and Devanagari words, the fee conflict (₹1,500 vs "nahi"), missing values staying "not mentioned", weekly vs monthly as "couldn't check", the teach-back check, paper reading, the receipt, the request queue and the API route limits.
+`npm test` runs **553 tests** (31 files, all passing at the time of writing): number parsing in Hindi, Hinglish and Devanagari words, the fee conflict (₹1,500 vs "nahi"), missing values staying "not mentioned", weekly vs monthly as "couldn't check", the teach-back check, paper reading, the receipt, the request queue, and the API route limits and allowed settings.
 
 ## Eval
 
