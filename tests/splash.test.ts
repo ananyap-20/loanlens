@@ -9,7 +9,7 @@ vi.mock("@/lib/audio/voice", async (importOriginal) => ({
   unlockAudio: vi.fn(() => order.push("unlock")),
 }));
 
-const { splashTap } = await import("@/app/flow/screens/Splash");
+const { splashTap, splashGreetings, Splash } = await import("@/app/flow/screens/Splash");
 const { ReplayButtons } = await import("@/app/flow/ui");
 const { LangProvider } = await import("@/app/flow/lang");
 const { SpeechProvider } = await import("@/app/flow/speech");
@@ -34,6 +34,27 @@ describe("splash tap", () => {
     splashTap(say, PACKS.hi.say!.splash, onStart);
     expect(order).toEqual(["unlock", `say:${PACKS.hi.say!.splash}`, "navigate"]); // navigated while speech still pending
     finish(true);
+  });
+});
+
+describe("splash screen", () => {
+  it("rotates the greeting through the ready languages only: Hindi, English, Marathi, never a Beta pack", () => {
+    const g = splashGreetings();
+    expect(g.map((x) => x.code)).toEqual(["hi", "en", "mr"]);
+    expect(g.map((x) => x.text)).toEqual([PACKS.hi.say!.splash, PACKS.en.say!.splash, PACKS.mr.say!.splash]);
+  });
+  it("shows the logo and a single arrow-only button that still has an accessible name", () => {
+    const html = renderToStaticMarkup(
+      createElement(LangProvider, null, createElement(SpeechProvider, null, createElement(Splash, { onStart: () => {} }))),
+    );
+    expect(html).toContain("/arth-logo.svg");
+    expect(html.match(/<button/g)).toHaveLength(1);
+    const start = PACKS.hi.ui!.start;
+    expect(html).toContain("/arth-logo.svg");
+    expect(html.match(/<button/g)).toHaveLength(1);
+    expect(html).toContain(`aria-label="${start}"`);
+    expect(html).toContain("→");
+    expect(html).not.toContain(`>${start}<`); // no visible label: the arrow works in any language
   });
 });
 
