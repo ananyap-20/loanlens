@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { unlockAudio } from "@/lib/audio/voice";
 import { getPack, PACKS, voiceFor } from "@/lib/i18n";
 import { langStatus } from "@/lib/i18n/status";
@@ -10,9 +11,23 @@ import { focusRing, primary, ReplayButtons } from "../ui";
 // Language picker + voice (Voice 1 / Voice 2) + start. Each selectable language speaks a short line in that
 // language. Languages without a finished wording pack are listed with a "Beta" tag but cannot be selected
 // (nothing ever falls back to another language's words). Any tap here also unlocks audio for the session.
-export function Welcome({ onStart }: { onStart: () => void }) {
+// Reached from the splash tap (`afterSplash` set): once the splash line has finished (or failed), speak the
+// language instruction once — unless the person already tapped something here.
+export function Welcome({ afterSplash, onStart }: { afterSplash: Promise<boolean> | null; onStart: () => void }) {
   const { pack, gender, setLang, setGender } = useLang();
-  const { say } = useSpeech();
+  const { say, error } = useSpeech();
+  const touched = useRef(false);
+  const instruction = pack.say.chooseLang;
+  useEffect(() => {
+    if (!afterSplash) return;
+    let live = true;
+    void afterSplash.then(() => {
+      if (live && !touched.current) void say(instruction);
+    });
+    return () => {
+      live = false;
+    };
+  }, [afterSplash, instruction, say]);
   const canMale = !!pack.timbre.voices.male;
   const canFemale = !!pack.timbre.voices.female;
   const status = langStatus(pack.code);
@@ -20,8 +35,8 @@ export function Welcome({ onStart }: { onStart: () => void }) {
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center gap-4 bg-cream px-5 pb-4 pt-4 text-center text-ink">
-      <ReplayButtons text={pack.greeting} className="absolute right-5 top-4" />
-      <div className="flex w-full flex-1 flex-col items-center justify-center gap-3 pt-16">
+      <ReplayButtons text={instruction} className="absolute right-5 top-4" onTap={() => (touched.current = true)} />
+      <div className="flex w-full flex-1 flex-col items-center justify-center gap-3 pt-20">
         <h1 className="flex items-baseline gap-3">
           <span lang="en" className="flex items-baseline text-5xl font-semibold tracking-tight">
             Arth
@@ -36,6 +51,11 @@ export function Welcome({ onStart }: { onStart: () => void }) {
           <span lang="hi">अर्थ</span> · <span lang="sa">अर्थम्</span> · <span lang="bn">অর্থ</span> · <span lang="gu">અર્થ</span>
         </p>
         <p className="text-sm text-muted">Proof of understanding, alongside the signature.</p>
+        {error && (
+          <p className="w-full rounded-chip border border-conflict/30 bg-conflict-soft p-3 text-lg text-conflict" role="alert">
+            {pack.ui.audioFailed.replace("{error}", error)}
+          </p>
+        )}
 
         <section className="mt-2 flex w-full flex-col gap-3" aria-label="language">
           <p className="text-base font-semibold">🗣️ {pack.ui.chooseLanguage}</p>
@@ -56,6 +76,7 @@ export function Welcome({ onStart }: { onStart: () => void }) {
                     selected ? "border-primary bg-primary text-white" : "border-line bg-surface"
                   }`}
                   onClick={() => {
+                    touched.current = true;
                     unlockAudio();
                     setLang(p.code);
                     applyVoice(getPack(p.code), voiceFor(getPack(p.code), gender).gender); // before speaking the greeting
@@ -87,6 +108,7 @@ export function Welcome({ onStart }: { onStart: () => void }) {
                   aria-pressed={gender === g}
                   className={`min-h-14 rounded-chip border-2 px-2 text-base font-semibold disabled:opacity-40 ${focusRing} ${gender === g ? "border-primary bg-primary/10" : "border-line bg-surface"}`}
                   onClick={() => {
+                    touched.current = true;
                     unlockAudio();
                     setGender(g);
                     applyVoice(pack, g);
@@ -103,6 +125,7 @@ export function Welcome({ onStart }: { onStart: () => void }) {
         <button
           className={`${primary} mt-2 min-h-20 text-3xl`}
           onClick={() => {
+            touched.current = true;
             unlockAudio();
             onStart();
           }}

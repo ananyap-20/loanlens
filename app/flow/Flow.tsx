@@ -17,6 +17,7 @@ import { Consent } from "./screens/Consent";
 import { Explain } from "./screens/Explain";
 import { Paper } from "./screens/Paper";
 import { Result } from "./screens/Result";
+import { Splash } from "./screens/Splash";
 import { TeachBack } from "./screens/TeachBack";
 import { Welcome } from "./screens/Welcome";
 import { Who } from "./screens/Who";
@@ -49,6 +50,10 @@ function FlowSteps() {
   const [gate, setGate] = useState<GateState | null>(null);
   const [handedTo, setHandedTo] = useState<"agent" | "borrower" | null>(null); // who has been handed the phone
   const nextId = useRef(1);
+  // Splash: once per page load. `splashSpoken` = the spoken welcome started by the splash tap; Welcome waits for it
+  // before its own instruction. null = Welcome was not reached from the splash (e.g. after "सब मिटाएँ").
+  const [splashDone, setSplashDone] = useState(false);
+  const [splashSpoken, setSplashSpoken] = useState<Promise<boolean> | null>(null);
 
   // A PDF shared to Arth arrives as /?shared=1 (see public/sw.js). Read the flag once, clean the URL.
   useEffect(() => {
@@ -90,6 +95,7 @@ function FlowSteps() {
     setChecks([]);
     setGate(null);
     setHandedTo(null);
+    setSplashSpoken(null);
     nextId.current = 1;
     setStep("welcome");
     void speak(t.cleared).catch(() => undefined);
@@ -108,7 +114,15 @@ function FlowSteps() {
 
   return (
     <SpeechProvider>
-      {step === "welcome" && <Welcome onStart={() => setStep("who")} />}
+      {step === "welcome" && !splashDone && (
+        <Splash
+          onStart={(spoken) => {
+            setSplashSpoken(spoken);
+            setSplashDone(true);
+          }}
+        />
+      )}
+      {step === "welcome" && splashDone && <Welcome afterSplash={splashSpoken} onStart={() => setStep("who")} />}
       {step === "who" && (
         <Who
           dots={dots}

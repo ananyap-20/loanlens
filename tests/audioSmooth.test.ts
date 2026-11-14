@@ -147,11 +147,11 @@ describe("static prompts", () => {
     expect(staticKeyFor("en", "female")).toBe("en-1");
   });
 
-  it("the fixed prompts are the Welcome, who-is-present, paper, handover, consent and agent-question lines, digit-free, within the Timbre limit", () => {
+  it("the fixed prompts are the splash, Welcome instruction, Welcome greeting, who-is-present, paper, handover, consent and agent-question lines, digit-free, within the Timbre limit", () => {
     for (const code of ["hi", "en", "mr"] as const) {
       const prompts = staticPrompts(PACKS[code]);
       expect(prompts.map((p) => p.id)).toEqual([
-        "greeting", "who", "paper", "handover-agent", "handover-borrower", "consent", "consent-done",
+        "splash", "choose-lang", "greeting", "who", "paper", "handover-agent", "handover-borrower", "consent", "consent-done",
         "agent-ask-loan_amount", "agent-ask-installment", "agent-ask-processing_fee", "agent-ask-tenure", "agent-ask-late_fee",
       ]);
       for (const p of prompts) {
@@ -187,8 +187,8 @@ describe("static prompts", () => {
         }
       }
     }
-    expect(n).toBe(78); // 3 languages x 2 voices x 13 prompts
-    expect(manifest.files.length).toBe(78);
+    expect(n).toBe(90); // 3 languages x 2 voices x 15 prompts
+    expect(manifest.files.length).toBe(90);
   });
 });
 

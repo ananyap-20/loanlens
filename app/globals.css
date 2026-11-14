@@ -71,6 +71,19 @@ body {
   animation: arth-pulse-ring 1.6s ease-out infinite;
 }
 
+/* Splash logo: one gentle fade-in, never looping. */
+@keyframes arth-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.fade-in {
+  animation: arth-fade-in 250ms ease-out both;
+}
+
 /* Bank notes: a faint paper grain, no image files. */
 .note-paper {
   background-image:
@@ -92,6 +105,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .pulse-ring,
+  .fade-in,
   .animate-pulse {
     animation: none !important;
   }

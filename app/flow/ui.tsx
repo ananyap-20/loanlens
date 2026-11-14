@@ -43,23 +43,32 @@ export function Dots({ total, current }: { total: number; current: number }) {
   );
 }
 
-/** Big 🔁 replay and 🐢 slow (0.85) buttons for a screen's spoken text; labelled in the selected language. */
-export function ReplayButtons({ text, className = "" }: { text: string; className?: string }) {
+/**
+ * Big 🔁 replay and 🐢 slow (0.85) buttons for a screen's spoken text: icon on top, the pack's own
+ * "say again" / "say slowly" word below (icon only if the pack has no word). Same place on every screen.
+ */
+export function ReplayButtons({ text, className = "", onTap }: { text: string; className?: string; onTap?: () => void }) {
   const { say, speaking } = useSpeech();
   const { ui } = useLang().pack;
-  const round = `press flex h-16 w-16 items-center justify-center rounded-full border border-line bg-cream text-3xl text-ink shadow-soft ${focusRing} ${speaking ? "pulse-ring" : ""}`;
+  const btn = `press flex min-h-16 min-w-[88px] flex-col items-center justify-center gap-0.5 rounded-btn border border-line bg-cream px-2 py-1.5 text-ink shadow-soft ${focusRing} ${speaking ? "pulse-ring" : ""}`;
   const run = (slow: boolean) => {
+    onTap?.();
     void resumeAudio(); // a tap is the moment the browser allows audio (matters on Welcome, before any other tap)
     void say(text, slow);
   };
   return (
-    <div className={`flex gap-3 ${className}`}>
-      <button aria-label={ui.replay} className={round} onClick={() => run(false)}>
-        🔁
-      </button>
-      <button aria-label={ui.slow} className={round} onClick={() => run(true)}>
-        🐢
-      </button>
+    <div className={`flex shrink-0 gap-2 ${className}`}>
+      {([false, true] as const).map((slow) => {
+        const label = slow ? ui.slow : ui.replay;
+        return (
+          <button key={String(slow)} aria-label={label} className={btn} onClick={() => run(slow)}>
+            <span aria-hidden="true" className="text-3xl leading-none">
+              {slow ? "🐢" : "🔁"}
+            </span>
+            {label && <span className="text-[15px] font-semibold leading-tight">{label}</span>}
+          </button>
+        );
+      })}
     </div>
   );
 }
