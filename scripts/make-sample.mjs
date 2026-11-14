@@ -1,4 +1,4 @@
-// One-off generator (non-AI): public/sample/kfs-sahyog.pdf. Icons: scripts/make-icons.mjs.
+// One-off generator (non-AI): public/sample/kfs-sahyog.pdf.
 // Run: node scripts/make-sample.mjs
 import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
 import QRCode from "qrcode";
