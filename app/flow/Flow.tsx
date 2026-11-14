@@ -101,8 +101,13 @@ function FlowSteps() {
     void speak(t.cleared).catch(() => undefined);
   }
 
-  // Before every change of speaker, a full-screen handover.
-  const speakerFor: Partial<Record<Step, "agent" | "borrower">> = { consent: "agent", agent: "agent", teachback: "borrower" };
+  // Before every change of speaker, a full-screen handover. When the borrower is alone, they already hold
+  // the phone, so there is nothing to hand over before the teach-back.
+  const speakerFor: Partial<Record<Step, "agent" | "borrower">> = {
+    consent: "agent",
+    agent: "agent",
+    teachback: presence === "with_agent" ? "borrower" : undefined,
+  };
   const needed = speakerFor[step];
   if (needed && handedTo !== needed) {
     return (
